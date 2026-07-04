@@ -236,6 +236,47 @@
     text-transform:uppercase;
   }
 
+  .compare-box{
+    margin-top:14px;
+    background:rgba(124,18,32,.05);
+    border:1px solid rgba(124,18,32,.18);
+    border-radius:8px;
+    padding:14px 16px;
+  }
+  .compare-row{margin-bottom:10px;}
+  .compare-label{
+    font-family:'Cinzel', serif;
+    font-size:10px;
+    letter-spacing:1.5px;
+    text-transform:uppercase;
+    color:var(--ink-soft);
+    display:block;
+    margin-bottom:4px;
+  }
+  .compare-latin{font-size:17px;}
+  .compare-heard{font-size:15px; color:var(--ink-soft); font-style:italic;}
+  .w-ok{color:#2f6b2f;}
+  .w-miss{color:var(--rubric); text-decoration:underline; text-decoration-color:rgba(124,18,32,.4);}
+  .score-chip{
+    display:inline-block;
+    font-family:'Cinzel', serif;
+    font-size:11px;
+    letter-spacing:1px;
+    text-transform:uppercase;
+    padding:4px 12px;
+    border-radius:14px;
+    margin-top:4px;
+  }
+  .score-good{background:#2f6b2f; color:#eafbe6;}
+  .score-mid{background:#a17a1e; color:#fff8e6;}
+  .score-low{background:var(--rubric); color:#fff0ee;}
+  .compare-note{
+    margin-top:12px;
+    font-size:13px;
+    font-style:italic;
+    color:var(--ink-soft);
+  }
+
   .nav-row{
     display:flex;
     justify-content:space-between;
@@ -437,6 +478,7 @@ let state = {
   level: localStorage.getItem('altar_level') || '1',
   step: 0,
   recordings: {}, // idx -> {url, blob}
+  transcripts: {}, // idx -> recognized text
   showTranslation: false
 };
 
@@ -523,7 +565,8 @@ function renderStep(){
             <span id="playbackHolder"></span>
             <span class="status-chip" id="statusChip"></span>
           </div>
-          ${state.recordings[i] ? `<div class="translation" style="margin-top:10px;">${s.serverT}</div>` : ''}
+          <div id="compareHolder"></div>
+          ${state.showTranslation ? `<div class="translation" style="margin-top:10px;">${s.serverT}</div>` : ''}
         </div>
       </div>
     </div>
@@ -581,7 +624,51 @@ function setupServerArea(i, s){
   }
 }
 
+function normToken(w){
+  return stripAccents(w).toLowerCase().replace(/[^a-z]/g,'');
+}
+
+function alignAndScore(correctText, heardText){
+  const correctTokens = correctText.split(/\s+/).filter(Boolean);
+  const correctNorm = correctTokens.map(normToken);
+  const heardNorm = heardText.split(/\s+/).filter(Boolean).map(normToken).filter(Boolean);
+  const n = correctNorm.length, m = heardNorm.length;
+  const dp = Array.from({length:n+1},()=>new Array(m+1).fill(0));
+  for(let a=1;a<=n;a++)for(let b=1;b<=m;b++){
+    dp[a][b] = (correctNorm[a-1] && correctNorm[a-1]===heardNorm[b-1]) ? dp[a-1][b-1]+1 : Math.max(dp[a-1][b], dp[a][b-1]);
+  }
+  let a=n,b=m; const matched = new Array(n).fill(false);
+  while(a>0 && b>0){
+    if(correctNorm[a-1]===heardNorm[b-1]){ matched[a-1]=true; a--; b--; }
+    else if(dp[a-1][b] >= dp[a][b-1]) a--;
+    else b--;
+  }
+  const score = n ? Math.round((dp[n][m]/n)*100) : 0;
+  const highlighted = correctTokens.map((tok,idx)=> matched[idx] ? `<span class="w-ok">${tok}</span>` : `<span class="w-miss">${tok}</span>`).join(' ');
+  return {score, highlighted};
+}
+
+function renderComparison(i, transcript){
+  const s = STEPS[i];
+  const holder = document.getElementById('compareHolder');
+  if(!holder) return;
+  if(!transcript){
+    holder.innerHTML = `<div class="compare-note">Speech recognition unavailable or heard nothing — recording saved, but no transcript to compare.</div>`;
+    return;
+  }
+  const {score, highlighted} = alignAndScore(s.server, transcript);
+  const cls = score>=85 ? 'score-good' : score>=55 ? 'score-mid' : 'score-low';
+  holder.innerHTML = `
+    <div class="compare-box">
+      <div class="compare-row"><span class="compare-label">Correct (Latin)</span><div class="latin compare-latin">${highlighted}</div></div>
+      <div class="compare-row"><span class="compare-label">You Said</span><div class="compare-heard">${transcript}</div></div>
+      <div class="score-chip ${cls}">${score}% match</div>
+    </div>`;
+}
+
 let mediaRecorder, chunks=[], recTimerInterval, recSeconds=0, currentStream;
+let recognition, recognizedText='';
+const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
 
 function setupRecorder(i){
   const recBtn = document.getElementById('recBtn');
@@ -593,17 +680,21 @@ function setupRecorder(i){
   if(state.recordings[i]){
     playbackHolder.innerHTML = `<audio controls src="${state.recordings[i].url}"></audio>`;
     recLabel.textContent = 'Re-record';
+    renderComparison(i, state.transcripts[i]);
   }
 
   recBtn.onclick = async ()=>{
     if(mediaRecorder && mediaRecorder.state === 'recording'){
       mediaRecorder.stop();
+      if(recognition){ try{ recognition.stop(); }catch(e){} }
       return;
     }
     try{
       const stream = await navigator.mediaDevices.getUserMedia({audio:true});
       currentStream = stream;
       chunks = [];
+      recognizedText = '';
+      document.getElementById('compareHolder').innerHTML = '';
       mediaRecorder = new MediaRecorder(stream);
       mediaRecorder.ondataavailable = e => chunks.push(e.data);
       mediaRecorder.onstop = ()=>{
@@ -617,14 +708,29 @@ function setupRecorder(i){
         clearInterval(recTimerInterval);
         timerEl.textContent = '';
         currentStream.getTracks().forEach(t=>t.stop());
-        // refresh dot progress + translation reveal
         document.querySelectorAll('.dots span')[i]?.classList.add('done');
-        const s = STEPS[i];
-        if(!document.querySelector('.server-block .translation')){
-          document.querySelector('.server-block').insertAdjacentHTML('beforeend', `<div class="translation" style="margin-top:10px;">${s.serverT}</div>`);
-        }
+        // give recognition a moment to fire its final onend/onresult before scoring
+        setTimeout(()=>{
+          state.transcripts[i] = recognizedText.trim();
+          renderComparison(i, state.transcripts[i]);
+        }, 350);
       };
       mediaRecorder.start();
+
+      if(SpeechRec){
+        recognition = new SpeechRec();
+        recognition.lang = 'it-IT'; // closest phonetic match to ecclesiastical Latin
+        recognition.continuous = true;
+        recognition.interimResults = false;
+        recognition.onresult = (e)=>{
+          let text = '';
+          for(let r=0;r<e.results.length;r++) text += e.results[r][0].transcript + ' ';
+          recognizedText = text;
+        };
+        recognition.onerror = ()=>{};
+        try{ recognition.start(); }catch(e){}
+      }
+
       recBtn.classList.add('recording');
       recLabel.textContent = 'Stop';
       recSeconds = 0;
@@ -652,13 +758,14 @@ function renderSummary(){
             <div class="sec">${idx+1}. ${s.section}</div>
             <div class="lat">${s.server}</div>
             ${state.recordings[idx] ? `<audio controls src="${state.recordings[idx].url}"></audio>` : `<span style="color:var(--ink-soft); font-style:italic; font-size:14px;">— not recorded —</span>`}
+            ${(state.recordings[idx] && state.transcripts[idx]) ? (()=>{ const r=alignAndScore(s.server, state.transcripts[idx]); const cls=r.score>=85?'score-good':r.score>=55?'score-mid':'score-low'; return `<div class="score-chip ${cls}" style="margin-top:8px;">${r.score}% match</div>`; })() : ''}
           </div>
         `).join('')}
         <button class="begin-btn restart-btn" id="restartBtn">Practice Again</button>
       </div>
     </div>`;
   document.getElementById('restartBtn').onclick = ()=>{
-    state.started = false; state.step = 0; state.recordings = {};
+    state.started = false; state.step = 0; state.recordings = {}; state.transcripts = {};
     render();
   };
 }
