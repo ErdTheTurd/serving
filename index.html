@@ -689,6 +689,16 @@ function setupRecorder(i){
       if(recognition){ try{ recognition.stop(); }catch(e){} }
       return;
     }
+
+    // Tear down any previous recognition session fully before starting a new one —
+    // Chrome only allows one active session at a time; starting too soon after the
+    // last one silently fails and produces an empty transcript.
+    if(recognition){
+      try{ recognition.onresult = null; recognition.onerror = null; recognition.onend = null; recognition.abort(); }catch(e){}
+      recognition = null;
+      await new Promise(r=>setTimeout(r, 300));
+    }
+
     try{
       const stream = await navigator.mediaDevices.getUserMedia({audio:true});
       currentStream = stream;
@@ -709,11 +719,18 @@ function setupRecorder(i){
         timerEl.textContent = '';
         currentStream.getTracks().forEach(t=>t.stop());
         document.querySelectorAll('.dots span')[i]?.classList.add('done');
-        // give recognition a moment to fire its final onend/onresult before scoring
-        setTimeout(()=>{
+        // wait for recognition's own onend (final results) before scoring, with a safety timeout
+        const finalize = ()=>{
           state.transcripts[i] = recognizedText.trim();
           renderComparison(i, state.transcripts[i]);
-        }, 350);
+        };
+        if(recognition){
+          let done = false;
+          recognition.onend = ()=>{ if(!done){ done=true; finalize(); } };
+          setTimeout(()=>{ if(!done){ done=true; finalize(); } }, 900);
+        } else {
+          setTimeout(finalize, 200);
+        }
       };
       mediaRecorder.start();
 
