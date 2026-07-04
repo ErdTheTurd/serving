@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Prayers at the Foot of the Altar — Practice</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #14100e;
+    --bg-vignette: #0b0908;
+    --page: #f4ecd8;
+    --page-edge: #e6d8b3;
+    --rubric: #7c1220;
+    --rubric-soft: #98283a;
+    --gold: #ab8a3f;
+    --gold-bright: #c9a94f;
+    --ink: #26201a;
+    --ink-soft: #5a4e3d;
+    --shadow: rgba(0,0,0,.45);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    min-height:100vh;
+    background:
+      radial-gradient(ellipse at 50% -10%, #241c17 0%, var(--bg) 45%, var(--bg-vignette) 100%);
+    color:var(--ink);
+    font-family:'EB Garamond', serif;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    padding:36px 16px 60px;
+  }
+  .brand{
+    text-align:center;
+    margin-bottom:28px;
+  }
+  .brand .cross{
+    font-size:22px;
+    color:var(--gold-bright);
+    display:block;
+    margin-bottom:6px;
+    letter-spacing:2px;
+  }
+  .brand h1{
+    font-family:'Cinzel', serif;
+    font-weight:600;
+    font-size:clamp(22px,3.4vw,34px);
+    letter-spacing:2.5px;
+    color:#f1e6c8;
+    margin:0 0 6px;
+    text-transform:uppercase;
+  }
+  .brand p{
+    font-family:'EB Garamond', serif;
+    font-style:italic;
+    color:#b9ab8a;
+    margin:0;
+    font-size:15px;
+    letter-spacing:.5px;
+  }
+
+  /* ===== the "missal" card ===== */
+  .missal-wrap{
+    position:relative;
+    width:100%;
+    max-width:660px;
+  }
+  .ribbon{
+    position:absolute;
+    left:-2px;
+    top:0;
+    width:16px;
+    height:46px;
+    background:linear-gradient(180deg, var(--gold-bright), var(--rubric-soft));
+    clip-path:polygon(0 0,100% 0,100% 78%,50% 100%,0 78%);
+    box-shadow:0 2px 6px rgba(0,0,0,.4);
+    transition:top .5s cubic-bezier(.65,0,.35,1);
+    z-index:5;
+  }
+  .missal{
+    position:relative;
+    background:
+      linear-gradient(180deg, var(--page) 0%, var(--page-edge) 100%);
+    border-radius:4px 10px 10px 4px;
+    box-shadow:0 18px 50px var(--shadow), 0 0 0 1px rgba(171,138,63,.35);
+    padding:38px 40px 30px 46px;
+    overflow:hidden;
+  }
+  .missal::before{
+    content:"";
+    position:absolute;
+    left:0;top:0;bottom:0;
+    width:6px;
+    background:linear-gradient(180deg, var(--rubric), var(--gold));
+  }
+  .meta-row{
+    display:flex;
+    justify-content:space-between;
+    align-items:baseline;
+    border-bottom:1px solid rgba(124,18,32,.25);
+    padding-bottom:10px;
+    margin-bottom:20px;
+  }
+  .step-count{
+    font-family:'Cinzel', serif;
+    font-size:11px;
+    letter-spacing:2px;
+    color:var(--ink-soft);
+    text-transform:uppercase;
+  }
+  .section-label{
+    font-family:'Cinzel', serif;
+    font-size:13px;
+    letter-spacing:1.5px;
+    color:var(--rubric);
+    text-transform:uppercase;
+    font-weight:600;
+  }
+
+  .block{margin-bottom:22px;}
+  .role{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    font-family:'Cinzel', serif;
+    font-size:11px;
+    letter-spacing:2px;
+    text-transform:uppercase;
+    color:var(--rubric);
+    margin-bottom:8px;
+  }
+  .role .dot{width:6px;height:6px;border-radius:50%;background:var(--rubric);display:inline-block;}
+  .latin{
+    font-size:20px;
+    line-height:1.55;
+    font-style:italic;
+    color:var(--ink);
+  }
+  .translation{
+    margin-top:8px;
+    font-size:14.5px;
+    color:var(--ink-soft);
+    font-style:normal;
+  }
+  .hear-btn{
+    margin-top:10px;
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    background:none;
+    border:1px solid var(--gold);
+    color:var(--rubric-soft);
+    border-radius:20px;
+    padding:5px 14px;
+    font-family:'EB Garamond', serif;
+    font-size:13px;
+    cursor:pointer;
+    letter-spacing:.3px;
+  }
+  .hear-btn:hover{background:rgba(171,138,63,.12);}
+
+  .server-block{
+    border-top:1px dashed rgba(124,18,32,.3);
+    padding-top:18px;
+  }
+  .reveal-wrap{position:relative;}
+  .reveal-bar{
+    height:3px;
+    width:100%;
+    background:rgba(124,18,32,.15);
+    border-radius:2px;
+    overflow:hidden;
+    margin-bottom:12px;
+  }
+  .reveal-bar-fill{
+    height:100%;
+    background:var(--rubric);
+    width:100%;
+    transform-origin:left;
+  }
+  @keyframes shrink{from{transform:scaleX(1);}to{transform:scaleX(0);}}
+  .locked-msg{
+    font-style:italic;
+    color:var(--ink-soft);
+    font-size:15px;
+    padding:10px 0 4px;
+  }
+  .hidden-text{ display:none; }
+  .fading{ animation: fadeout .45s forwards; }
+  @keyframes fadeout{ to{opacity:0; height:0; margin:0; padding:0;} }
+
+  .record-row{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    margin-top:14px;
+    flex-wrap:wrap;
+  }
+  .rec-btn{
+    font-family:'Cinzel', serif;
+    letter-spacing:1.5px;
+    font-size:12px;
+    text-transform:uppercase;
+    border:none;
+    border-radius:24px;
+    padding:10px 20px;
+    cursor:pointer;
+    color:#fff5e6;
+    background:var(--rubric);
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    transition:transform .15s, background .2s;
+  }
+  .rec-btn:hover{transform:translateY(-1px); background:var(--rubric-soft);}
+  .rec-btn:disabled{background:#c8bb9d;cursor:not-allowed;transform:none;color:#7c7157;}
+  .rec-btn.recording{background:#8f0e0e; animation:pulse 1.1s infinite;}
+  @keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(143,14,14,.5);}50%{box-shadow:0 0 0 8px rgba(143,14,14,0);}}
+  .rec-dot{width:9px;height:9px;border-radius:50%;background:#fff;display:inline-block;}
+
+  .timer{
+    font-family:'Cinzel', serif;
+    font-size:13px;
+    color:var(--ink-soft);
+    min-width:44px;
+  }
+  audio{height:34px; max-width:220px;}
+  .status-chip{
+    font-size:12px;
+    font-family:'Cinzel', serif;
+    letter-spacing:1px;
+    color:var(--gold);
+    text-transform:uppercase;
+  }
+
+  .nav-row{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    max-width:660px;
+    width:100%;
+    margin-top:22px;
+  }
+  .nav-btn{
+    font-family:'Cinzel', serif;
+    letter-spacing:1.5px;
+    font-size:12px;
+    text-transform:uppercase;
+    background:none;
+    border:1px solid var(--gold);
+    color:#e7d9b3;
+    padding:9px 18px;
+    border-radius:24px;
+    cursor:pointer;
+  }
+  .nav-btn:hover{background:rgba(171,138,63,.15);}
+  .nav-btn:disabled{opacity:.35; cursor:not-allowed;}
+  .dots{display:flex; gap:5px;}
+  .dots span{width:6px;height:6px;border-radius:50%;background:#443a2f;}
+  .dots span.done{background:var(--gold-bright);}
+  .dots span.current{background:var(--rubric-soft); box-shadow:0 0 0 3px rgba(124,18,32,.25);}
+
+  /* top controls */
+  .controls{
+    display:flex;
+    gap:10px;
+    align-items:center;
+    margin-bottom:20px;
+    flex-wrap:wrap;
+    justify-content:center;
+  }
+  .seg{
+    display:flex;
+    border:1px solid var(--gold);
+    border-radius:24px;
+    overflow:hidden;
+  }
+  .seg button{
+    background:none;
+    border:none;
+    color:#d9c9a0;
+    font-family:'Cinzel', serif;
+    font-size:11px;
+    letter-spacing:1.5px;
+    text-transform:uppercase;
+    padding:8px 14px;
+    cursor:pointer;
+  }
+  .seg button.active{background:var(--rubric); color:#fff5e6;}
+  .toggle-link{
+    font-size:12px;
+    font-family:'Cinzel', serif;
+    letter-spacing:1px;
+    color:#b9ab8a;
+    text-transform:uppercase;
+    cursor:pointer;
+    background:none;
+    border:1px solid rgba(185,171,138,.4);
+    border-radius:24px;
+    padding:8px 14px;
+  }
+  .toggle-link.active{color:var(--gold-bright); border-color:var(--gold-bright);}
+
+  /* cover + summary */
+  .cover, .summary{
+    max-width:660px;
+    width:100%;
+  }
+  .cover .missal, .summary .missal{padding:40px 40px 34px 46px;}
+  .cover h2, .summary h2{
+    font-family:'Cinzel', serif;
+    font-size:20px;
+    letter-spacing:1.5px;
+    color:var(--rubric);
+    text-transform:uppercase;
+    margin-top:0;
+  }
+  .cover p{line-height:1.6; font-size:16px;}
+  .begin-btn{
+    font-family:'Cinzel', serif;
+    letter-spacing:2px;
+    text-transform:uppercase;
+    font-size:13px;
+    background:var(--rubric);
+    color:#fff5e6;
+    border:none;
+    border-radius:26px;
+    padding:12px 26px;
+    cursor:pointer;
+    margin-top:10px;
+  }
+  .begin-btn:hover{background:var(--rubric-soft);}
+  .summary-item{
+    border-bottom:1px solid rgba(124,18,32,.15);
+    padding:12px 0;
+  }
+  .summary-item .sec{font-family:'Cinzel',serif; font-size:11px; letter-spacing:1px; color:var(--gold); text-transform:uppercase;}
+  .summary-item .lat{font-style:italic; margin:4px 0 8px; font-size:15px;}
+  .restart-btn{
+    margin-top:18px;
+  }
+
+  footer{
+    margin-top:30px;
+    font-size:12px;
+    color:#5f5748;
+    font-style:italic;
+    text-align:center;
+  }
+
+  @media (max-width:480px){
+    .missal{padding:30px 22px 24px 30px;}
+    .latin{font-size:18px;}
+  }
+</style>
+</head>
+<body>
+
+<div class="brand">
+  <span class="cross">✝</span>
+  <h1>Prayers at the Foot of the Altar</h1>
+  <p>Ordinary of the Mass · Traditional Latin Rite</p>
+</div>
+
+<div id="app"></div>
+
+<footer>Speak clearly and unhurried, as at the altar rail.</footer>
+
+<script>
+const STEPS = [
+  {section:"Sign of the Cross", priest:"In nómine Patris, et Fílii, et Spíritus Sancti.", priestT:"In the name of the Father, and of the Son, and of the Holy Ghost.",
+   server:"Amen.", serverT:"Amen."},
+
+  {section:"Psalm 42 — Judica Me Deus", priest:"Introíbo ad altáre Dei.", priestT:"I will go in unto the altar of God.",
+   server:"Ad Deum qui lætíficat juventútem meam.", serverT:"To God, who giveth joy to my youth."},
+
+  {section:"Psalm 42 — Judica Me Deus", priest:"Júdica me, Deus, et discérne causam meam de gente non sancta: ab hómine iníquo et dolóso érue me.", priestT:"Judge me, O God, and distinguish my cause from the nation that is not holy: deliver me from the unjust and deceitful man.",
+   server:"Quia tu es, Deus, fortitúdo mea: quare me repulísti, et quare tristis incédo, dum afflígit me inimícus?", serverT:"For Thou, O God, art my strength: why hast Thou cast me off? And why do I go about in sadness, while the enemy afflicteth me?"},
+
+  {section:"Psalm 42 — Judica Me Deus", priest:"Emítte lucem tuam, et veritátem tuam: ipsa me deduxérunt, et adduxérunt in montem sanctum tuum, et in tabernácula tua.", priestT:"Send forth Thy light and Thy truth: they have conducted me and brought me unto Thy holy hill and Thy dwelling place.",
+   server:"Et introíbo ad altáre Dei: ad Deum qui lætíficat juventútem meam.", serverT:"And I will go in unto the altar of God: to God, who giveth joy to my youth."},
+
+  {section:"Psalm 42 — Judica Me Deus", priest:"Confitébor tibi in cíthara, Deus, Deus meus: quare tristis es, ánima mea? et quare contúrbas me?", priestT:"I will praise Thee upon the harp, O God, my God: why art thou sad, my soul, and why dost thou disquiet me?",
+   server:"Spera in Deo, quóniam adhuc confitébor illi: salutáre vultus mei, et Deus meus.", serverT:"Hope in God, for I will still praise Him: who is the salvation of my countenance, and my God."},
+
+  {section:"Psalm 42 — Judica Me Deus", priest:"Glória Patri, et Fílio, et Spirítui Sancto.", priestT:"Glory be to the Father, and to the Son, and to the Holy Ghost.",
+   server:"Sicut erat in princípio, et nunc, et semper: et in sǽcula sæculórum. Amen.", serverT:"As it was in the beginning, is now, and ever shall be, world without end. Amen."},
+
+  {section:"Psalm 42 — Judica Me Deus", priest:"Introíbo ad altáre Dei.", priestT:"I will go in unto the altar of God.",
+   server:"Ad Deum qui lætíficat juventútem meam.", serverT:"To God, who giveth joy to my youth."},
+
+  {section:"Versicle", priest:"Adjutórium nostrum in nómine Dómini.", priestT:"Our help is in the name of the Lord.",
+   server:"Qui fecit cælum et terram.", serverT:"Who made heaven and earth."},
+
+  {section:"Confiteor", priest:"Confíteor Deo omnipoténti, beátæ Maríæ semper Vírgini, beáto Michaéli Archángelo, beáto Joánni Baptístæ, sanctis Apóstolis Petro et Paulo, ómnibus Sanctis, et vobis fratres: quia peccávi nimis cogitatióne, verbo et ópere: mea culpa, mea culpa, mea máxima culpa. Ideo precor beátam Maríam semper Vírginem, beátum Michaélem Archángelum, beátum Joánnem Baptístam, sanctos Apóstolos Petrum et Paulum, omnes Sanctos, et vos fratres, oráre pro me ad Dóminum Deum nostrum.",
+   priestT:"I confess to almighty God... that I have sinned exceedingly in thought, word and deed: through my fault, through my fault, through my most grievous fault. Therefore I beseech the Blessed Mary ever Virgin... and you, brethren, to pray for me to the Lord our God.",
+   server:"Misereátur tui omnípotens Deus, et, dimíssis peccátis tuis, perdúcat te ad vitam ætérnam.", serverT:"May almighty God have mercy on thee, forgive thee thy sins, and bring thee to life everlasting."},
+
+  {section:"Confiteor", priest:"Amen.", priestT:"Amen.",
+   server:"Confíteor Deo omnipoténti, beátæ Maríæ semper Vírgini, beáto Michaéli Archángelo, beáto Joánni Baptístæ, sanctis Apóstolis Petro et Paulo, ómnibus Sanctis, et tibi pater: quia peccávi nimis cogitatióne, verbo et ópere: mea culpa, mea culpa, mea máxima culpa. Ideo precor beátam Maríam semper Vírginem, beátum Michaélem Archángelum, beátum Joánnem Baptístam, sanctos Apóstolos Petrum et Paulum, omnes Sanctos, et te pater, oráre pro me ad Dóminum Deum nostrum.",
+   serverT:"I confess to almighty God... and to thee, father, that I have sinned exceedingly in thought, word and deed... and thee, father, to pray for me to the Lord our God."},
+
+  {section:"Confiteor", priest:"Misereátur vestri omnípotens Deus, et, dimíssis peccátis vestris, perdúcat vos ad vitam ætérnam.", priestT:"May almighty God have mercy upon you, forgive you your sins, and bring you to life everlasting.",
+   server:"Amen.", serverT:"Amen."},
+
+  {section:"Confiteor", priest:"Indulgéntiam, absolutiónem, et remissiónem peccatórum nostrórum tríbuat nobis omnípotens et miséricors Dóminus.", priestT:"May the almighty and merciful Lord grant us pardon, absolution, and remission of our sins.",
+   server:"Amen.", serverT:"Amen."},
+
+  {section:"Versicles Before the Altar", priest:"Deus, tu convérsus vivificábis nos.", priestT:"Thou wilt turn again, O God, and quicken us.",
+   server:"Et plebs tua lætábitur in te.", serverT:"And Thy people shall rejoice in Thee."},
+
+  {section:"Versicles Before the Altar", priest:"Osténde nobis, Dómine, misericórdiam tuam.", priestT:"Show us, O Lord, Thy mercy.",
+   server:"Et salutáre tuum da nobis.", serverT:"And grant us Thy salvation."},
+
+  {section:"Versicles Before the Altar", priest:"Dómine, exáudi oratiónem meam.", priestT:"O Lord, hear my prayer.",
+   server:"Et clamor meus ad te véniat.", serverT:"And let my cry come unto Thee."},
+
+  {section:"Versicles Before the Altar", priest:"Dóminus vobíscum.", priestT:"The Lord be with you.",
+   server:"Et cum spíritu tuo.", serverT:"And with thy spirit."},
+
+  {section:"Collects", priest:"Orémus. Aufer a nobis, quǽsumus, Dómine, iniquitátes nostras: ut ad Sancta sanctórum puris mereámur méntibus introíre. Per Christum Dóminum nostrum.", priestT:"Let us pray. Take away from us our iniquities, we entreat Thee, O Lord, that we may be worthy to enter with pure minds into the Holy of Holies. Through Christ our Lord.",
+   server:"Amen.", serverT:"Amen."},
+
+  {section:"Collects", priest:"Orámus te, Dómine, per mérita Sanctórum tuórum, quorum relíquiæ hic sunt, et ómnium Sanctórum: ut indulgére dignéris ómnia peccáta mea.", priestT:"We beseech Thee, O Lord, by the merits of Thy Saints whose relics are here, and of all the Saints, that Thou wouldst vouchsafe to forgive me all my sins.",
+   server:"Amen.", serverT:"Amen."}
+];
+
+const app = document.getElementById('app');
+let state = {
+  started:false,
+  level: localStorage.getItem('altar_level') || '1',
+  step: 0,
+  recordings: {}, // idx -> {url, blob}
+  showTranslation: false
+};
+
+function stripAccents(s){
+  return s.normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+}
+
+function speak(text){
+  if(!('speechSynthesis' in window)) return;
+  window.speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(stripAccents(text));
+  const voices = window.speechSynthesis.getVoices();
+  let voice = voices.find(v=>v.lang && v.lang.toLowerCase().startsWith('it')) ||
+              voices.find(v=>v.lang && v.lang.toLowerCase().startsWith('la')) ||
+              voices.find(v=>v.default) || voices[0];
+  if(voice) u.voice = voice;
+  u.rate = 0.82;
+  u.pitch = 0.95;
+  window.speechSynthesis.speak(u);
+}
+if('speechSynthesis' in window){
+  window.speechSynthesis.onvoiceschanged = ()=>{};
+}
+
+function renderCover(){
+  app.innerHTML = `
+    <div class="cover">
+      <div class="missal">
+        <h2>Before You Begin</h2>
+        <p>Practice the server's responses in the Prayers at the Foot of the Altar. You will hear and read the priest's part, then record your own response.</p>
+        <p><strong>Level I — Reveal:</strong> the response appears for five seconds, then hides before you record.<br>
+        <strong>Level II — Memory:</strong> the response is never shown. Recall it and record.</p>
+        <div class="seg" style="margin:16px 0;">
+          <button data-lvl="1" class="${state.level==='1'?'active':''}">Level I</button>
+          <button data-lvl="2" class="${state.level==='2'?'active':''}">Level II</button>
+        </div><br>
+        <button class="begin-btn" id="beginBtn">Begin</button>
+      </div>
+    </div>`;
+  app.querySelectorAll('.seg button').forEach(b=>{
+    b.onclick = ()=>{ state.level = b.dataset.lvl; localStorage.setItem('altar_level', state.level); renderCover(); };
+  });
+  document.getElementById('beginBtn').onclick = ()=>{ state.started = true; state.step = 0; render(); };
+}
+
+function renderStep(){
+  const i = state.step;
+  const total = STEPS.length;
+  const s = STEPS[i];
+  const ribbonTop = 8 + (i/(total-1))*86; // percent within card area
+
+  app.innerHTML = `
+    <div class="controls">
+      <div class="seg">
+        <button data-lvl="1" class="${state.level==='1'?'active':''}">Level I · Reveal</button>
+        <button data-lvl="2" class="${state.level==='2'?'active':''}">Level II · Memory</button>
+      </div>
+      <button class="toggle-link ${state.showTranslation?'active':''}" id="transToggle">English</button>
+    </div>
+    <div class="missal-wrap">
+      <div class="ribbon" style="top:${ribbonTop}%"></div>
+      <div class="missal">
+        <div class="meta-row">
+          <span class="step-count">Step ${i+1} of ${total}</span>
+          <span class="section-label">${s.section}</span>
+        </div>
+
+        <div class="block">
+          <div class="role"><span class="dot"></span>Priest</div>
+          <div class="latin">${s.priest}</div>
+          ${state.showTranslation ? `<div class="translation">${s.priestT}</div>` : ''}
+          <button class="hear-btn" id="hearBtn">🔊 Hear the Priest</button>
+        </div>
+
+        <div class="block server-block">
+          <div class="role"><span class="dot" style="background:var(--gold);"></span>Your Response</div>
+          <div id="serverArea"></div>
+
+          <div class="record-row">
+            <button class="rec-btn" id="recBtn" disabled>
+              <span class="rec-dot"></span><span id="recLabel">Record</span>
+            </button>
+            <span class="timer" id="timer"></span>
+            <span id="playbackHolder"></span>
+            <span class="status-chip" id="statusChip"></span>
+          </div>
+          ${state.recordings[i] ? `<div class="translation" style="margin-top:10px;">${s.serverT}</div>` : ''}
+        </div>
+      </div>
+    </div>
+
+    <div class="nav-row">
+      <button class="nav-btn" id="prevBtn" ${i===0?'disabled':''}>&larr; Prev</button>
+      <div class="dots">${STEPS.map((_,idx)=>`<span class="${idx===i?'current':(state.recordings[idx]?'done':'')}"></span>`).join('')}</div>
+      <button class="nav-btn" id="nextBtn">${i===total-1?'Finish':'Next →'}</button>
+    </div>
+  `;
+
+  document.getElementById('transToggle').onclick = ()=>{ state.showTranslation = !state.showTranslation; renderStep(); };
+  app.querySelectorAll('.seg button').forEach(b=>{
+    b.onclick = ()=>{ state.level = b.dataset.lvl; localStorage.setItem('altar_level', state.level); renderStep(); };
+  });
+  document.getElementById('hearBtn').onclick = ()=> speak(s.priest);
+  document.getElementById('prevBtn').onclick = ()=>{ state.step = Math.max(0, state.step-1); render(); };
+  document.getElementById('nextBtn').onclick = ()=>{
+    if(i===total-1){ state.started='summary'; render(); }
+    else { state.step++; render(); }
+  };
+
+  setupServerArea(i, s);
+  setupRecorder(i);
+
+  // auto speak priest line on step load
+  setTimeout(()=>speak(s.priest), 250);
+}
+
+function setupServerArea(i, s){
+  const area = document.getElementById('serverArea');
+  const recBtn = document.getElementById('recBtn');
+
+  if(state.level === '1'){
+    area.innerHTML = `
+      <div class="reveal-wrap">
+        <div class="reveal-bar"><div class="reveal-bar-fill" id="revealFill"></div></div>
+        <div class="latin" id="revealText">${s.server}</div>
+      </div>`;
+    const fill = document.getElementById('revealFill');
+    fill.style.animation = 'shrink 5s linear forwards';
+    recBtn.disabled = true;
+    setTimeout(()=>{
+      const txt = document.getElementById('revealText');
+      if(txt){
+        txt.classList.add('fading');
+        setTimeout(()=>{ if(txt) txt.style.display='none'; },450);
+      }
+      recBtn.disabled = false;
+      document.getElementById('statusChip').textContent = 'Now record from memory';
+    }, 5000);
+  } else {
+    area.innerHTML = `<div class="locked-msg">— text hidden · recall the response, then record —</div>`;
+    recBtn.disabled = false;
+  }
+}
+
+let mediaRecorder, chunks=[], recTimerInterval, recSeconds=0, currentStream;
+
+function setupRecorder(i){
+  const recBtn = document.getElementById('recBtn');
+  const recLabel = document.getElementById('recLabel');
+  const timerEl = document.getElementById('timer');
+  const playbackHolder = document.getElementById('playbackHolder');
+  const statusChip = document.getElementById('statusChip');
+
+  if(state.recordings[i]){
+    playbackHolder.innerHTML = `<audio controls src="${state.recordings[i].url}"></audio>`;
+    recLabel.textContent = 'Re-record';
+  }
+
+  recBtn.onclick = async ()=>{
+    if(mediaRecorder && mediaRecorder.state === 'recording'){
+      mediaRecorder.stop();
+      return;
+    }
+    try{
+      const stream = await navigator.mediaDevices.getUserMedia({audio:true});
+      currentStream = stream;
+      chunks = [];
+      mediaRecorder = new MediaRecorder(stream);
+      mediaRecorder.ondataavailable = e => chunks.push(e.data);
+      mediaRecorder.onstop = ()=>{
+        const blob = new Blob(chunks, {type: chunks[0]?.type || 'audio/webm'});
+        const url = URL.createObjectURL(blob);
+        state.recordings[i] = {url, blob};
+        playbackHolder.innerHTML = `<audio controls src="${url}"></audio>`;
+        recBtn.classList.remove('recording');
+        recLabel.textContent = 'Re-record';
+        statusChip.textContent = 'Saved';
+        clearInterval(recTimerInterval);
+        timerEl.textContent = '';
+        currentStream.getTracks().forEach(t=>t.stop());
+        // refresh dot progress + translation reveal
+        document.querySelectorAll('.dots span')[i]?.classList.add('done');
+        const s = STEPS[i];
+        if(!document.querySelector('.server-block .translation')){
+          document.querySelector('.server-block').insertAdjacentHTML('beforeend', `<div class="translation" style="margin-top:10px;">${s.serverT}</div>`);
+        }
+      };
+      mediaRecorder.start();
+      recBtn.classList.add('recording');
+      recLabel.textContent = 'Stop';
+      recSeconds = 0;
+      timerEl.textContent = '0:00';
+      recTimerInterval = setInterval(()=>{
+        recSeconds++;
+        const m = Math.floor(recSeconds/60), sec = String(recSeconds%60).padStart(2,'0');
+        timerEl.textContent = `${m}:${sec}`;
+      },1000);
+    }catch(err){
+      statusChip.textContent = 'Microphone access denied';
+    }
+  };
+}
+
+function renderSummary(){
+  const recordedCount = Object.keys(state.recordings).length;
+  app.innerHTML = `
+    <div class="summary">
+      <div class="missal">
+        <h2>Prayers Completed</h2>
+        <p>You recorded ${recordedCount} of ${STEPS.length} responses.</p>
+        ${STEPS.map((s,idx)=>`
+          <div class="summary-item">
+            <div class="sec">${idx+1}. ${s.section}</div>
+            <div class="lat">${s.server}</div>
+            ${state.recordings[idx] ? `<audio controls src="${state.recordings[idx].url}"></audio>` : `<span style="color:var(--ink-soft); font-style:italic; font-size:14px;">— not recorded —</span>`}
+          </div>
+        `).join('')}
+        <button class="begin-btn restart-btn" id="restartBtn">Practice Again</button>
+      </div>
+    </div>`;
+  document.getElementById('restartBtn').onclick = ()=>{
+    state.started = false; state.step = 0; state.recordings = {};
+    render();
+  };
+}
+
+function render(){
+  if(!state.started) renderCover();
+  else if(state.started === 'summary') renderSummary();
+  else renderStep();
+}
+
+render();
+</script>
+</body>
+</html>
