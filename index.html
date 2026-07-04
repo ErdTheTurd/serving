@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Prayers at the Foot of the Altar — Practice</title>
+<title>Server's Responses — The Holy Mass</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap" rel="stylesheet">
 <style>
@@ -33,47 +33,17 @@
     align-items:center;
     padding:36px 16px 60px;
   }
-  .brand{
-    text-align:center;
-    margin-bottom:28px;
-  }
-  .brand .cross{
-    font-size:22px;
-    color:var(--gold-bright);
-    display:block;
-    margin-bottom:6px;
-    letter-spacing:2px;
-  }
+  .brand{text-align:center; margin-bottom:24px;}
+  .brand .cross{font-size:22px; color:var(--gold-bright); display:block; margin-bottom:6px; letter-spacing:2px;}
   .brand h1{
-    font-family:'Cinzel', serif;
-    font-weight:600;
-    font-size:clamp(22px,3.4vw,34px);
-    letter-spacing:2.5px;
-    color:#f1e6c8;
-    margin:0 0 6px;
-    text-transform:uppercase;
+    font-family:'Cinzel', serif; font-weight:600; font-size:clamp(20px,3.2vw,32px);
+    letter-spacing:2.5px; color:#f1e6c8; margin:0 0 6px; text-transform:uppercase;
   }
-  .brand p{
-    font-family:'EB Garamond', serif;
-    font-style:italic;
-    color:#b9ab8a;
-    margin:0;
-    font-size:15px;
-    letter-spacing:.5px;
-  }
+  .brand p{font-family:'EB Garamond', serif; font-style:italic; color:#b9ab8a; margin:0; font-size:14.5px; letter-spacing:.5px;}
 
-  /* ===== the "missal" card ===== */
-  .missal-wrap{
-    position:relative;
-    width:100%;
-    max-width:660px;
-  }
+  .missal-wrap{position:relative; width:100%; max-width:660px;}
   .ribbon{
-    position:absolute;
-    left:-2px;
-    top:0;
-    width:16px;
-    height:46px;
+    position:absolute; left:-2px; top:0; width:16px; height:46px;
     background:linear-gradient(180deg, var(--gold-bright), var(--rubric-soft));
     clip-path:polygon(0 0,100% 0,100% 78%,50% 100%,0 78%);
     box-shadow:0 2px 6px rgba(0,0,0,.4);
@@ -82,319 +52,131 @@
   }
   .missal{
     position:relative;
-    background:
-      linear-gradient(180deg, var(--page) 0%, var(--page-edge) 100%);
+    background:linear-gradient(180deg, var(--page) 0%, var(--page-edge) 100%);
     border-radius:4px 10px 10px 4px;
     box-shadow:0 18px 50px var(--shadow), 0 0 0 1px rgba(171,138,63,.35);
     padding:38px 40px 30px 46px;
     overflow:hidden;
   }
-  .missal::before{
-    content:"";
-    position:absolute;
-    left:0;top:0;bottom:0;
-    width:6px;
-    background:linear-gradient(180deg, var(--rubric), var(--gold));
-  }
-  .meta-row{
-    display:flex;
-    justify-content:space-between;
-    align-items:baseline;
-    border-bottom:1px solid rgba(124,18,32,.25);
-    padding-bottom:10px;
-    margin-bottom:20px;
-  }
-  .step-count{
-    font-family:'Cinzel', serif;
-    font-size:11px;
-    letter-spacing:2px;
-    color:var(--ink-soft);
-    text-transform:uppercase;
-  }
-  .section-label{
-    font-family:'Cinzel', serif;
-    font-size:13px;
-    letter-spacing:1.5px;
-    color:var(--rubric);
-    text-transform:uppercase;
-    font-weight:600;
-  }
+  .missal::before{content:""; position:absolute; left:0;top:0;bottom:0; width:6px; background:linear-gradient(180deg, var(--rubric), var(--gold));}
+  .meta-row{display:flex; justify-content:space-between; align-items:baseline; border-bottom:1px solid rgba(124,18,32,.25); padding-bottom:10px; margin-bottom:20px;}
+  .step-count{font-family:'Cinzel', serif; font-size:11px; letter-spacing:2px; color:var(--ink-soft); text-transform:uppercase;}
+  .section-label{font-family:'Cinzel', serif; font-size:13px; letter-spacing:1.5px; color:var(--rubric); text-transform:uppercase; font-weight:600; text-align:right;}
 
   .block{margin-bottom:22px;}
-  .role{
-    display:flex;
-    align-items:center;
-    gap:8px;
-    font-family:'Cinzel', serif;
-    font-size:11px;
-    letter-spacing:2px;
-    text-transform:uppercase;
-    color:var(--rubric);
-    margin-bottom:8px;
-  }
+  .role{display:flex; align-items:center; gap:8px; font-family:'Cinzel', serif; font-size:11px; letter-spacing:2px; text-transform:uppercase; color:var(--rubric); margin-bottom:8px;}
   .role .dot{width:6px;height:6px;border-radius:50%;background:var(--rubric);display:inline-block;}
-  .latin{
-    font-size:20px;
-    line-height:1.55;
-    font-style:italic;
-    color:var(--ink);
-  }
-  .translation{
-    margin-top:8px;
-    font-size:14.5px;
-    color:var(--ink-soft);
-    font-style:normal;
-  }
-  .hear-btn{
-    margin-top:10px;
-    display:inline-flex;
-    align-items:center;
-    gap:6px;
-    background:none;
-    border:1px solid var(--gold);
-    color:var(--rubric-soft);
-    border-radius:20px;
-    padding:5px 14px;
-    font-family:'EB Garamond', serif;
-    font-size:13px;
-    cursor:pointer;
-    letter-spacing:.3px;
-  }
-  .hear-btn:hover{background:rgba(171,138,63,.12);}
+  .latin{font-size:20px; line-height:1.55; font-style:italic; color:var(--ink);}
+  .rubric-note{font-size:14.5px; color:var(--ink-soft); font-style:italic;}
+  .translation{margin-top:8px; font-size:14.5px; color:var(--ink-soft); font-style:normal;}
+  .varies-tag{font-family:'Cinzel', serif; font-size:10px; letter-spacing:1px; text-transform:uppercase; color:var(--gold); border:1px solid var(--gold); border-radius:10px; padding:1px 8px; margin-left:8px;}
 
-  .server-block{
-    border-top:1px dashed rgba(124,18,32,.3);
-    padding-top:18px;
+  .hear-row{display:flex; align-items:center; gap:10px; margin-top:10px; flex-wrap:wrap;}
+  .hear-btn, .mini-btn{
+    display:inline-flex; align-items:center; gap:6px; background:none; border:1px solid var(--gold);
+    color:var(--rubric-soft); border-radius:20px; padding:5px 14px; font-family:'EB Garamond', serif;
+    font-size:13px; cursor:pointer; letter-spacing:.3px;
   }
+  .hear-btn:hover, .mini-btn:hover{background:rgba(171,138,63,.12);}
+  .mini-btn.rec-active{background:#8f0e0e; color:#fff; border-color:#8f0e0e;}
+  .voice-note{font-size:12px; color:var(--ink-soft); font-style:italic;}
+
+  .server-block{border-top:1px dashed rgba(124,18,32,.3); padding-top:18px;}
   .reveal-wrap{position:relative;}
-  .reveal-bar{
-    height:3px;
-    width:100%;
-    background:rgba(124,18,32,.15);
-    border-radius:2px;
-    overflow:hidden;
-    margin-bottom:12px;
-  }
-  .reveal-bar-fill{
-    height:100%;
-    background:var(--rubric);
-    width:100%;
-    transform-origin:left;
-  }
+  .reveal-bar{height:3px; width:100%; background:rgba(124,18,32,.15); border-radius:2px; overflow:hidden; margin-bottom:12px;}
+  .reveal-bar-fill{height:100%; background:var(--rubric); width:100%; transform-origin:left;}
   @keyframes shrink{from{transform:scaleX(1);}to{transform:scaleX(0);}}
-  .locked-msg{
-    font-style:italic;
-    color:var(--ink-soft);
-    font-size:15px;
-    padding:10px 0 4px;
-  }
-  .hidden-text{ display:none; }
-  .fading{ animation: fadeout .45s forwards; }
+  .locked-msg{font-style:italic; color:var(--ink-soft); font-size:15px; padding:10px 0 4px;}
+  .fading{animation: fadeout .45s forwards;}
   @keyframes fadeout{ to{opacity:0; height:0; margin:0; padding:0;} }
 
-  .record-row{
-    display:flex;
-    align-items:center;
-    gap:12px;
-    margin-top:14px;
-    flex-wrap:wrap;
-  }
+  .record-row{display:flex; align-items:center; gap:12px; margin-top:14px; flex-wrap:wrap;}
   .rec-btn{
-    font-family:'Cinzel', serif;
-    letter-spacing:1.5px;
-    font-size:12px;
-    text-transform:uppercase;
-    border:none;
-    border-radius:24px;
-    padding:10px 20px;
-    cursor:pointer;
-    color:#fff5e6;
-    background:var(--rubric);
-    display:inline-flex;
-    align-items:center;
-    gap:8px;
-    transition:transform .15s, background .2s;
+    font-family:'Cinzel', serif; letter-spacing:1.5px; font-size:12px; text-transform:uppercase;
+    border:none; border-radius:24px; padding:10px 20px; cursor:pointer; color:#fff5e6; background:var(--rubric);
+    display:inline-flex; align-items:center; gap:8px; transition:transform .15s, background .2s;
   }
   .rec-btn:hover{transform:translateY(-1px); background:var(--rubric-soft);}
   .rec-btn:disabled{background:#c8bb9d;cursor:not-allowed;transform:none;color:#7c7157;}
   .rec-btn.recording{background:#8f0e0e; animation:pulse 1.1s infinite;}
   @keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(143,14,14,.5);}50%{box-shadow:0 0 0 8px rgba(143,14,14,0);}}
   .rec-dot{width:9px;height:9px;border-radius:50%;background:#fff;display:inline-block;}
-
-  .timer{
-    font-family:'Cinzel', serif;
-    font-size:13px;
-    color:var(--ink-soft);
-    min-width:44px;
-  }
+  .timer{font-family:'Cinzel', serif; font-size:13px; color:var(--ink-soft); min-width:44px;}
   audio{height:34px; max-width:220px;}
-  .status-chip{
-    font-size:12px;
-    font-family:'Cinzel', serif;
-    letter-spacing:1px;
-    color:var(--gold);
-    text-transform:uppercase;
-  }
+  .status-chip{font-size:12px; font-family:'Cinzel', serif; letter-spacing:1px; color:var(--gold); text-transform:uppercase;}
 
-  .compare-box{
-    margin-top:14px;
-    background:rgba(124,18,32,.05);
-    border:1px solid rgba(124,18,32,.18);
-    border-radius:8px;
-    padding:14px 16px;
-  }
+  .compare-box{margin-top:14px; background:rgba(124,18,32,.05); border:1px solid rgba(124,18,32,.18); border-radius:8px; padding:14px 16px;}
   .compare-row{margin-bottom:10px;}
-  .compare-label{
-    font-family:'Cinzel', serif;
-    font-size:10px;
-    letter-spacing:1.5px;
-    text-transform:uppercase;
-    color:var(--ink-soft);
-    display:block;
-    margin-bottom:4px;
-  }
+  .compare-label{font-family:'Cinzel', serif; font-size:10px; letter-spacing:1.5px; text-transform:uppercase; color:var(--ink-soft); display:block; margin-bottom:4px;}
   .compare-latin{font-size:17px;}
   .compare-heard{font-size:15px; color:var(--ink-soft); font-style:italic;}
   .w-ok{color:#2f6b2f;}
   .w-miss{color:var(--rubric); text-decoration:underline; text-decoration-color:rgba(124,18,32,.4);}
-  .score-chip{
-    display:inline-block;
-    font-family:'Cinzel', serif;
-    font-size:11px;
-    letter-spacing:1px;
-    text-transform:uppercase;
-    padding:4px 12px;
-    border-radius:14px;
-    margin-top:4px;
-  }
+  .score-chip{display:inline-block; font-family:'Cinzel', serif; font-size:11px; letter-spacing:1px; text-transform:uppercase; padding:4px 12px; border-radius:14px; margin-top:4px;}
   .score-good{background:#2f6b2f; color:#eafbe6;}
   .score-mid{background:#a17a1e; color:#fff8e6;}
   .score-low{background:var(--rubric); color:#fff0ee;}
-  .compare-note{
-    margin-top:12px;
-    font-size:13px;
-    font-style:italic;
-    color:var(--ink-soft);
-  }
+  .compare-note{margin-top:12px; font-size:13px; font-style:italic; color:var(--ink-soft);}
 
-  .nav-row{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    max-width:660px;
-    width:100%;
-    margin-top:22px;
-  }
+  .nav-row{display:flex; justify-content:space-between; align-items:center; max-width:660px; width:100%; margin-top:22px; gap:10px;}
   .nav-btn{
-    font-family:'Cinzel', serif;
-    letter-spacing:1.5px;
-    font-size:12px;
-    text-transform:uppercase;
-    background:none;
-    border:1px solid var(--gold);
-    color:#e7d9b3;
-    padding:9px 18px;
-    border-radius:24px;
-    cursor:pointer;
+    font-family:'Cinzel', serif; letter-spacing:1.5px; font-size:12px; text-transform:uppercase; background:none;
+    border:1px solid var(--gold); color:#e7d9b3; padding:9px 18px; border-radius:24px; cursor:pointer; white-space:nowrap;
   }
   .nav-btn:hover{background:rgba(171,138,63,.15);}
   .nav-btn:disabled{opacity:.35; cursor:not-allowed;}
-  .dots{display:flex; gap:5px;}
+  .dots{display:flex; gap:4px; flex-wrap:wrap; max-width:280px; justify-content:center;}
   .dots span{width:6px;height:6px;border-radius:50%;background:#443a2f;}
   .dots span.done{background:var(--gold-bright);}
   .dots span.current{background:var(--rubric-soft); box-shadow:0 0 0 3px rgba(124,18,32,.25);}
 
-  /* top controls */
-  .controls{
-    display:flex;
-    gap:10px;
-    align-items:center;
-    margin-bottom:20px;
-    flex-wrap:wrap;
-    justify-content:center;
-  }
-  .seg{
-    display:flex;
-    border:1px solid var(--gold);
-    border-radius:24px;
-    overflow:hidden;
-  }
-  .seg button{
-    background:none;
-    border:none;
-    color:#d9c9a0;
-    font-family:'Cinzel', serif;
-    font-size:11px;
-    letter-spacing:1.5px;
-    text-transform:uppercase;
-    padding:8px 14px;
-    cursor:pointer;
-  }
+  .controls{display:flex; gap:10px; align-items:center; margin-bottom:18px; flex-wrap:wrap; justify-content:center; max-width:660px;}
+  .seg{display:flex; border:1px solid var(--gold); border-radius:24px; overflow:hidden;}
+  .seg button{background:none; border:none; color:#d9c9a0; font-family:'Cinzel', serif; font-size:11px; letter-spacing:1.5px; text-transform:uppercase; padding:8px 14px; cursor:pointer;}
   .seg button.active{background:var(--rubric); color:#fff5e6;}
   .toggle-link{
-    font-size:12px;
-    font-family:'Cinzel', serif;
-    letter-spacing:1px;
-    color:#b9ab8a;
-    text-transform:uppercase;
-    cursor:pointer;
-    background:none;
-    border:1px solid rgba(185,171,138,.4);
-    border-radius:24px;
-    padding:8px 14px;
+    font-size:12px; font-family:'Cinzel', serif; letter-spacing:1px; color:#b9ab8a; text-transform:uppercase; cursor:pointer;
+    background:none; border:1px solid rgba(185,171,138,.4); border-radius:24px; padding:8px 14px;
   }
   .toggle-link.active{color:var(--gold-bright); border-color:var(--gold-bright);}
 
-  /* cover + summary */
-  .cover, .summary{
-    max-width:660px;
-    width:100%;
+  .cover, .summary, .settings-view, .recordpriest-view{max-width:660px; width:100%;}
+  .cover .missal, .summary .missal, .settings-view .missal, .recordpriest-view .missal{padding:38px 40px 34px 46px;}
+  .cover h2, .summary h2, .settings-view h2, .recordpriest-view h2{
+    font-family:'Cinzel', serif; font-size:20px; letter-spacing:1.5px; color:var(--rubric); text-transform:uppercase; margin-top:0;
   }
-  .cover .missal, .summary .missal{padding:40px 40px 34px 46px;}
-  .cover h2, .summary h2{
-    font-family:'Cinzel', serif;
-    font-size:20px;
-    letter-spacing:1.5px;
-    color:var(--rubric);
-    text-transform:uppercase;
-    margin-top:0;
-  }
-  .cover p{line-height:1.6; font-size:16px;}
+  .cover p, .settings-view p{line-height:1.6; font-size:16px;}
   .begin-btn{
-    font-family:'Cinzel', serif;
-    letter-spacing:2px;
-    text-transform:uppercase;
-    font-size:13px;
-    background:var(--rubric);
-    color:#fff5e6;
-    border:none;
-    border-radius:26px;
-    padding:12px 26px;
-    cursor:pointer;
-    margin-top:10px;
+    font-family:'Cinzel', serif; letter-spacing:2px; text-transform:uppercase; font-size:13px; background:var(--rubric);
+    color:#fff5e6; border:none; border-radius:26px; padding:12px 26px; cursor:pointer; margin-top:10px;
   }
   .begin-btn:hover{background:var(--rubric-soft);}
-  .summary-item{
-    border-bottom:1px solid rgba(124,18,32,.15);
-    padding:12px 0;
-  }
+  .begin-btn.ghost{background:none; border:1px solid var(--gold); color:var(--rubric-soft);}
+  .summary-item{border-bottom:1px solid rgba(124,18,32,.15); padding:12px 0;}
   .summary-item .sec{font-family:'Cinzel',serif; font-size:11px; letter-spacing:1px; color:var(--gold); text-transform:uppercase;}
   .summary-item .lat{font-style:italic; margin:4px 0 8px; font-size:15px;}
-  .restart-btn{
-    margin-top:18px;
-  }
+  .restart-btn{margin-top:18px;}
 
-  footer{
-    margin-top:30px;
-    font-size:12px;
-    color:#5f5748;
-    font-style:italic;
-    text-align:center;
+  .field-label{font-family:'Cinzel', serif; font-size:11px; letter-spacing:1.5px; text-transform:uppercase; color:var(--ink-soft); display:block; margin:16px 0 6px;}
+  .text-input{
+    width:100%; padding:9px 12px; border:1px solid rgba(124,18,32,.3); border-radius:6px; font-family:'EB Garamond', serif;
+    font-size:15px; background:#fffdf6;
   }
+  select.text-input{cursor:pointer;}
+  .settings-note{font-size:13px; color:var(--ink-soft); font-style:italic; margin-top:4px;}
+
+  .rp-item{border-bottom:1px solid rgba(124,18,32,.15); padding:14px 0;}
+  .rp-item .sec{font-family:'Cinzel',serif; font-size:10px; letter-spacing:1px; color:var(--gold); text-transform:uppercase;}
+  .rp-item .lat{font-style:italic; margin:4px 0 10px; font-size:15px;}
+  .rp-controls{display:flex; align-items:center; gap:10px; flex-wrap:wrap;}
+
+  footer{margin-top:30px; font-size:12px; color:#5f5748; font-style:italic; text-align:center;}
 
   @media (max-width:480px){
-    .missal{padding:30px 22px 24px 30px;}
+    .missal, .cover .missal, .summary .missal, .settings-view .missal, .recordpriest-view .missal{padding:28px 20px 22px 28px;}
     .latin{font-size:18px;}
+    .meta-row{flex-direction:column; align-items:flex-start; gap:4px;}
+    .section-label{text-align:left;}
   }
 </style>
 </head>
@@ -402,133 +184,415 @@
 
 <div class="brand">
   <span class="cross">✝</span>
-  <h1>Prayers at the Foot of the Altar</h1>
-  <p>Ordinary of the Mass · Traditional Latin Rite</p>
+  <h1>Server's Responses — The Holy Mass</h1>
+  <p>Traditional Latin Rite · Missa Lecta</p>
 </div>
 
 <div id="app"></div>
-
 <footer>Speak clearly and unhurried, as at the altar rail.</footer>
 
 <script>
+/* ============ FULL MASS SEQUENCE (server's parts) ============ */
 const STEPS = [
-  {section:"Sign of the Cross", priest:"In nómine Patris, et Fílii, et Spíritus Sancti.", priestT:"In the name of the Father, and of the Son, and of the Holy Ghost.",
-   server:"Amen.", serverT:"Amen."},
+{section:"Sign of the Cross", priest:"In nómine Patris, et Fílii, et Spíritus Sancti.", priestT:"In the name of the Father, and of the Son, and of the Holy Ghost.",
+ server:"Amen.", serverT:"Amen."},
 
-  {section:"Psalm 42 — Judica Me Deus", priest:"Introíbo ad altáre Dei.", priestT:"I will go in unto the altar of God.",
-   server:"Ad Deum qui lætíficat juventútem meam.", serverT:"To God, who giveth joy to my youth."},
+{section:"Psalm 42 — Judica Me", priest:"Introíbo ad altáre Dei.", priestT:"I will go in unto the altar of God.",
+ server:"Ad Deum qui lætíficat juventútem meam.", serverT:"To God, who giveth joy to my youth."},
 
-  {section:"Psalm 42 — Judica Me Deus", priest:"Júdica me, Deus, et discérne causam meam de gente non sancta: ab hómine iníquo et dolóso érue me.", priestT:"Judge me, O God, and distinguish my cause from the nation that is not holy: deliver me from the unjust and deceitful man.",
-   server:"Quia tu es, Deus, fortitúdo mea: quare me repulísti, et quare tristis incédo, dum afflígit me inimícus?", serverT:"For Thou, O God, art my strength: why hast Thou cast me off? And why do I go about in sadness, while the enemy afflicteth me?"},
+{section:"Psalm 42 — Judica Me", priest:"Júdica me, Deus, et discérne causam meam de gente non sancta: ab hómine iníquo et dolóso érue me.", priestT:"Judge me, O God, and distinguish my cause from the nation that is not holy.",
+ server:"Quia tu es, Deus, fortitúdo mea: quare me repulísti, et quare tristis incédo, dum afflígit me inimícus?", serverT:"For Thou, O God, art my strength: why hast Thou cast me off?"},
 
-  {section:"Psalm 42 — Judica Me Deus", priest:"Emítte lucem tuam, et veritátem tuam: ipsa me deduxérunt, et adduxérunt in montem sanctum tuum, et in tabernácula tua.", priestT:"Send forth Thy light and Thy truth: they have conducted me and brought me unto Thy holy hill and Thy dwelling place.",
-   server:"Et introíbo ad altáre Dei: ad Deum qui lætíficat juventútem meam.", serverT:"And I will go in unto the altar of God: to God, who giveth joy to my youth."},
+{section:"Psalm 42 — Judica Me", priest:"Emítte lucem tuam, et veritátem tuam: ipsa me deduxérunt, et adduxérunt in montem sanctum tuum, et in tabernácula tua.", priestT:"Send forth Thy light and Thy truth: they have led me to Thy holy hill.",
+ server:"Et introíbo ad altáre Dei: ad Deum qui lætíficat juventútem meam.", serverT:"And I will go in unto the altar of God: to God, who giveth joy to my youth."},
 
-  {section:"Psalm 42 — Judica Me Deus", priest:"Confitébor tibi in cíthara, Deus, Deus meus: quare tristis es, ánima mea? et quare contúrbas me?", priestT:"I will praise Thee upon the harp, O God, my God: why art thou sad, my soul, and why dost thou disquiet me?",
-   server:"Spera in Deo, quóniam adhuc confitébor illi: salutáre vultus mei, et Deus meus.", serverT:"Hope in God, for I will still praise Him: who is the salvation of my countenance, and my God."},
+{section:"Psalm 42 — Judica Me", priest:"Confitébor tibi in cíthara, Deus, Deus meus: quare tristis es, ánima mea? et quare contúrbas me?", priestT:"I will praise Thee upon the harp, O God: why art thou sad, my soul?",
+ server:"Spera in Deo, quóniam adhuc confitébor illi: salutáre vultus mei, et Deus meus.", serverT:"Hope in God, for I will still praise Him: who is the salvation of my countenance."},
 
-  {section:"Psalm 42 — Judica Me Deus", priest:"Glória Patri, et Fílio, et Spirítui Sancto.", priestT:"Glory be to the Father, and to the Son, and to the Holy Ghost.",
-   server:"Sicut erat in princípio, et nunc, et semper: et in sǽcula sæculórum. Amen.", serverT:"As it was in the beginning, is now, and ever shall be, world without end. Amen."},
+{section:"Psalm 42 — Judica Me", priest:"Glória Patri, et Fílio, et Spirítui Sancto.", priestT:"Glory be to the Father, and to the Son, and to the Holy Ghost.",
+ server:"Sicut erat in princípio, et nunc, et semper: et in sǽcula sæculórum. Amen.", serverT:"As it was in the beginning, is now, and ever shall be, world without end. Amen."},
 
-  {section:"Psalm 42 — Judica Me Deus", priest:"Introíbo ad altáre Dei.", priestT:"I will go in unto the altar of God.",
-   server:"Ad Deum qui lætíficat juventútem meam.", serverT:"To God, who giveth joy to my youth."},
+{section:"Psalm 42 — Judica Me", priest:"Introíbo ad altáre Dei.", priestT:"I will go in unto the altar of God.",
+ server:"Ad Deum qui lætíficat juventútem meam.", serverT:"To God, who giveth joy to my youth."},
 
-  {section:"Versicle", priest:"Adjutórium nostrum in nómine Dómini.", priestT:"Our help is in the name of the Lord.",
-   server:"Qui fecit cælum et terram.", serverT:"Who made heaven and earth."},
+{section:"Versicle", priest:"Adjutórium nostrum in nómine Dómini.", priestT:"Our help is in the name of the Lord.",
+ server:"Qui fecit cælum et terram.", serverT:"Who made heaven and earth."},
 
-  {section:"Confiteor", priest:"Confíteor Deo omnipoténti, beátæ Maríæ semper Vírgini, beáto Michaéli Archángelo, beáto Joánni Baptístæ, sanctis Apóstolis Petro et Paulo, ómnibus Sanctis, et vobis fratres: quia peccávi nimis cogitatióne, verbo et ópere: mea culpa, mea culpa, mea máxima culpa. Ideo precor beátam Maríam semper Vírginem, beátum Michaélem Archángelum, beátum Joánnem Baptístam, sanctos Apóstolos Petrum et Paulum, omnes Sanctos, et vos fratres, oráre pro me ad Dóminum Deum nostrum.",
-   priestT:"I confess to almighty God... that I have sinned exceedingly in thought, word and deed: through my fault, through my fault, through my most grievous fault. Therefore I beseech the Blessed Mary ever Virgin... and you, brethren, to pray for me to the Lord our God.",
-   server:"Misereátur tui omnípotens Deus, et, dimíssis peccátis tuis, perdúcat te ad vitam ætérnam.", serverT:"May almighty God have mercy on thee, forgive thee thy sins, and bring thee to life everlasting."},
+{section:"Confiteor", priest:"Confíteor Deo omnipoténti, beátæ Maríæ semper Vírgini, beáto Michaéli Archángelo, beáto Joánni Baptístæ, sanctis Apóstolis Petro et Paulo, ómnibus Sanctis, et vobis fratres: quia peccávi nimis cogitatióne, verbo et ópere: mea culpa, mea culpa, mea máxima culpa. Ideo precor beátam Maríam semper Vírginem, beátum Michaélem Archángelum, beátum Joánnem Baptístam, sanctos Apóstolos Petrum et Paulum, omnes Sanctos, et vos fratres, oráre pro me ad Dóminum Deum nostrum.",
+ priestT:"I confess to almighty God... that I have sinned exceedingly... and you, brethren, to pray for me to the Lord our God.",
+ server:"Misereátur tui omnípotens Deus, et, dimíssis peccátis tuis, perdúcat te ad vitam ætérnam.", serverT:"May almighty God have mercy on thee, forgive thee thy sins, and bring thee to life everlasting."},
 
-  {section:"Confiteor", priest:"Amen.", priestT:"Amen.",
-   server:"Confíteor Deo omnipoténti, beátæ Maríæ semper Vírgini, beáto Michaéli Archángelo, beáto Joánni Baptístæ, sanctis Apóstolis Petro et Paulo, ómnibus Sanctis, et tibi pater: quia peccávi nimis cogitatióne, verbo et ópere: mea culpa, mea culpa, mea máxima culpa. Ideo precor beátam Maríam semper Vírginem, beátum Michaélem Archángelum, beátum Joánnem Baptístam, sanctos Apóstolos Petrum et Paulum, omnes Sanctos, et te pater, oráre pro me ad Dóminum Deum nostrum.",
-   serverT:"I confess to almighty God... and to thee, father, that I have sinned exceedingly in thought, word and deed... and thee, father, to pray for me to the Lord our God."},
+{section:"Confiteor", priest:"Amen.", priestT:"Amen.",
+ server:"Confíteor Deo omnipoténti, beátæ Maríæ semper Vírgini, beáto Michaéli Archángelo, beáto Joánni Baptístæ, sanctis Apóstolis Petro et Paulo, ómnibus Sanctis, et tibi pater: quia peccávi nimis cogitatióne, verbo et ópere: mea culpa, mea culpa, mea máxima culpa. Ideo precor beátam Maríam semper Vírginem, beátum Michaélem Archángelum, beátum Joánnem Baptístam, sanctos Apóstolos Petrum et Paulum, omnes Sanctos, et te pater, oráre pro me ad Dóminum Deum nostrum.",
+ serverT:"I confess to almighty God... and to thee, father, that I have sinned exceedingly... and thee, father, to pray for me to the Lord our God."},
 
-  {section:"Confiteor", priest:"Misereátur vestri omnípotens Deus, et, dimíssis peccátis vestris, perdúcat vos ad vitam ætérnam.", priestT:"May almighty God have mercy upon you, forgive you your sins, and bring you to life everlasting.",
-   server:"Amen.", serverT:"Amen."},
+{section:"Confiteor", priest:"Misereátur vestri omnípotens Deus, et, dimíssis peccátis vestris, perdúcat vos ad vitam ætérnam.", priestT:"May almighty God have mercy upon you, forgive you your sins, and bring you to life everlasting.",
+ server:"Amen.", serverT:"Amen."},
 
-  {section:"Confiteor", priest:"Indulgéntiam, absolutiónem, et remissiónem peccatórum nostrórum tríbuat nobis omnípotens et miséricors Dóminus.", priestT:"May the almighty and merciful Lord grant us pardon, absolution, and remission of our sins.",
-   server:"Amen.", serverT:"Amen."},
+{section:"Confiteor", priest:"Indulgéntiam, absolutiónem, et remissiónem peccatórum nostrórum tríbuat nobis omnípotens et miséricors Dóminus.", priestT:"May the almighty and merciful Lord grant us pardon, absolution, and remission of our sins.",
+ server:"Amen.", serverT:"Amen."},
 
-  {section:"Versicles Before the Altar", priest:"Deus, tu convérsus vivificábis nos.", priestT:"Thou wilt turn again, O God, and quicken us.",
-   server:"Et plebs tua lætábitur in te.", serverT:"And Thy people shall rejoice in Thee."},
+{section:"Versicles Before the Altar", priest:"Deus, tu convérsus vivificábis nos.", priestT:"Thou wilt turn again, O God, and quicken us.",
+ server:"Et plebs tua lætábitur in te.", serverT:"And Thy people shall rejoice in Thee."},
 
-  {section:"Versicles Before the Altar", priest:"Osténde nobis, Dómine, misericórdiam tuam.", priestT:"Show us, O Lord, Thy mercy.",
-   server:"Et salutáre tuum da nobis.", serverT:"And grant us Thy salvation."},
+{section:"Versicles Before the Altar", priest:"Osténde nobis, Dómine, misericórdiam tuam.", priestT:"Show us, O Lord, Thy mercy.",
+ server:"Et salutáre tuum da nobis.", serverT:"And grant us Thy salvation."},
 
-  {section:"Versicles Before the Altar", priest:"Dómine, exáudi oratiónem meam.", priestT:"O Lord, hear my prayer.",
-   server:"Et clamor meus ad te véniat.", serverT:"And let my cry come unto Thee."},
+{section:"Versicles Before the Altar", priest:"Dómine, exáudi oratiónem meam.", priestT:"O Lord, hear my prayer.",
+ server:"Et clamor meus ad te véniat.", serverT:"And let my cry come unto Thee."},
 
-  {section:"Versicles Before the Altar", priest:"Dóminus vobíscum.", priestT:"The Lord be with you.",
-   server:"Et cum spíritu tuo.", serverT:"And with thy spirit."},
+{section:"Versicles Before the Altar", priest:"Dóminus vobíscum.", priestT:"The Lord be with you.",
+ server:"Et cum spíritu tuo.", serverT:"And with thy spirit."},
 
-  {section:"Collects", priest:"Orémus. Aufer a nobis, quǽsumus, Dómine, iniquitátes nostras: ut ad Sancta sanctórum puris mereámur méntibus introíre. Per Christum Dóminum nostrum.", priestT:"Let us pray. Take away from us our iniquities, we entreat Thee, O Lord, that we may be worthy to enter with pure minds into the Holy of Holies. Through Christ our Lord.",
-   server:"Amen.", serverT:"Amen."},
+{section:"Collect (at the foot of the altar)", priest:"Orémus. Aufer a nobis, quǽsumus, Dómine, iniquitátes nostras: ut ad Sancta sanctórum puris mereámur méntibus introíre. Per Christum Dóminum nostrum.", priestT:"Let us pray. Take away from us our iniquities, that we may enter with pure minds into the Holy of Holies.",
+ server:"Amen.", serverT:"Amen."},
 
-  {section:"Collects", priest:"Orámus te, Dómine, per mérita Sanctórum tuórum, quorum relíquiæ hic sunt, et ómnium Sanctórum: ut indulgére dignéris ómnia peccáta mea.", priestT:"We beseech Thee, O Lord, by the merits of Thy Saints whose relics are here, and of all the Saints, that Thou wouldst vouchsafe to forgive me all my sins.",
-   server:"Amen.", serverT:"Amen."},
+{section:"Collect (at the foot of the altar)", priest:"Orámus te, Dómine, per mérita Sanctórum tuórum, quorum relíquiæ hic sunt, et ómnium Sanctórum: ut indulgére dignéris ómnia peccáta mea.", priestT:"We beseech Thee, O Lord, by the merits of Thy Saints, to forgive me all my sins.",
+ server:"Amen.", serverT:"Amen."},
 
-  {section:"Offertory — Oráte Fratres", priest:"Oráte, fratres: ut meum ac vestrum sacrifícium acceptábile fiat apud Deum Patrem omnipoténtem.", priestT:"Pray, brethren, that my sacrifice and yours may be acceptable to God the Father almighty.",
-   server:"Suscípiat Dóminus sacrifícium de mánibus tuis ad laudem et glóriam nóminis sui, ad utilitátem quoque nostram, totiúsque Ecclésiæ suæ sanctæ.", serverT:"May the Lord receive the sacrifice from thy hands, to the praise and glory of His name, to our benefit also, and that of all His holy Church."}
+{section:"Before the Collect of the Day", priest:"Dóminus vobíscum.", priestT:"The Lord be with you.",
+ server:"Et cum spíritu tuo.", serverT:"And with thy spirit."},
+
+{section:"The Collect", priest:"Orémus. [The Collect of the day is prayed here — its text varies.] ...Per ómnia sǽcula sæculórum.", priestT:"Let us pray. [Collect of the day] ...world without end.", varies:true,
+ server:"Amen.", serverT:"Amen."},
+
+{section:"Epistle", priest:"[The Epistle is read — its text varies by day.]", priestT:"[Epistle of the day]", varies:true,
+ server:"Deo grátias.", serverT:"Thanks be to God."},
+
+{section:"Before the Gospel", priest:"Dóminus vobíscum.", priestT:"The Lord be with you.",
+ server:"Et cum spíritu tuo.", serverT:"And with thy spirit."},
+
+{section:"Gospel", priest:"Sequéntia sancti Evangélii secúndum [N].", priestT:"The continuation of the holy Gospel according to [N].", varies:true,
+ server:"Glória tibi, Dómine.", serverT:"Glory be to Thee, O Lord."},
+
+{section:"Credo", priest:"(The Creed is intoned by the Priest at the middle of the altar.)", priestT:"(intoned)",
+ server:"Credo in unum Deum, Patrem omnipoténtem, factórem cæli et terræ, visibílium ómnium, et invisibílium. Et in unum Dóminum Jesum Christum, Fílium Dei unigénitum. Et ex Patre natum ante ómnia sǽcula. Deum de Deo, lumen de lúmine, Deum verum de Deo vero. Génitum, non factum, consubstantiálem Patri: per quem ómnia facta sunt. Qui propter nos hómines, et propter nostram salútem descéndit de cælis. Et incarnátus est de Spíritu Sancto ex María Vírgine: et homo factus est. Crucifíxus étiam pro nobis: sub Póntio Piláto passus, et sepúltus est. Et resurréxit tértia die, secúndum Scriptúras. Et ascéndit in cælum: sedet ad déxteram Patris. Et íterum ventúrus est cum glória judicáre vivos, et mórtuos: cujus regni non erit finis. Et in Spíritum Sanctum, Dóminum, et vivificántem: qui ex Patre, Filióque procédit. Qui cum Patre, et Fílio simul adorátur, et conglorificátur: qui locútus est per Prophétas. Et unam sanctam cathólicam et apostólicam Ecclésiam. Confíteor unum baptísma in remissiónem peccatórum. Et expécto resurrectiónem mórtuorum. Et vitam ventúri sǽculi. Amen.",
+ serverT:"I believe in one God, the Father almighty... and the life of the world to come. Amen."},
+
+{section:"Before the Offertory", priest:"Dóminus vobíscum.", priestT:"The Lord be with you.",
+ server:"Et cum spíritu tuo.", serverT:"And with thy spirit."},
+
+{section:"Offertory — Oráte Fratres", priest:"Oráte, fratres: ut meum ac vestrum sacrifícium acceptábile fiat apud Deum Patrem omnipoténtem.", priestT:"Pray, brethren, that my sacrifice and yours may be acceptable to God the Father almighty.",
+ server:"Suscípiat Dóminus sacrifícium de mánibus tuis ad laudem et glóriam nóminis sui, ad utilitátem quoque nostram, totiúsque Ecclésiæ suæ sanctæ.", serverT:"May the Lord receive the sacrifice from thy hands, to the praise and glory of His name, to our benefit and that of all His holy Church."},
+
+{section:"Secret", priest:"[The Secret prayer is said silently, ending aloud:] ...Per ómnia sǽcula sæculórum.", priestT:"[Secret of the day, ending] ...world without end.", varies:true,
+ server:"Amen.", serverT:"Amen."},
+
+{section:"Preface", priest:"Dóminus vobíscum.", priestT:"The Lord be with you.",
+ server:"Et cum spíritu tuo.", serverT:"And with thy spirit."},
+
+{section:"Preface", priest:"Sursum corda.", priestT:"Lift up your hearts.",
+ server:"Habémus ad Dóminum.", serverT:"We have lifted them up unto the Lord."},
+
+{section:"Preface", priest:"Grátias agámus Dómino Deo nostro.", priestT:"Let us give thanks to the Lord our God.",
+ server:"Dignum et justum est.", serverT:"It is meet and just."},
+
+{section:"Sanctus", priest:"(The Priest concludes the Preface aloud and continues the Canon in silence.)", priestT:"(silent Canon begins)",
+ server:"Sánctus, Sánctus, Sánctus, Dóminus Deus Sábaoth. Pleni sunt cæli et terra glória tua. Hosánna in excélsis. Benedíctus qui venit in nómine Dómini. Hosánna in excélsis.", serverT:"Holy, Holy, Holy, Lord God of Hosts. Heaven and earth are full of Thy glory. Hosanna in the highest. Blessed is He who cometh in the name of the Lord. Hosanna in the highest."},
+
+{section:"End of the Canon", priest:"(The Priest, having consecrated in silence, concludes aloud:) ...Per ómnia sǽcula sæculórum.", priestT:"(silent Canon, then aloud) ...world without end.",
+ server:"Amen.", serverT:"Amen."},
+
+{section:"Pater Noster", priest:"Pater noster, qui es in cælis: sanctificétur nomen tuum: advéniat regnum tuum: fiat volúntas tua, sicut in cælo, et in terra. Panem nostrum quotidiánum da nobis hódie: et dimítte nobis débita nostra, sicut et nos dimíttimus debitóribus nostris. Et ne nos indúcas in tentatiónem.", priestT:"Our Father, who art in heaven... and lead us not into temptation.",
+ server:"Sed líbera nos a malo.", serverT:"But deliver us from evil."},
+
+{section:"Pater Noster", priest:"(The Priest continues silently, then concludes aloud:) ...Per ómnia sǽcula sæculórum.", priestT:"(silent embolism, then aloud) ...world without end.",
+ server:"Amen.", serverT:"Amen."},
+
+{section:"Pax Domini", priest:"Pax Dómini sit semper vobíscum.", priestT:"May the peace of the Lord be always with you.",
+ server:"Et cum spíritu tuo.", serverT:"And with thy spirit."},
+
+{section:"Agnus Dei", priest:"(Said by the Priest bowing before the Blessed Sacrament.)", priestT:"(said quietly)",
+ server:"Agnus Dei, qui tollis peccáta mundi: miserére nobis. Agnus Dei, qui tollis peccáta mundi: miserére nobis. Agnus Dei, qui tollis peccáta mundi: dona nobis pacem.", serverT:"Lamb of God, who takest away the sins of the world: have mercy on us (x2)... grant us peace."},
+
+{section:"Domine, non sum dignus", priest:"Ecce Agnus Dei, ecce qui tollit peccáta mundi.", priestT:"Behold the Lamb of God, behold Him who taketh away the sins of the world.",
+ server:"Dómine, non sum dignus, ut intres sub tectum meum: sed tantum dic verbo, et sanábitur ánima mea. (Said three times.)", serverT:"Lord, I am not worthy that Thou shouldst enter under my roof: but only say the word, and my soul shall be healed."},
+
+{section:"Before the Postcommunion", priest:"Dóminus vobíscum.", priestT:"The Lord be with you.",
+ server:"Et cum spíritu tuo.", serverT:"And with thy spirit."},
+
+{section:"Postcommunion", priest:"Orémus. [The Postcommunion prayer is said here — its text varies.] ...Per ómnia sǽcula sæculórum.", priestT:"[Postcommunion of the day] ...world without end.", varies:true,
+ server:"Amen.", serverT:"Amen."},
+
+{section:"Dismissal", priest:"Dóminus vobíscum.", priestT:"The Lord be with you.",
+ server:"Et cum spíritu tuo.", serverT:"And with thy spirit."},
+
+{section:"Dismissal", priest:"Ite, missa est.", priestT:"Go, the Mass is ended.",
+ server:"Deo grátias.", serverT:"Thanks be to God."},
+
+{section:"Blessing", priest:"Benedícat vos omnípotens Deus, Pater, et Fílius, et Spíritus Sanctus.", priestT:"May almighty God bless you, the Father, and the Son, and the Holy Ghost.",
+ server:"Amen.", serverT:"Amen."},
+
+{section:"Last Gospel", priest:"Dóminus vobíscum.", priestT:"The Lord be with you.",
+ server:"Et cum spíritu tuo.", serverT:"And with thy spirit."},
+
+{section:"Last Gospel", priest:"Inítium sancti Evangélii secúndum Joánnem.", priestT:"The beginning of the holy Gospel according to John.",
+ server:"Glória tibi, Dómine.", serverT:"Glory be to Thee, O Lord."},
+
+{section:"Last Gospel", priest:"In princípio erat Verbum, et Verbum erat apud Deum, et Deus erat Verbum. Hoc erat in princípio apud Deum. Omnia per ipsum facta sunt: et sine ipso factum est nihil, quod factum est: in ipso vita erat, et vita erat lux hóminum: et lux in ténebris lucet, et ténebræ eam non comprehendérunt. Fuit homo missus a Deo, cui nomen erat Joánnes. Hic venit in testimónium, ut testimónium perhibéret de lúmine, ut omnes créderent per illum. Non erat ille lux, sed ut testimónium perhibéret de lúmine. Erat lux vera, quæ illúminat omnem hóminem veniéntem in hunc mundum. In mundo erat, et mundus per ipsum factus est, et mundus eum non cognóvit. In própria venit, et sui eum non recepérunt. Quotquot autem recepérunt eum, dedit eis potestátem fílios Dei fíeri, his qui credunt in nómine ejus. Qui non ex sanguínibus, neque ex voluntáte carnis, neque ex voluntáte viri, sed ex Deo nati sunt. Et Verbum caro factum est, et habitávit in nobis: et vídimus glóriam ejus, glóriam quasi Unigéniti a Patre, plenum grátiæ et veritátis.",
+ priestT:"In the beginning was the Word... and we saw His glory, the glory as of the Only-begotten of the Father, full of grace and truth.",
+ server:"Deo grátias.", serverT:"Thanks be to God."}
 ];
 
+/* ============ STATE ============ */
 const app = document.getElementById('app');
 let state = {
-  started:false,
+  view: 'cover', // cover | settings | recordPriest | practice | summary
   level: localStorage.getItem('altar_level') || '1',
   step: 0,
-  recordings: {}, // idx -> {url, blob}
-  transcripts: {}, // idx -> recognized text
-  showTranslation: false
+  recordings: {},
+  transcripts: {},
+  priestRecordings: JSON.parse(sessionStorage.getItem('altar_priestRecUrls') || '{}'), // idx -> url (session only, blobs don't survive reload anyway)
+  showTranslation: false,
+  priestMode: localStorage.getItem('altar_priestMode') || 'browser', // browser | custom | eleven
+  voiceURI: localStorage.getItem('altar_voiceURI') || '',
+  elevenKey: localStorage.getItem('altar_elevenKey') || '',
+  elevenVoiceId: localStorage.getItem('altar_elevenVoiceId') || '',
+  elevenCache: {}
 };
+// blob objects can't survive reload via sessionStorage — reset the recording map fresh each load
+state.priestRecordings = {};
 
-function stripAccents(s){
-  return s.normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+function stripAccents(s){ return s.normalize('NFD').replace(/[\u0300-\u036f]/g,''); }
+
+/* ============ BROWSER TTS ============ */
+let availableVoices = [];
+function loadVoices(){
+  if(!('speechSynthesis' in window)) return;
+  availableVoices = window.speechSynthesis.getVoices();
 }
-
-function speak(text){
+if('speechSynthesis' in window){
+  loadVoices();
+  window.speechSynthesis.onvoiceschanged = loadVoices;
+}
+function speakBrowser(text){
   if(!('speechSynthesis' in window)) return;
   window.speechSynthesis.cancel();
   const u = new SpeechSynthesisUtterance(stripAccents(text));
-  const voices = window.speechSynthesis.getVoices();
-  let voice = voices.find(v=>v.lang && v.lang.toLowerCase().startsWith('it')) ||
-              voices.find(v=>v.lang && v.lang.toLowerCase().startsWith('la')) ||
-              voices.find(v=>v.default) || voices[0];
+  let voice = availableVoices.find(v=>v.voiceURI === state.voiceURI);
+  if(!voice) voice = availableVoices.find(v=>v.lang && v.lang.toLowerCase().startsWith('it')) || availableVoices.find(v=>v.default) || availableVoices[0];
   if(voice) u.voice = voice;
   u.rate = 0.82;
   u.pitch = 0.95;
   window.speechSynthesis.speak(u);
 }
-if('speechSynthesis' in window){
-  window.speechSynthesis.onvoiceschanged = ()=>{};
+
+/* ============ ELEVENLABS TTS ============ */
+async function speakEleven(text, i, statusEl){
+  if(!state.elevenKey || !state.elevenVoiceId){
+    if(statusEl) statusEl.textContent = 'Add your ElevenLabs API key & Voice ID in Voice Settings.';
+    return;
+  }
+  if(state.elevenCache[i]){
+    new Audio(state.elevenCache[i]).play();
+    return;
+  }
+  if(statusEl) statusEl.textContent = 'Generating…';
+  try{
+    const res = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${state.elevenVoiceId}`, {
+      method:'POST',
+      headers:{ 'Content-Type':'application/json', 'xi-api-key': state.elevenKey, 'Accept':'audio/mpeg' },
+      body: JSON.stringify({ text: text, model_id:'eleven_multilingual_v2', voice_settings:{stability:0.5, similarity_boost:0.75} })
+    });
+    if(!res.ok) throw new Error('ElevenLabs error ' + res.status);
+    const blob = await res.blob();
+    const url = URL.createObjectURL(blob);
+    state.elevenCache[i] = url;
+    if(statusEl) statusEl.textContent = '';
+    new Audio(url).play();
+  }catch(err){
+    if(statusEl) statusEl.textContent = 'ElevenLabs request failed — check your key/voice ID.';
+  }
 }
 
+function playPriestLine(i, statusEl){
+  const s = STEPS[i];
+  if(state.priestMode === 'custom'){
+    if(state.priestRecordings[i]){ new Audio(state.priestRecordings[i]).play(); }
+    else if(statusEl){ statusEl.textContent = 'No recording yet for this line — record it in "Record the Priest".'; }
+  } else if(state.priestMode === 'eleven'){
+    speakEleven(s.priest, i, statusEl);
+  } else {
+    speakBrowser(s.priest);
+  }
+}
+
+/* ============ SPEECH-TO-TEXT SCORING (server's part) ============ */
+function normToken(w){ return stripAccents(w).toLowerCase().replace(/[^a-z]/g,''); }
+function alignAndScore(correctText, heardText){
+  const correctTokens = correctText.replace(/\(.*?\)/g,'').split(/\s+/).filter(Boolean);
+  const correctNorm = correctTokens.map(normToken);
+  const heardNorm = heardText.split(/\s+/).filter(Boolean).map(normToken).filter(Boolean);
+  const n = correctNorm.length, m = heardNorm.length;
+  const dp = Array.from({length:n+1},()=>new Array(m+1).fill(0));
+  for(let a=1;a<=n;a++)for(let b=1;b<=m;b++){
+    dp[a][b] = (correctNorm[a-1] && correctNorm[a-1]===heardNorm[b-1]) ? dp[a-1][b-1]+1 : Math.max(dp[a-1][b], dp[a][b-1]);
+  }
+  let a=n,b=m; const matched = new Array(n).fill(false);
+  while(a>0 && b>0){
+    if(correctNorm[a-1]===heardNorm[b-1]){ matched[a-1]=true; a--; b--; }
+    else if(dp[a-1][b] >= dp[a][b-1]) a--;
+    else b--;
+  }
+  const score = n ? Math.round((dp[n][m]/n)*100) : 0;
+  const highlighted = correctTokens.map((tok,idx)=> matched[idx] ? `<span class="w-ok">${tok}</span>` : `<span class="w-miss">${tok}</span>`).join(' ');
+  return {score, highlighted};
+}
+function renderComparison(i, transcript){
+  const s = STEPS[i];
+  const holder = document.getElementById('compareHolder');
+  if(!holder) return;
+  if(!transcript){
+    holder.innerHTML = `<div class="compare-note">Speech recognition unavailable or heard nothing — recording saved, but no transcript to compare.</div>`;
+    return;
+  }
+  const {score, highlighted} = alignAndScore(s.server, transcript);
+  const cls = score>=85 ? 'score-good' : score>=55 ? 'score-mid' : 'score-low';
+  holder.innerHTML = `
+    <div class="compare-box">
+      <div class="compare-row"><span class="compare-label">Correct (Latin)</span><div class="latin compare-latin">${highlighted}</div></div>
+      <div class="compare-row"><span class="compare-label">You Said</span><div class="compare-heard">${transcript}</div></div>
+      <div class="score-chip ${cls}">${score}% match</div>
+    </div>`;
+}
+
+/* ============ COVER ============ */
 function renderCover(){
   app.innerHTML = `
-    <div class="cover">
-      <div class="missal">
-        <h2>Before You Begin</h2>
-        <p>Practice the server's responses in the Prayers at the Foot of the Altar. You will hear and read the priest's part, then record your own response.</p>
-        <p><strong>Level I — Reveal:</strong> the response appears for five seconds, then hides before you record.<br>
-        <strong>Level II — Memory:</strong> the response is never shown. Recall it and record.</p>
-        <div class="seg" style="margin:16px 0;">
-          <button data-lvl="1" class="${state.level==='1'?'active':''}">Level I</button>
-          <button data-lvl="2" class="${state.level==='2'?'active':''}">Level II</button>
-        </div><br>
-        <button class="begin-btn" id="beginBtn">Begin</button>
-      </div>
-    </div>`;
+    <div class="cover"><div class="missal">
+      <h2>Before You Begin</h2>
+      <p>Practice the server's responses for the whole of the Holy Mass — from the Prayers at the Foot of the Altar to the Last Gospel.</p>
+      <p><strong>Level I — Reveal:</strong> the response appears for five seconds, then hides before you record.<br>
+      <strong>Level II — Memory:</strong> the response is never shown. Recall it and record.</p>
+      <div class="seg" style="margin:16px 0;">
+        <button data-lvl="1" class="${state.level==='1'?'active':''}">Level I</button>
+        <button data-lvl="2" class="${state.level==='2'?'active':''}">Level II</button>
+      </div><br>
+      <button class="begin-btn" id="beginBtn">Begin</button>
+      <button class="begin-btn ghost" id="settingsBtn" style="margin-left:8px;">⚙ Voice Settings</button>
+      <button class="begin-btn ghost" id="recPriestBtn" style="margin-left:8px;">🎙 Record the Priest</button>
+    </div></div>`;
   app.querySelectorAll('.seg button').forEach(b=>{
     b.onclick = ()=>{ state.level = b.dataset.lvl; localStorage.setItem('altar_level', state.level); renderCover(); };
   });
-  document.getElementById('beginBtn').onclick = ()=>{ state.started = true; state.step = 0; render(); };
+  document.getElementById('beginBtn').onclick = ()=>{ state.view='practice'; state.step=0; render(); };
+  document.getElementById('settingsBtn').onclick = ()=>{ state.view='settings'; render(); };
+  document.getElementById('recPriestBtn').onclick = ()=>{ state.view='recordPriest'; render(); };
 }
 
+/* ============ SETTINGS ============ */
+function renderSettings(){
+  const voiceOptions = availableVoices.map(v=>`<option value="${v.voiceURI}" ${v.voiceURI===state.voiceURI?'selected':''}>${v.name} (${v.lang})</option>`).join('');
+  app.innerHTML = `
+    <div class="settings-view"><div class="missal">
+      <h2>Voice Settings — the Priest</h2>
+      <p>Choose how you'd like to hear the priest's lines.</p>
+      <div class="seg" style="margin:10px 0;">
+        <button data-mode="browser" class="${state.priestMode==='browser'?'active':''}">Browser Voice</button>
+        <button data-mode="custom" class="${state.priestMode==='custom'?'active':''}">My Recording</button>
+        <button data-mode="eleven" class="${state.priestMode==='eleven'?'active':''}">ElevenLabs</button>
+      </div>
+
+      <div id="modeDetail"></div>
+
+      <button class="begin-btn" id="doneSettingsBtn" style="margin-top:18px;">Done</button>
+    </div></div>`;
+
+  function renderModeDetail(){
+    const holder = document.getElementById('modeDetail');
+    if(state.priestMode === 'browser'){
+      holder.innerHTML = `
+        <label class="field-label">Voice</label>
+        <select class="text-input" id="voiceSelect">
+          <option value="">Auto (Italian-leaning, best default)</option>
+          ${voiceOptions}
+        </select>
+        <div class="settings-note">Your browser's available voices vary by device. Italian voices tend to sound closest to ecclesiastical Latin.</div>`;
+      document.getElementById('voiceSelect').onchange = (e)=>{ state.voiceURI = e.target.value; localStorage.setItem('altar_voiceURI', state.voiceURI); };
+    } else if(state.priestMode === 'custom'){
+      holder.innerHTML = `<div class="settings-note">Read every priest's line aloud once, in your own voice — use the "Record the Priest" button on the main screen. Those recordings will play back during practice instead of a synthetic voice.</div>`;
+    } else {
+      holder.innerHTML = `
+        <label class="field-label">ElevenLabs API Key</label>
+        <input class="text-input" id="elevenKeyInput" type="password" placeholder="sk-..." value="${state.elevenKey}">
+        <label class="field-label">Voice ID</label>
+        <input class="text-input" id="elevenVoiceInput" type="text" placeholder="e.g. 21m00Tcm4TlvDq8ikWAM" value="${state.elevenVoiceId}">
+        <div class="settings-note">Stored only in your browser (localStorage) and sent directly from your browser to ElevenLabs — never through any server of ours. Generated audio is cached per line to save credits.</div>`;
+      document.getElementById('elevenKeyInput').onchange = (e)=>{ state.elevenKey = e.target.value.trim(); localStorage.setItem('altar_elevenKey', state.elevenKey); state.elevenCache = {}; };
+      document.getElementById('elevenVoiceInput').onchange = (e)=>{ state.elevenVoiceId = e.target.value.trim(); localStorage.setItem('altar_elevenVoiceId', state.elevenVoiceId); state.elevenCache = {}; };
+    }
+  }
+  renderModeDetail();
+
+  app.querySelectorAll('.seg button').forEach(b=>{
+    b.onclick = ()=>{ state.priestMode = b.dataset.mode; localStorage.setItem('altar_priestMode', state.priestMode); renderSettings(); };
+  });
+  document.getElementById('doneSettingsBtn').onclick = ()=>{ state.view='cover'; render(); };
+}
+
+/* ============ RECORD-THE-PRIEST BOOTH ============ */
+let rpMediaRecorder, rpChunks=[], rpStream;
+function renderRecordPriest(){
+  app.innerHTML = `
+    <div class="recordpriest-view"><div class="missal">
+      <h2>Record the Priest</h2>
+      <p style="font-size:15px;">Read each line aloud, in order — your voice will stand in for the priest during practice. This only matters if "My Recording" is selected in Voice Settings.</p>
+      <div id="rpList"></div>
+      <button class="begin-btn" id="rpDoneBtn" style="margin-top:14px;">Done — Back</button>
+    </div></div>`;
+
+  const list = document.getElementById('rpList');
+  list.innerHTML = STEPS.map((s,idx)=>`
+    <div class="rp-item" data-idx="${idx}">
+      <div class="sec">${idx+1}. ${s.section}</div>
+      <div class="lat">${s.priest}</div>
+      <div class="rp-controls">
+        <button class="mini-btn rp-rec-btn" data-idx="${idx}">🎙 Record</button>
+        <span class="rp-playback"></span>
+      </div>
+    </div>
+  `).join('');
+
+  list.querySelectorAll('.rp-rec-btn').forEach(btn=>{
+    btn.onclick = async ()=>{
+      const idx = parseInt(btn.dataset.idx);
+      if(rpMediaRecorder && rpMediaRecorder.state === 'recording'){
+        rpMediaRecorder.stop();
+        return;
+      }
+      try{
+        rpStream = await navigator.mediaDevices.getUserMedia({audio:true});
+        rpChunks = [];
+        rpMediaRecorder = new MediaRecorder(rpStream);
+        rpMediaRecorder.ondataavailable = e=>rpChunks.push(e.data);
+        rpMediaRecorder.onstop = ()=>{
+          const blob = new Blob(rpChunks, {type: rpChunks[0]?.type || 'audio/webm'});
+          const url = URL.createObjectURL(blob);
+          state.priestRecordings[idx] = url;
+          const item = list.querySelector(`.rp-item[data-idx="${idx}"] .rp-playback`);
+          item.innerHTML = `<audio controls src="${url}"></audio>`;
+          btn.textContent = '🎙 Re-record';
+          btn.classList.remove('rec-active');
+          rpStream.getTracks().forEach(t=>t.stop());
+        };
+        rpMediaRecorder.start();
+        btn.textContent = '⏹ Stop';
+        btn.classList.add('rec-active');
+      }catch(err){
+        alert('Microphone access denied.');
+      }
+    };
+  });
+
+  document.getElementById('rpDoneBtn').onclick = ()=>{ state.view='cover'; render(); };
+}
+
+/* ============ PRACTICE STEP ============ */
 function renderStep(){
   const i = state.step;
   const total = STEPS.length;
   const s = STEPS[i];
-  const ribbonTop = 8 + (i/(total-1))*86; // percent within card area
+  const ribbonTop = 8 + (i/(total-1))*86;
 
   app.innerHTML = `
     <div class="controls">
@@ -537,6 +601,7 @@ function renderStep(){
         <button data-lvl="2" class="${state.level==='2'?'active':''}">Level II · Memory</button>
       </div>
       <button class="toggle-link ${state.showTranslation?'active':''}" id="transToggle">English</button>
+      <button class="toggle-link" id="settingsLink">⚙ Voice</button>
     </div>
     <div class="missal-wrap">
       <div class="ribbon" style="top:${ribbonTop}%"></div>
@@ -548,9 +613,12 @@ function renderStep(){
 
         <div class="block">
           <div class="role"><span class="dot"></span>Priest</div>
-          <div class="latin">${s.priest}</div>
+          <div class="latin">${s.priest}${s.varies ? '<span class="varies-tag">varies by day</span>' : ''}</div>
           ${state.showTranslation ? `<div class="translation">${s.priestT}</div>` : ''}
-          <button class="hear-btn" id="hearBtn">🔊 Hear the Priest</button>
+          <div class="hear-row">
+            <button class="hear-btn" id="hearBtn">🔊 Hear the Priest</button>
+            <span class="voice-note" id="hearStatus"></span>
+          </div>
         </div>
 
         <div class="block server-block">
@@ -579,21 +647,21 @@ function renderStep(){
   `;
 
   document.getElementById('transToggle').onclick = ()=>{ state.showTranslation = !state.showTranslation; renderStep(); };
+  document.getElementById('settingsLink').onclick = ()=>{ state.view='settings'; render(); };
   app.querySelectorAll('.seg button').forEach(b=>{
     b.onclick = ()=>{ state.level = b.dataset.lvl; localStorage.setItem('altar_level', state.level); renderStep(); };
   });
-  document.getElementById('hearBtn').onclick = ()=> speak(s.priest);
+  document.getElementById('hearBtn').onclick = ()=> playPriestLine(i, document.getElementById('hearStatus'));
   document.getElementById('prevBtn').onclick = ()=>{ state.step = Math.max(0, state.step-1); render(); };
   document.getElementById('nextBtn').onclick = ()=>{
-    if(i===total-1){ state.started='summary'; render(); }
+    if(i===total-1){ state.view='summary'; render(); }
     else { state.step++; render(); }
   };
 
   setupServerArea(i, s);
   setupRecorder(i);
 
-  // auto speak priest line on step load
-  setTimeout(()=>speak(s.priest), 250);
+  setTimeout(()=>playPriestLine(i, document.getElementById('hearStatus')), 250);
 }
 
 function setupServerArea(i, s){
@@ -611,10 +679,7 @@ function setupServerArea(i, s){
     recBtn.disabled = true;
     setTimeout(()=>{
       const txt = document.getElementById('revealText');
-      if(txt){
-        txt.classList.add('fading');
-        setTimeout(()=>{ if(txt) txt.style.display='none'; },450);
-      }
+      if(txt){ txt.classList.add('fading'); setTimeout(()=>{ if(txt) txt.style.display='none'; },450); }
       recBtn.disabled = false;
       document.getElementById('statusChip').textContent = 'Now record from memory';
     }, 5000);
@@ -622,48 +687,6 @@ function setupServerArea(i, s){
     area.innerHTML = `<div class="locked-msg">— text hidden · recall the response, then record —</div>`;
     recBtn.disabled = false;
   }
-}
-
-function normToken(w){
-  return stripAccents(w).toLowerCase().replace(/[^a-z]/g,'');
-}
-
-function alignAndScore(correctText, heardText){
-  const correctTokens = correctText.split(/\s+/).filter(Boolean);
-  const correctNorm = correctTokens.map(normToken);
-  const heardNorm = heardText.split(/\s+/).filter(Boolean).map(normToken).filter(Boolean);
-  const n = correctNorm.length, m = heardNorm.length;
-  const dp = Array.from({length:n+1},()=>new Array(m+1).fill(0));
-  for(let a=1;a<=n;a++)for(let b=1;b<=m;b++){
-    dp[a][b] = (correctNorm[a-1] && correctNorm[a-1]===heardNorm[b-1]) ? dp[a-1][b-1]+1 : Math.max(dp[a-1][b], dp[a][b-1]);
-  }
-  let a=n,b=m; const matched = new Array(n).fill(false);
-  while(a>0 && b>0){
-    if(correctNorm[a-1]===heardNorm[b-1]){ matched[a-1]=true; a--; b--; }
-    else if(dp[a-1][b] >= dp[a][b-1]) a--;
-    else b--;
-  }
-  const score = n ? Math.round((dp[n][m]/n)*100) : 0;
-  const highlighted = correctTokens.map((tok,idx)=> matched[idx] ? `<span class="w-ok">${tok}</span>` : `<span class="w-miss">${tok}</span>`).join(' ');
-  return {score, highlighted};
-}
-
-function renderComparison(i, transcript){
-  const s = STEPS[i];
-  const holder = document.getElementById('compareHolder');
-  if(!holder) return;
-  if(!transcript){
-    holder.innerHTML = `<div class="compare-note">Speech recognition unavailable or heard nothing — recording saved, but no transcript to compare.</div>`;
-    return;
-  }
-  const {score, highlighted} = alignAndScore(s.server, transcript);
-  const cls = score>=85 ? 'score-good' : score>=55 ? 'score-mid' : 'score-low';
-  holder.innerHTML = `
-    <div class="compare-box">
-      <div class="compare-row"><span class="compare-label">Correct (Latin)</span><div class="latin compare-latin">${highlighted}</div></div>
-      <div class="compare-row"><span class="compare-label">You Said</span><div class="compare-heard">${transcript}</div></div>
-      <div class="score-chip ${cls}">${score}% match</div>
-    </div>`;
 }
 
 let mediaRecorder, chunks=[], recTimerInterval, recSeconds=0, currentStream;
@@ -689,16 +712,11 @@ function setupRecorder(i){
       if(recognition){ try{ recognition.stop(); }catch(e){} }
       return;
     }
-
-    // Tear down any previous recognition session fully before starting a new one —
-    // Chrome only allows one active session at a time; starting too soon after the
-    // last one silently fails and produces an empty transcript.
     if(recognition){
-      try{ recognition.onresult = null; recognition.onerror = null; recognition.onend = null; recognition.abort(); }catch(e){}
+      try{ recognition.onresult=null; recognition.onerror=null; recognition.onend=null; recognition.abort(); }catch(e){}
       recognition = null;
-      await new Promise(r=>setTimeout(r, 300));
+      await new Promise(r=>setTimeout(r,300));
     }
-
     try{
       const stream = await navigator.mediaDevices.getUserMedia({audio:true});
       currentStream = stream;
@@ -719,29 +737,22 @@ function setupRecorder(i){
         timerEl.textContent = '';
         currentStream.getTracks().forEach(t=>t.stop());
         document.querySelectorAll('.dots span')[i]?.classList.add('done');
-        // wait for recognition's own onend (final results) before scoring, with a safety timeout
-        const finalize = ()=>{
-          state.transcripts[i] = recognizedText.trim();
-          renderComparison(i, state.transcripts[i]);
-        };
+        const finalize = ()=>{ state.transcripts[i] = recognizedText.trim(); renderComparison(i, state.transcripts[i]); };
         if(recognition){
-          let done = false;
+          let done=false;
           recognition.onend = ()=>{ if(!done){ done=true; finalize(); } };
           setTimeout(()=>{ if(!done){ done=true; finalize(); } }, 900);
-        } else {
-          setTimeout(finalize, 200);
-        }
+        } else { setTimeout(finalize, 200); }
       };
       mediaRecorder.start();
 
       if(SpeechRec){
         recognition = new SpeechRec();
-        recognition.lang = 'it-IT'; // closest phonetic match to ecclesiastical Latin
+        recognition.lang = 'it-IT';
         recognition.continuous = true;
         recognition.interimResults = false;
         recognition.onresult = (e)=>{
-          let text = '';
-          for(let r=0;r<e.results.length;r++) text += e.results[r][0].transcript + ' ';
+          let text=''; for(let r=0;r<e.results.length;r++) text += e.results[r][0].transcript + ' ';
           recognizedText = text;
         };
         recognition.onerror = ()=>{};
@@ -763,36 +774,36 @@ function setupRecorder(i){
   };
 }
 
+/* ============ SUMMARY ============ */
 function renderSummary(){
   const recordedCount = Object.keys(state.recordings).length;
   app.innerHTML = `
-    <div class="summary">
-      <div class="missal">
-        <h2>Prayers Completed</h2>
-        <p>You recorded ${recordedCount} of ${STEPS.length} responses.</p>
-        ${STEPS.map((s,idx)=>`
-          <div class="summary-item">
-            <div class="sec">${idx+1}. ${s.section}</div>
-            <div class="lat">${s.server}</div>
-            ${state.recordings[idx] ? `<audio controls src="${state.recordings[idx].url}"></audio>` : `<span style="color:var(--ink-soft); font-style:italic; font-size:14px;">— not recorded —</span>`}
-            ${(state.recordings[idx] && state.transcripts[idx]) ? (()=>{ const r=alignAndScore(s.server, state.transcripts[idx]); const cls=r.score>=85?'score-good':r.score>=55?'score-mid':'score-low'; return `<div class="score-chip ${cls}" style="margin-top:8px;">${r.score}% match</div>`; })() : ''}
-          </div>
-        `).join('')}
-        <button class="begin-btn restart-btn" id="restartBtn">Practice Again</button>
-      </div>
-    </div>`;
+    <div class="summary"><div class="missal">
+      <h2>Mass Completed</h2>
+      <p>You recorded ${recordedCount} of ${STEPS.length} responses.</p>
+      ${STEPS.map((s,idx)=>`
+        <div class="summary-item">
+          <div class="sec">${idx+1}. ${s.section}</div>
+          <div class="lat">${s.server}</div>
+          ${state.recordings[idx] ? `<audio controls src="${state.recordings[idx].url}"></audio>` : `<span style="color:var(--ink-soft); font-style:italic; font-size:14px;">— not recorded —</span>`}
+          ${(state.recordings[idx] && state.transcripts[idx]) ? (()=>{ const r=alignAndScore(s.server, state.transcripts[idx]); const cls=r.score>=85?'score-good':r.score>=55?'score-mid':'score-low'; return `<div class="score-chip ${cls}" style="margin-top:8px;">${r.score}% match</div>`; })() : ''}
+        </div>
+      `).join('')}
+      <button class="begin-btn restart-btn" id="restartBtn">Practice Again</button>
+    </div></div>`;
   document.getElementById('restartBtn').onclick = ()=>{
-    state.started = false; state.step = 0; state.recordings = {}; state.transcripts = {};
+    state.view='cover'; state.step=0; state.recordings={}; state.transcripts={};
     render();
   };
 }
 
 function render(){
-  if(!state.started) renderCover();
-  else if(state.started === 'summary') renderSummary();
+  if(state.view === 'cover') renderCover();
+  else if(state.view === 'settings') renderSettings();
+  else if(state.view === 'recordPriest') renderRecordPriest();
+  else if(state.view === 'summary') renderSummary();
   else renderStep();
 }
-
 render();
 </script>
 </body>
