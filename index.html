@@ -3,29 +3,32 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Server's Responses — The Holy Mass</title>
+<title>Acolyte Practice — Immaculate Conception · El Paso</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap" rel="stylesheet">
 <style>
   :root{
-    --bg: #14100e;
-    --bg-vignette: #0b0908;
-    --page: #f4ecd8;
-    --page-edge: #e6d8b3;
-    --rubric: #7c1220;
-    --rubric-soft: #98283a;
-    --gold: #ab8a3f;
-    --gold-bright: #c9a94f;
-    --ink: #26201a;
-    --ink-soft: #5a4e3d;
-    --shadow: rgba(0,0,0,.45);
+    --bg: #0c1220;
+    --bg-vignette: #060a12;
+    --page: #f7f4ec;
+    --page-edge: #e8e2d4;
+    --rubric: #1a3a6e;
+    --rubric-soft: #2a5298;
+    --gold: #8b7355;
+    --gold-bright: #c4a35a;
+    --ink: #1a1820;
+    --ink-soft: #4a5568;
+    --ic-blue: #1e4080;
+    --ic-blue-light: #4a7bc8;
+    --ic-white: #f0f4fa;
+    --shadow: rgba(0,0,0,.5);
   }
   *{box-sizing:border-box;}
   html,body{margin:0;padding:0;}
   body{
     min-height:100vh;
     background:
-      radial-gradient(ellipse at 50% -10%, #241c17 0%, var(--bg) 45%, var(--bg-vignette) 100%);
+      radial-gradient(ellipse at 50% -10%, #152040 0%, var(--bg) 45%, var(--bg-vignette) 100%);
     color:var(--ink);
     font-family:'EB Garamond', serif;
     display:flex;
@@ -34,12 +37,14 @@
     padding:36px 16px 60px;
   }
   .brand{text-align:center; margin-bottom:24px;}
-  .brand .cross{font-size:22px; color:var(--gold-bright); display:block; margin-bottom:6px; letter-spacing:2px;}
+  .brand .cross{font-size:22px; color:var(--ic-white); display:block; margin-bottom:6px; letter-spacing:2px;}
   .brand h1{
-    font-family:'Cinzel', serif; font-weight:600; font-size:clamp(20px,3.2vw,32px);
-    letter-spacing:2.5px; color:#f1e6c8; margin:0 0 6px; text-transform:uppercase;
+    font-family:'Cinzel', serif; font-weight:600; font-size:clamp(18px,3vw,28px);
+    letter-spacing:2px; color:var(--ic-white); margin:0 0 4px; text-transform:uppercase;
   }
-  .brand p{font-family:'EB Garamond', serif; font-style:italic; color:#b9ab8a; margin:0; font-size:14.5px; letter-spacing:.5px;}
+  .brand .parish{font-family:'Cinzel', serif; font-size:clamp(13px,2vw,16px); letter-spacing:1.5px; color:var(--ic-blue-light); margin:0 0 6px; text-transform:uppercase;}
+  .brand p{font-family:'EB Garamond', serif; font-style:italic; color:#9aa8c4; margin:0; font-size:14.5px; letter-spacing:.5px;}
+  .brand .feast{font-family:'Cinzel', serif; font-size:11px; letter-spacing:2px; color:var(--gold-bright); text-transform:uppercase; margin-top:8px; display:block;}
 
   .missal-wrap{position:relative; width:100%; max-width:660px;}
   .ribbon{
@@ -58,7 +63,7 @@
     padding:38px 40px 30px 46px;
     overflow:hidden;
   }
-  .missal::before{content:""; position:absolute; left:0;top:0;bottom:0; width:6px; background:linear-gradient(180deg, var(--rubric), var(--gold));}
+  .missal::before{content:""; position:absolute; left:0;top:0;bottom:0; width:6px; background:linear-gradient(180deg, var(--ic-blue), var(--ic-blue-light));}
   .meta-row{display:flex; justify-content:space-between; align-items:baseline; border-bottom:1px solid rgba(124,18,32,.25); padding-bottom:10px; margin-bottom:20px;}
   .step-count{font-family:'Cinzel', serif; font-size:11px; letter-spacing:2px; color:var(--ink-soft); text-transform:uppercase;}
   .section-label{font-family:'Cinzel', serif; font-size:13px; letter-spacing:1.5px; color:var(--rubric); text-transform:uppercase; font-weight:600; text-align:right;}
@@ -170,7 +175,23 @@
   .rp-item .lat{font-style:italic; margin:4px 0 10px; font-size:15px;}
   .rp-controls{display:flex; align-items:center; gap:10px; flex-wrap:wrap;}
 
-  footer{margin-top:30px; font-size:12px; color:#5f5748; font-style:italic; text-align:center;}
+  .movement-box{margin:16px 0; padding:16px 18px; background:linear-gradient(135deg, rgba(30,64,128,.08), rgba(30,64,128,.03)); border:1px solid rgba(30,64,128,.25); border-radius:8px;}
+  .movement-label{font-family:'Cinzel', serif; font-size:10px; letter-spacing:2px; text-transform:uppercase; color:var(--ic-blue); margin-bottom:8px; display:block;}
+  .movement-q{font-size:16px; line-height:1.5; color:var(--ink); margin-bottom:12px;}
+  .mc-options{display:flex; flex-direction:column; gap:8px;}
+  .mc-btn{
+    text-align:left; background:#fffdf8; border:1px solid rgba(30,64,128,.3); border-radius:6px;
+    padding:10px 14px; font-family:'EB Garamond', serif; font-size:15px; color:var(--ink); cursor:pointer; line-height:1.4;
+    transition:background .15s, border-color .15s;
+  }
+  .mc-btn:hover:not(:disabled){background:rgba(30,64,128,.06); border-color:var(--ic-blue);}
+  .mc-btn:disabled{cursor:default;}
+  .mc-btn.correct{background:#e8f4e8; border-color:#2f6b2f; color:#1a4a1a;}
+  .mc-btn.wrong{background:#fdeaea; border-color:var(--rubric-soft); color:#6b1a1a;}
+  .movement-note{margin-top:10px; font-size:14px; font-style:italic; color:var(--ink-soft); padding-top:8px; border-top:1px dashed rgba(30,64,128,.2);}
+  .role-badge{display:inline-block; font-family:'Cinzel', serif; font-size:10px; letter-spacing:1.5px; text-transform:uppercase; background:var(--ic-blue); color:#fff; padding:3px 10px; border-radius:12px; margin-left:8px; vertical-align:middle;}
+
+  footer{margin-top:30px; font-size:12px; color:#6a7894; font-style:italic; text-align:center;}
 
   @media (max-width:480px){
     .missal, .cover .missal, .summary .missal, .settings-view .missal, .recordpriest-view .missal{padding:28px 20px 22px 28px;}
@@ -183,19 +204,27 @@
 <body>
 
 <div class="brand">
-  <span class="cross">✝</span>
-  <h1>Server's Responses — The Holy Mass</h1>
-  <p>Traditional Latin Rite · Missa Lecta</p>
+  <span class="cross">✠</span>
+  <h1>Acolyte Practice</h1>
+  <p class="parish">Immaculate Conception Church · FSSP · El Paso, Texas</p>
+  <p>1962 Roman Missal · Missa Lecta · Two Acolytes</p>
+  <span class="feast">In Conceptione Immaculata B. Mariæ Virginis</span>
 </div>
 
 <div id="app"></div>
-<footer>Speak clearly and unhurried, as at the altar rail.</footer>
+<footer>Immaculate Conception Church · 118 N Campbell St · El Paso, TX · FSSP</footer>
 
 <script>
 /* ============ FULL MASS SEQUENCE (server's parts) ============ */
 const STEPS = [
 {section:"Sign of the Cross", priest:"In nómine Patris, et Fílii, et Spíritus Sancti.", priestT:"In the name of the Father, and of the Son, and of the Holy Ghost.",
- server:"Amen.", serverT:"Amen."},
+ server:"Amen.", serverT:"Amen.",
+ movement:{ac1:{q:"As Acolyte 1 (Epistle side, to the Priest's right), upon arriving at the foot of the altar you:",
+   options:[{t:"Genuflect together on the floor line, then kneel side by side — AC 1 on the right",ok:true},{t:"Stand at the credence table until the Gospel",ok:false},{t:"Ascend immediately to the Epistle corner",ok:false},{t:"Remain in the sacristy until the Offertory",ok:false}],
+   note:"Both acolytes arrive shoulder-to-shoulder, AC 1 on the right. Genuflect on the floor line facing the altar, then kneel for the Prayers at the Foot."},
+ ac2:{q:"As Acolyte 2 (Gospel side, to the Priest's left), upon arriving at the foot of the altar you:",
+   options:[{t:"Genuflect together on the floor line, then kneel side by side — AC 2 on the left",ok:true},{t:"Go directly to the Gospel side of the altar and stand",ok:false},{t:"Wait at the sedilia for the Priest",ok:false},{t:"Transfer the Missal to the Gospel side now",ok:false}],
+   note:"AC 2 is on the left. Both genuflect and kneel together at the foot for the Prayers at the Foot of the Altar."}}},
 
 {section:"Psalm 42 — Judica Me", priest:"Introíbo ad altáre Dei.", priestT:"I will go in unto the altar of God.",
  server:"Ad Deum qui lætíficat juventútem meam.", serverT:"To God, who giveth joy to my youth."},
@@ -220,7 +249,13 @@ const STEPS = [
 
 {section:"Confiteor", priest:"Confíteor Deo omnipoténti, beátæ Maríæ semper Vírgini, beáto Michaéli Archángelo, beáto Joánni Baptístæ, sanctis Apóstolis Petro et Paulo, ómnibus Sanctis, et vobis fratres: quia peccávi nimis cogitatióne, verbo et ópere: mea culpa, mea culpa, mea máxima culpa. Ideo precor beátam Maríam semper Vírginem, beátum Michaélem Archángelum, beátum Joánnem Baptístam, sanctos Apóstolos Petrum et Paulum, omnes Sanctos, et vos fratres, oráre pro me ad Dóminum Deum nostrum.",
  priestT:"I confess to almighty God... that I have sinned exceedingly... and you, brethren, to pray for me to the Lord our God.",
- server:"Misereátur tui omnípotens Deus, et, dimíssis peccátis tuis, perdúcat te ad vitam ætérnam.", serverT:"May almighty God have mercy on thee, forgive thee thy sins, and bring thee to life everlasting."},
+ server:"Misereátur tui omnípotens Deus, et, dimíssis peccátis tuis, perdúcat te ad vitam ætérnam.", serverT:"May almighty God have mercy on thee, forgive thee thy sins, and bring thee to life everlasting.",
+ movement:{ac1:{q:"As Acolyte 1, during the Priest's Confiteor at the foot of the altar:",
+   options:[{t:"Strike your breast three times at 'mea culpa, mea culpa, mea máxima culpa'",ok:true},{t:"Ring the Sanctus bell once",ok:false},{t:"Ascend the altar steps to the Epistle corner",ok:false},{t:"Transfer the Missal to the Gospel side",ok:false}],
+   note:"Both acolytes kneel at the foot and strike the breast three times with the Priest during his Confiteor."},
+ ac2:{q:"As Acolyte 2, during the Priest's Confiteor at the foot of the altar:",
+   options:[{t:"Strike your breast three times at 'mea culpa, mea culpa, mea máxima culpa'",ok:true},{t:"Go to the credence table for the cruets",ok:false},{t:"Stand and face the congregation",ok:false},{t:"Hold the chalice veil at the Gospel corner",ok:false}],
+   note:"Both acolytes kneel at the foot and strike the breast three times with the Priest during his Confiteor."}}},
 
 {section:"Confiteor", priest:"Amen.", priestT:"Amen.",
  server:"Confíteor Deo omnipoténti, beátæ Maríæ semper Vírgini, beáto Michaéli Archángelo, beáto Joánni Baptístæ, sanctis Apóstolis Petro et Paulo, ómnibus Sanctis, et tibi pater: quia peccávi nimis cogitatióne, verbo et ópere: mea culpa, mea culpa, mea máxima culpa. Ideo precor beátam Maríam semper Vírginem, beátum Michaélem Archángelum, beátum Joánnem Baptístam, sanctos Apóstolos Petrum et Paulum, omnes Sanctos, et te pater, oráre pro me ad Dóminum Deum nostrum.",
@@ -230,7 +265,13 @@ const STEPS = [
  server:"Amen.", serverT:"Amen."},
 
 {section:"Confiteor", priest:"Indulgéntiam, absolutiónem, et remissiónem peccatórum nostrórum tríbuat nobis omnípotens et miséricors Dóminus.", priestT:"May the almighty and merciful Lord grant us pardon, absolution, and remission of our sins.",
- server:"Amen.", serverT:"Amen."},
+ server:"Amen.", serverT:"Amen.",
+ movement:{ac1:{q:"As Acolyte 1, after the absolution and before ascending to the altar:",
+   options:[{t:"Rise, then lead ascending to the altar — kiss it in the middle, then go to the Epistle side",ok:true},{t:"Remain kneeling at the foot until the Gospel",ok:false},{t:"Go to the credence table for the bell",ok:false},{t:"Transfer the Missal to the Gospel side",ok:false}],
+   note:"After the absolution both acolytes rise. AC 1 leads ascending to the altar; both kiss the altar in the middle, then take their places at the sides."},
+ ac2:{q:"As Acolyte 2, after the absolution and before ascending to the altar:",
+   options:[{t:"Rise and follow AC 1 up — kiss the altar in the middle, then go to the Gospel side",ok:true},{t:"Stay at the foot and ring the Sanctus bell",ok:false},{t:"Go directly to the sedilia",ok:false},{t:"Move the Missal before ascending",ok:false}],
+   note:"Both acolytes rise together, ascend, kiss the altar at the center, and take their positions — AC 2 on the Gospel side."}}},
 
 {section:"Versicles Before the Altar", priest:"Deus, tu convérsus vivificábis nos.", priestT:"Thou wilt turn again, O God, and quicken us.",
  server:"Et plebs tua lætábitur in te.", serverT:"And Thy people shall rejoice in Thee."},
@@ -253,29 +294,59 @@ const STEPS = [
 {section:"Before the Collect of the Day", priest:"Dóminus vobíscum.", priestT:"The Lord be with you.",
  server:"Et cum spíritu tuo.", serverT:"And with thy spirit."},
 
-{section:"The Collect", priest:"Orémus. [The Collect of the day is prayed here — its text varies.] ...Per ómnia sǽcula sæculórum.", priestT:"Let us pray. [Collect of the day] ...world without end.", varies:true,
+{section:"The Collect", priest:"Orémus. Deus, qui per Immaculátam Vírginis Conceptiónem dignum Fílio tuo habitáculum præparásti: quǽsumus; ut, qui ex morte ejúsdem Fílii tui prævísa, eam ab omni labe præservásti, nos quoque mundos ejus intercessióne ad te perveníre concédas. Per eúndem Dóminum nostrum.", priestT:"O God, who by the Immaculate Conception of the Virgin didst prepare a worthy habitation for Thy Son... grant that we also, being cleansed, may come to Thee through her intercession.",
  server:"Amen.", serverT:"Amen."},
 
-{section:"Epistle", priest:"[The Epistle is read — its text varies by day.]", priestT:"[Epistle of the day]", varies:true,
- server:"Deo grátias.", serverT:"Thanks be to God."},
+{section:"Epistle", priest:"Léctio libri Sapientiæ. Dóminus possédit me in inítio viárum suárum, ántequam quidquam fáceret a princípio. Ab ætérno ordináta sum, et ex antíquis, ántequam terra fíeret. Nondum erant abýssi, et ego jam concépta eram… Beátus homo qui audit me et qui vígilat ad fores meas quotídie. Qui me invénerit invéniet vitam et háuriet salútem a Dómino.", priestT:"Lesson from the book of Wisdom. The Lord possessed me in the beginning of His ways… He that shall find me shall find life, and shall have salvation from the Lord.",
+ server:"Deo grátias.", serverT:"Thanks be to God.",
+ movement:{ac1:{q:"As Acolyte 1, while the Priest reads the Epistle at the Epistle corner:",
+   options:[{t:"Stand at the Epistle side, slightly behind and to the Priest's right",ok:true},{t:"Kneel at the center of the altar",ok:false},{t:"Transfer the Missal to the Gospel side",ok:false},{t:"Ring the Sanctus bell once",ok:false}],
+   note:"Both acolytes stand at their respective sides during the Epistle. AC 1 is at the Epistle side near the Priest."},
+ ac2:{q:"As Acolyte 2, while the Priest reads the Epistle:",
+   options:[{t:"Stand at the Gospel side, slightly behind and to the Priest's left",ok:true},{t:"Ascend to move the Missal now",ok:false},{t:"Kneel at the foot of the altar",ok:false},{t:"Go to the credence table for water",ok:false}],
+   note:"AC 2 stands at the Gospel side during the Epistle. The Missal is still on the Epistle side."}}},
 
 {section:"Before the Gospel", priest:"Dóminus vobíscum.", priestT:"The Lord be with you.",
- server:"Et cum spíritu tuo.", serverT:"And with thy spirit."},
+ server:"Et cum spíritu tuo.", serverT:"And with thy spirit.",
+ movement:{ac1:{q:"As Acolyte 1, before the Gospel is proclaimed:",
+   options:[{t:"Remain at the Epistle side while AC 2 transfers the Missal",ok:true},{t:"Transfer the Missal yourself to the Gospel side",ok:false},{t:"Descend to the foot and kneel",ok:false},{t:"Ring the Sanctus bell",ok:false}],
+   note:"AC 2 transfers the Missal from the Epistle side to the Gospel side before the Gospel. AC 1 stays in place."},
+ ac2:{q:"As Acolyte 2, before the Gospel is proclaimed:",
+   options:[{t:"Ascend diagonally to the Gospel side, place the Missal facing the center, then return to your place",ok:true},{t:"Wait at the foot until the Last Gospel",ok:false},{t:"Bring the cruets to the altar",ok:false},{t:"Ring the Sanctus bell three times",ok:false}],
+   note:"AC 2 moves the Missal to the Gospel side before the Gospel. Ascend diagonally, place the book, then return to the Gospel side."}}},
 
-{section:"Gospel", priest:"Sequéntia sancti Evangélii secúndum [N].", priestT:"The continuation of the holy Gospel according to [N].", varies:true,
- server:"Glória tibi, Dómine.", serverT:"Glory be to Thee, O Lord."},
+{section:"Gospel", priest:"Sequéntia sancti Evangélii secúndum Lucam.", priestT:"The continuation of the holy Gospel according to Luke.",
+ server:"Glória tibi, Dómine.", serverT:"Glory be to Thee, O Lord.",
+ movement:{ac1:{q:"As Acolyte 1, during the Gospel:",
+   options:[{t:"Turn to face the Gospel side (toward the Missal) and make the sign of the cross on forehead, lips, and breast",ok:true},{t:"Transfer the Missal to the Epistle side",ok:false},{t:"Kneel at the center throughout the Gospel",ok:false},{t:"Hold the chasuble at the elevations",ok:false}],
+   note:"Both acolytes turn toward the Gospel side. At the beginning of the Gospel, sign yourself on forehead, lips, and breast."},
+ ac2:{q:"As Acolyte 2, during the Gospel:",
+   options:[{t:"Stand at the Gospel side near the Missal; turn toward it and sign yourself at the Gospel",ok:true},{t:"Descend to the foot and kneel",ok:false},{t:"Go fetch the cruets from the credence",ok:false},{t:"Ring the Sanctus bell once",ok:false}],
+   note:"AC 2 stands at the Gospel side near the Missal. Both acolytes turn toward the Gospel and sign themselves."}}},
 
 {section:"Credo", priest:"(The Creed is intoned by the Priest at the middle of the altar.)", priestT:"(intoned)",
  server:"Credo in unum Deum, Patrem omnipoténtem, factórem cæli et terræ, visibílium ómnium, et invisibílium. Et in unum Dóminum Jesum Christum, Fílium Dei unigénitum. Et ex Patre natum ante ómnia sǽcula. Deum de Deo, lumen de lúmine, Deum verum de Deo vero. Génitum, non factum, consubstantiálem Patri: per quem ómnia facta sunt. Qui propter nos hómines, et propter nostram salútem descéndit de cælis. Et incarnátus est de Spíritu Sancto ex María Vírgine: et homo factus est. Crucifíxus étiam pro nobis: sub Póntio Piláto passus, et sepúltus est. Et resurréxit tértia die, secúndum Scriptúras. Et ascéndit in cælum: sedet ad déxteram Patris. Et íterum ventúrus est cum glória judicáre vivos, et mórtuos: cujus regni non erit finis. Et in Spíritum Sanctum, Dóminum, et vivificántem: qui ex Patre, Filióque procédit. Qui cum Patre, et Fílio simul adorátur, et conglorificátur: qui locútus est per Prophétas. Et unam sanctam cathólicam et apostólicam Ecclésiam. Confíteor unum baptísma in remissiónem peccatórum. Et expécto resurrectiónem mórtuorum. Et vitam ventúri sǽculi. Amen.",
- serverT:"I believe in one God, the Father almighty... and the life of the world to come. Amen."},
+ serverT:"I believe in one God, the Father almighty... and the life of the world to come. Amen.",
+ movement:{ac1:{q:"As Acolyte 1, at 'Et incarnátus est de Spíritu Sancto ex María Vírgine':",
+   options:[{t:"Genuflect on one knee (or bow deeply if the Blessed Sacrament is not reserved on the altar)",ok:true},{t:"Ring the Sanctus bell",ok:false},{t:"Transfer the Missal to the Epistle side",ok:false},{t:"Descend to the foot of the altar",ok:false}],
+   note:"Both acolytes genuflect (or bow at a side altar) at the Incarnatus. On this feast of the Immaculate Conception, the bow to Our Lady's prerogative is especially mindful."},
+ ac2:{q:"As Acolyte 2, at 'Et incarnátus est de Spíritu Sancto ex María Vírgine':",
+   options:[{t:"Genuflect on one knee (or bow deeply if at a side altar without the Blessed Sacrament)",ok:true},{t:"Go to the credence table for the cruets",ok:false},{t:"Remain standing and continue reading the Creed aloud",ok:false},{t:"Move the Missal to the Gospel side",ok:false}],
+   note:"Both acolytes genuflect at the Incarnatus. Rise when the Priest rises."}}},
 
 {section:"Before the Offertory", priest:"Dóminus vobíscum.", priestT:"The Lord be with you.",
  server:"Et cum spíritu tuo.", serverT:"And with thy spirit."},
 
 {section:"Offertory — Oráte Fratres", priest:"Oráte, fratres: ut meum ac vestrum sacrifícium acceptábile fiat apud Deum Patrem omnipoténtem.", priestT:"Pray, brethren, that my sacrifice and yours may be acceptable to God the Father almighty.",
- server:"Suscípiat Dóminus sacrifícium de mánibus tuis ad laudem et glóriam nóminis sui, ad utilitátem quoque nostram, totiúsque Ecclésiæ suæ sanctæ.", serverT:"May the Lord receive the sacrifice from thy hands, to the praise and glory of His name, to our benefit and that of all His holy Church."},
+ server:"Suscípiat Dóminus sacrifícium de mánibus tuis ad laudem et glóriam nóminis sui, ad utilitátem quoque nostram, totiúsque Ecclésiæ suæ sanctæ.", serverT:"May the Lord receive the sacrifice from thy hands, to the praise and glory of His name, to our benefit and that of all His holy Church.",
+ movement:{ac1:{q:"As Acolyte 1, at the Offertory:",
+   options:[{t:"Go to the credence, fetch both cruets, meet AC 2 at the Epistle side steps, and present wine (AC 2 presents water)",ok:true},{t:"Transfer the Missal to the Gospel side",ok:false},{t:"Ring the Sanctus bell",ok:false},{t:"Hold the chasuble at the elevation",ok:false}],
+   note:"AC 1 fetches both cruets from the credence. Both present wine and water to the Priest with solita oscula (kisses) on the cruets."},
+ ac2:{q:"As Acolyte 2, at the Offertory:",
+   options:[{t:"Ascend the center steps to take the chalice veil from the Priest, fold it in thirds toward the Epistle corner, then join AC 1 to present water",ok:true},{t:"Ring the Sanctus bell three times",ok:false},{t:"Remain at the Gospel side without moving",ok:false},{t:"Kneel at the foot of the altar",ok:false}],
+   note:"AC 2 removes and folds the chalice veil, then joins AC 1 at the Epistle side to present the water cruet."}}},
 
-{section:"Secret", priest:"[The Secret prayer is said silently, ending aloud:] ...Per ómnia sǽcula sæculórum.", priestT:"[Secret of the day, ending] ...world without end.", varies:true,
+{section:"Secret", priest:"…Salutárem hóstiam, quam in solemnitáte Immaculátæ Conceptiónis beátæ Vírginis Maríæ tibi, Dómine, offérimus, súscipe et præsta: ut, sicut illam tua grátia præveniénte ab omni labe immúnem profitémur: ita ejus intercessióne a culpis ómnibus liberémur. Per Dóminum nostrum… Per ómnia sǽcula sæculórum.", priestT:"Receive the saving Victim which we offer on the solemnity of the Immaculate Conception… Per omnia saecula saeculorum.",
  server:"Amen.", serverT:"Amen."},
 
 {section:"Preface", priest:"Dóminus vobíscum.", priestT:"The Lord be with you.",
@@ -287,11 +358,23 @@ const STEPS = [
 {section:"Preface", priest:"Grátias agámus Dómino Deo nostro.", priestT:"Let us give thanks to the Lord our God.",
  server:"Dignum et justum est.", serverT:"It is meet and just."},
 
-{section:"Sanctus", priest:"(The Priest concludes the Preface aloud and continues the Canon in silence.)", priestT:"(silent Canon begins)",
- server:"Sánctus, Sánctus, Sánctus, Dóminus Deus Sábaoth. Pleni sunt cæli et terra glória tua. Hosánna in excélsis. Benedíctus qui venit in nómine Dómini. Hosánna in excélsis.", serverT:"Holy, Holy, Holy, Lord God of Hosts. Heaven and earth are full of Thy glory. Hosanna in the highest. Blessed is He who cometh in the name of the Lord. Hosanna in the highest."},
+{section:"Sanctus", priest:"(The Priest concludes the Preface of the Blessed Virgin and continues the Canon in silence.)", priestT:"(Preface of the B.V.M. for the Immaculate Conception; Canon begins in silence)",
+ server:"Sánctus, Sánctus, Sánctus, Dóminus Deus Sábaoth. Pleni sunt cæli et terra glória tua. Hosánna in excélsis. Benedíctus qui venit in nómine Dómini. Hosánna in excélsis.", serverT:"Holy, Holy, Holy, Lord God of Hosts. Heaven and earth are full of Thy glory. Hosanna in the highest. Blessed is He who cometh in the name of the Lord. Hosanna in the highest.",
+ movement:{ac1:{q:"As Acolyte 1, at the Sanctus:",
+   options:[{t:"Ring the Sanctus bell once as the Priest begins the Sanctus",ok:true},{t:"Transfer the Missal to the Gospel side",ok:false},{t:"Descend to the foot and kneel",ok:false},{t:"Present the water cruet to the Priest",ok:false}],
+   note:"AC 1 alone rings the Sanctus bell once when the Priest begins the Sanctus. Both acolytes then kneel for the Canon."},
+ ac2:{q:"As Acolyte 2, at the Sanctus:",
+   options:[{t:"Kneel at your place on the Gospel side — do not ring the bell",ok:true},{t:"Ring the Sanctus bell once",ok:false},{t:"Stand and hold the chasuble",ok:false},{t:"Go to the credence table",ok:false}],
+   note:"Only AC 1 rings the Sanctus bell. AC 2 kneels at the Gospel side for the Canon."}}},
 
-{section:"End of the Canon", priest:"(The Priest, having consecrated in silence, concludes aloud:) ...Per ómnia sǽcula sæculórum.", priestT:"(silent Canon, then aloud) ...world without end.",
- server:"Amen.", serverT:"Amen."},
+{section:"End of the Canon", priest:"(The Priest, having consecrated in silence, concludes aloud:) …Per ómnia sǽcula sæculórum.", priestT:"(silent Canon, then aloud) …world without end.",
+ server:"Amen.", serverT:"Amen.",
+ movement:{ac1:{q:"As Acolyte 1, at the Consecration and elevations:",
+   options:[{t:"Ring once at each genuflection; ring three times during each elevation; assist in lifting the chasuble with AC 2",ok:true},{t:"Ring only once at the Sanctus and then remain still",ok:false},{t:"Transfer the Missal after the elevation",ok:false},{t:"Stand at the Epistle side without kneeling",ok:false}],
+   note:"AC 1 rings at each genuflection and three times during each elevation. Both acolytes lift the chasuble at the elevations."},
+ ac2:{q:"As Acolyte 2, at the Consecration and elevations:",
+   options:[{t:"Kneel and assist AC 1 in lifting the chasuble at each elevation — do not ring the bell",ok:true},{t:"Ring the bell three times at each elevation",ok:false},{t:"Stand and face the congregation",ok:false},{t:"Descend to the foot for the Lavabo",ok:false}],
+   note:"Both acolytes kneel and lift the chasuble at the elevations. Only AC 1 rings the bell."}}},
 
 {section:"Pater Noster", priest:"Pater noster, qui es in cælis: sanctificétur nomen tuum: advéniat regnum tuum: fiat volúntas tua, sicut in cælo, et in terra. Panem nostrum quotidiánum da nobis hódie: et dimítte nobis débita nostra, sicut et nos dimíttimus debitóribus nostris. Et ne nos indúcas in tentatiónem.", priestT:"Our Father, who art in heaven... and lead us not into temptation.",
  server:"Sed líbera nos a malo.", serverT:"But deliver us from evil."},
@@ -306,19 +389,37 @@ const STEPS = [
  server:"Agnus Dei, qui tollis peccáta mundi: miserére nobis. Agnus Dei, qui tollis peccáta mundi: miserére nobis. Agnus Dei, qui tollis peccáta mundi: dona nobis pacem.", serverT:"Lamb of God, who takest away the sins of the world: have mercy on us (x2)... grant us peace."},
 
 {section:"Domine, non sum dignus", priest:"Ecce Agnus Dei, ecce qui tollit peccáta mundi.", priestT:"Behold the Lamb of God, behold Him who taketh away the sins of the world.",
- server:"Dómine, non sum dignus, ut intres sub tectum meum: sed tantum dic verbo, et sanábitur ánima mea. (Said three times.)", serverT:"Lord, I am not worthy that Thou shouldst enter under my roof: but only say the word, and my soul shall be healed."},
+ server:"Dómine, non sum dignus, ut intres sub tectum meum: sed tantum dic verbo, et sanábitur ánima mea. (Said three times.)", serverT:"Lord, I am not worthy that Thou shouldst enter under my roof: but only say the word, and my soul shall be healed.",
+ movement:{ac1:{q:"As Acolyte 1, when the Priest turns with the Host and chalice for 'Ecce Agnus Dei':",
+   options:[{t:"Ring the bell once at each of the three 'Dómine, non sum dignus' (with the Priest's triple repetition)",ok:true},{t:"Transfer the Missal to the Epistle side",ok:false},{t:"Stand and do not ring the bell",ok:false},{t:"Descend to the foot immediately",ok:false}],
+   note:"AC 1 rings once at each Domine non sum dignus. Both acolytes strike the breast at each response."},
+ ac2:{q:"As Acolyte 2, when the Priest presents the Host and chalice:",
+   options:[{t:"Strike your breast three times with the Priest at each 'Dómine, non sum dignus' — AC 1 rings the bell",ok:true},{t:"Ring the bell once at each response",ok:false},{t:"Go to the credence for the ablutions",ok:false},{t:"Move the Missal before Communion",ok:false}],
+   note:"Both acolytes strike the breast. Only AC 1 rings the bell at each Domine non sum dignus."}}},
 
 {section:"Before the Postcommunion", priest:"Dóminus vobíscum.", priestT:"The Lord be with you.",
  server:"Et cum spíritu tuo.", serverT:"And with thy spirit."},
 
-{section:"Postcommunion", priest:"Orémus. [The Postcommunion prayer is said here — its text varies.] ...Per ómnia sǽcula sæculórum.", priestT:"[Postcommunion of the day] ...world without end.", varies:true,
- server:"Amen.", serverT:"Amen."},
+{section:"Postcommunion", priest:"Orémus. Sacraménta quæ súmpsimus, Dómine Deus noster: illíus in nobis culpæ vúlnera réparent, a qua Immaculátam beátæ Maríæ Conceptiónem singuláriter præservásti. Per Dóminum nostrum… Per ómnia sǽcula sæculórum.", priestT:"May the Sacraments which we have received heal in us the wounds of that sin, from which Thou didst uniquely preserve the Immaculate Conception of blessed Mary.",
+ server:"Amen.", serverT:"Amen.",
+ movement:{ac1:{q:"As Acolyte 1, after Holy Communion while the Priest prays the Postcommunion:",
+   options:[{t:"Stand at the Epistle side — AC 2 will move the Missal back after the Postcommunion",ok:true},{t:"Move the Missal to the Epistle side yourself",ok:false},{t:"Ring the Sanctus bell",ok:false},{t:"Descend to the foot for the Last Gospel",ok:false}],
+   note:"After Communion, AC 2 transfers the Missal back to the Epistle side before the Last Gospel."},
+ ac2:{q:"As Acolyte 2, after Holy Communion:",
+   options:[{t:"After the Postcommunion, ascend to move the Missal from the Gospel side back to the Epistle side",ok:true},{t:"Ring the bell at the Postcommunion",ok:false},{t:"Go to the credence for the cruets",ok:false},{t:"Kneel at the foot immediately",ok:false}],
+   note:"AC 2 moves the Missal back to the Epistle side after the Postcommunion, before the Last Gospel."}}},
 
 {section:"Dismissal", priest:"Dóminus vobíscum.", priestT:"The Lord be with you.",
  server:"Et cum spíritu tuo.", serverT:"And with thy spirit."},
 
 {section:"Dismissal", priest:"Ite, missa est.", priestT:"Go, the Mass is ended.",
- server:"Deo grátias.", serverT:"Thanks be to God."},
+ server:"Deo grátias.", serverT:"Thanks be to God.",
+ movement:{ac1:{q:"As Acolyte 1, at the dismissal:",
+   options:[{t:"Kiss the altar with AC 2, genuflect on the floor line, then retrieve the Priest's biretta at the sedilia",ok:true},{t:"Transfer the Missal before descending",ok:false},{t:"Ring the Sanctus bell",ok:false},{t:"Remain on the altar until the Last Gospel",ok:false}],
+   note:"Both acolytes kiss the altar, descend, genuflect on the floor line. AC 1 retrieves the biretta for the Priest."},
+ ac2:{q:"As Acolyte 2, at the dismissal:",
+   options:[{t:"Kiss the altar with AC 1, genuflect on the floor line, and kneel at the foot for the Last Gospel",ok:true},{t:"Go to the credence table and wait",ok:false},{t:"Retrieve the Priest's biretta",ok:false},{t:"Ring the bell as the Priest says Ite missa est",ok:false}],
+   note:"Both kiss the altar and genuflect. AC 1 gets the biretta; both kneel at the foot for the Last Gospel."}}},
 
 {section:"Blessing", priest:"Benedícat vos omnípotens Deus, Pater, et Fílius, et Spíritus Sanctus.", priestT:"May almighty God bless you, the Father, and the Son, and the Holy Ghost.",
  server:"Amen.", serverT:"Amen."},
@@ -327,7 +428,13 @@ const STEPS = [
  server:"Et cum spíritu tuo.", serverT:"And with thy spirit."},
 
 {section:"Last Gospel", priest:"Inítium sancti Evangélii secúndum Joánnem.", priestT:"The beginning of the holy Gospel according to John.",
- server:"Glória tibi, Dómine.", serverT:"Glory be to Thee, O Lord."},
+ server:"Glória tibi, Dómine.", serverT:"Glory be to Thee, O Lord.",
+ movement:{ac1:{q:"As Acolyte 1, during the Last Gospel:",
+   options:[{t:"Kneel at the foot on the right; hold the Last Gospel card if the Priest needs it",ok:true},{t:"Stand at the Epistle side of the altar",ok:false},{t:"Transfer the Missal to the Gospel side",ok:false},{t:"Ring the Sanctus bell at the beginning",ok:false}],
+   note:"Both acolytes kneel at the foot for the Last Gospel. AC 1 may hold the card for the Priest."},
+ ac2:{q:"As Acolyte 2, during the Last Gospel:",
+   options:[{t:"Kneel at the foot on the left for the Last Gospel",ok:true},{t:"Ascend to the altar to move the Missal",ok:false},{t:"Stand at the credence table",ok:false},{t:"Retrieve the biretta for the Priest",ok:false}],
+   note:"Both acolytes kneel at the foot. After the Last Gospel, join the Priest for the Leonine Prayers if they are said."}}},
 
 {section:"Last Gospel", priest:"In princípio erat Verbum, et Verbum erat apud Deum, et Deus erat Verbum. Hoc erat in princípio apud Deum. Omnia per ipsum facta sunt: et sine ipso factum est nihil, quod factum est: in ipso vita erat, et vita erat lux hóminum: et lux in ténebris lucet, et ténebræ eam non comprehendérunt. Fuit homo missus a Deo, cui nomen erat Joánnes. Hic venit in testimónium, ut testimónium perhibéret de lúmine, ut omnes créderent per illum. Non erat ille lux, sed ut testimónium perhibéret de lúmine. Erat lux vera, quæ illúminat omnem hóminem veniéntem in hunc mundum. In mundo erat, et mundus per ipsum factus est, et mundus eum non cognóvit. In própria venit, et sui eum non recepérunt. Quotquot autem recepérunt eum, dedit eis potestátem fílios Dei fíeri, his qui credunt in nómine ejus. Qui non ex sanguínibus, neque ex voluntáte carnis, neque ex voluntáte viri, sed ex Deo nati sunt. Et Verbum caro factum est, et habitávit in nobis: et vídimus glóriam ejus, glóriam quasi Unigéniti a Patre, plenum grátiæ et veritátis.",
  priestT:"In the beginning was the Word... and we saw His glory, the glory as of the Only-begotten of the Father, full of grace and truth.",
@@ -339,12 +446,14 @@ const app = document.getElementById('app');
 let state = {
   view: 'cover', // cover | settings | recordPriest | practice | summary
   level: localStorage.getItem('altar_level') || '1',
+  role: localStorage.getItem('altar_role') || 'ac1', // ac1 | ac2
   step: 0,
   recordings: {},
   transcripts: {},
-  priestRecordings: JSON.parse(sessionStorage.getItem('altar_priestRecUrls') || '{}'), // idx -> url (session only, blobs don't survive reload anyway)
+  movementAnswers: {},
+  priestRecordings: JSON.parse(sessionStorage.getItem('altar_priestRecUrls') || '{}'),
   showTranslation: false,
-  priestMode: localStorage.getItem('altar_priestMode') || 'browser', // browser | custom | eleven
+  priestMode: localStorage.getItem('altar_priestMode') || 'browser',
   voiceURI: localStorage.getItem('altar_voiceURI') || '',
   elevenKey: localStorage.getItem('altar_elevenKey') || '',
   elevenVoiceId: localStorage.getItem('altar_elevenVoiceId') || '',
@@ -461,21 +570,31 @@ function renderCover(){
   app.innerHTML = `
     <div class="cover"><div class="missal">
       <h2>Before You Begin</h2>
-      <p>Practice the server's responses for the whole of the Holy Mass — from the Prayers at the Foot of the Altar to the Last Gospel.</p>
+      <p>Practice the acolyte's Latin responses and ceremonial movements for the <em>Missa Lecta</em> on the Feast of the Immaculate Conception — according to the 1962 Roman Missal, as served at Immaculate Conception Church, El Paso.</p>
       <p><strong>Level I — Reveal:</strong> the response appears for five seconds, then hides before you record.<br>
       <strong>Level II — Memory:</strong> the response is never shown. Recall it and record.</p>
-      <div class="seg" style="margin:16px 0;">
+      <label class="field-label" style="margin-top:14px;">Your Role</label>
+      <div class="seg" style="margin:6px 0 12px;">
+        <button data-role="ac1" class="${state.role==='ac1'?'active':''}">Acolyte 1 · Epistle</button>
+        <button data-role="ac2" class="${state.role==='ac2'?'active':''}">Acolyte 2 · Gospel</button>
+      </div>
+      <div class="settings-note" style="margin-bottom:12px;">AC 1 rings the Sanctus bell and leads at the foot. AC 2 moves the Missal before the Gospel and after Communion.</div>
+      <label class="field-label">Practice Level</label>
+      <div class="seg" style="margin:6px 0 16px;">
         <button data-lvl="1" class="${state.level==='1'?'active':''}">Level I</button>
         <button data-lvl="2" class="${state.level==='2'?'active':''}">Level II</button>
-      </div><br>
+      </div>
       <button class="begin-btn" id="beginBtn">Begin</button>
       <button class="begin-btn ghost" id="settingsBtn" style="margin-left:8px;">⚙ Voice Settings</button>
       <button class="begin-btn ghost" id="recPriestBtn" style="margin-left:8px;">🎙 Record the Priest</button>
     </div></div>`;
-  app.querySelectorAll('.seg button').forEach(b=>{
+  app.querySelectorAll('.seg button[data-lvl]').forEach(b=>{
     b.onclick = ()=>{ state.level = b.dataset.lvl; localStorage.setItem('altar_level', state.level); renderCover(); };
   });
-  document.getElementById('beginBtn').onclick = ()=>{ state.view='practice'; state.step=0; render(); };
+  app.querySelectorAll('.seg button[data-role]').forEach(b=>{
+    b.onclick = ()=>{ state.role = b.dataset.role; localStorage.setItem('altar_role', state.role); renderCover(); };
+  });
+  document.getElementById('beginBtn').onclick = ()=>{ state.view='practice'; state.step=0; state.movementAnswers={}; render(); };
   document.getElementById('settingsBtn').onclick = ()=>{ state.view='settings'; render(); };
   document.getElementById('recPriestBtn').onclick = ()=>{ state.view='recordPriest'; render(); };
 }
@@ -597,6 +716,10 @@ function renderStep(){
   app.innerHTML = `
     <div class="controls">
       <div class="seg">
+        <button data-role="ac1" class="${state.role==='ac1'?'active':''}">AC 1</button>
+        <button data-role="ac2" class="${state.role==='ac2'?'active':''}">AC 2</button>
+      </div>
+      <div class="seg">
         <button data-lvl="1" class="${state.level==='1'?'active':''}">Level I · Reveal</button>
         <button data-lvl="2" class="${state.level==='2'?'active':''}">Level II · Memory</button>
       </div>
@@ -622,7 +745,8 @@ function renderStep(){
         </div>
 
         <div class="block server-block">
-          <div class="role"><span class="dot" style="background:var(--gold);"></span>Your Response</div>
+          <div class="role"><span class="dot" style="background:var(--gold);"></span>Your Response <span class="role-badge">${state.role==='ac1'?'Acolyte 1 · Epistle':'Acolyte 2 · Gospel'}</span></div>
+          <div id="movementArea"></div>
           <div id="serverArea"></div>
 
           <div class="record-row">
@@ -648,8 +772,11 @@ function renderStep(){
 
   document.getElementById('transToggle').onclick = ()=>{ state.showTranslation = !state.showTranslation; renderStep(); };
   document.getElementById('settingsLink').onclick = ()=>{ state.view='settings'; render(); };
-  app.querySelectorAll('.seg button').forEach(b=>{
+  app.querySelectorAll('.seg button[data-lvl]').forEach(b=>{
     b.onclick = ()=>{ state.level = b.dataset.lvl; localStorage.setItem('altar_level', state.level); renderStep(); };
+  });
+  app.querySelectorAll('.seg button[data-role]').forEach(b=>{
+    b.onclick = ()=>{ state.role = b.dataset.role; localStorage.setItem('altar_role', state.role); renderStep(); };
   });
   document.getElementById('hearBtn').onclick = ()=> playPriestLine(i, document.getElementById('hearStatus'));
   document.getElementById('prevBtn').onclick = ()=>{ state.step = Math.max(0, state.step-1); render(); };
@@ -658,10 +785,42 @@ function renderStep(){
     else { state.step++; render(); }
   };
 
+  setupMovementQuiz(i, s);
   setupServerArea(i, s);
   setupRecorder(i);
 
   setTimeout(()=>playPriestLine(i, document.getElementById('hearStatus')), 250);
+}
+
+function setupMovementQuiz(i, s){
+  const area = document.getElementById('movementArea');
+  if(!area || !s.movement) { if(area) area.innerHTML = ''; return; }
+  const mv = s.movement[state.role];
+  if(!mv){ area.innerHTML = ''; return; }
+  const answered = state.movementAnswers[i];
+  const opts = mv.options.map((o,oi)=>{
+    let cls = '';
+    if(answered !== undefined){
+      cls = o.ok ? 'correct' : (answered === oi ? 'wrong' : '');
+    }
+    return `<button class="mc-btn ${cls}" data-oi="${oi}" ${answered !== undefined ? 'disabled' : ''}>${o.t}</button>`;
+  }).join('');
+  area.innerHTML = `
+    <div class="movement-box">
+      <span class="movement-label">Movement · ${state.role==='ac1'?'Acolyte 1':'Acolyte 2'}</span>
+      <div class="movement-q">${mv.q}</div>
+      <div class="mc-options">${opts}</div>
+      ${answered !== undefined ? `<div class="movement-note">${mv.note}</div>` : ''}
+    </div>`;
+  if(answered === undefined){
+    area.querySelectorAll('.mc-btn').forEach(btn=>{
+      btn.onclick = ()=>{
+        const oi = parseInt(btn.dataset.oi);
+        state.movementAnswers[i] = oi;
+        setupMovementQuiz(i, s);
+      };
+    });
+  }
 }
 
 function setupServerArea(i, s){
@@ -690,8 +849,78 @@ function setupServerArea(i, s){
 }
 
 let mediaRecorder, chunks=[], recTimerInterval, recSeconds=0, currentStream;
-let recognition, recognizedText='';
+let recognition, recognizedText='', recognitionActive=false;
 const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+function bestRecognitionLang(){
+  if(!SpeechRec) return 'it-IT';
+  try{
+    const probe = new SpeechRec();
+    const langs = ['la-VA','la','it-IT','it'];
+    for(const lang of langs){
+      probe.lang = lang;
+      if(probe.lang === lang) return lang;
+    }
+  }catch(e){}
+  return 'it-IT';
+}
+const RECOG_LANG = bestRecognitionLang();
+
+function appendRecognitionResults(e){
+  for(let r = e.resultIndex; r < e.results.length; r++){
+    if(e.results[r].isFinal){
+      recognizedText += e.results[r][0].transcript + ' ';
+    }
+  }
+}
+
+function startRecognitionSession(){
+  if(!SpeechRec || recognitionActive) return;
+  recognition = new SpeechRec();
+  recognition.lang = RECOG_LANG;
+  recognition.continuous = true;
+  recognition.interimResults = true;
+  recognition.maxAlternatives = 3;
+  recognition.onresult = appendRecognitionResults;
+  recognition.onerror = (e)=>{
+    if(e.error === 'no-speech' || e.error === 'aborted') return;
+    if(mediaRecorder && mediaRecorder.state === 'recording' && !recognitionActive){
+      setTimeout(()=>{ if(mediaRecorder?.state === 'recording') startRecognitionSession(); }, 120);
+    }
+  };
+  recognition.onend = ()=>{
+    recognitionActive = false;
+    if(mediaRecorder && mediaRecorder.state === 'recording'){
+      setTimeout(()=>{ if(mediaRecorder?.state === 'recording') startRecognitionSession(); }, 80);
+    }
+  };
+  try{
+    recognition.start();
+    recognitionActive = true;
+  }catch(e){ recognitionActive = false; }
+}
+
+function stopRecognitionSession(onDone){
+  if(!recognition){
+    onDone();
+    return;
+  }
+  const rec = recognition;
+  recognition = null;
+  recognitionActive = false;
+  rec.onresult = appendRecognitionResults;
+  rec.onerror = null;
+  let finished = false;
+  const finish = ()=>{
+    if(finished) return;
+    finished = true;
+    try{ rec.abort(); }catch(e){}
+    onDone();
+  };
+  rec.onend = finish;
+  try{ rec.stop(); }catch(e){ finish(); }
+  setTimeout(finish, 1500);
+}
 
 function setupRecorder(i){
   const recBtn = document.getElementById('recBtn');
@@ -709,13 +938,11 @@ function setupRecorder(i){
   recBtn.onclick = async ()=>{
     if(mediaRecorder && mediaRecorder.state === 'recording'){
       mediaRecorder.stop();
-      if(recognition){ try{ recognition.stop(); }catch(e){} }
       return;
     }
     if(recognition){
-      try{ recognition.onresult=null; recognition.onerror=null; recognition.onend=null; recognition.abort(); }catch(e){}
-      recognition = null;
-      await new Promise(r=>setTimeout(r,300));
+      stopRecognitionSession(()=>{});
+      await new Promise(r=>setTimeout(r, 150));
     }
     try{
       const stream = await navigator.mediaDevices.getUserMedia({audio:true});
@@ -737,27 +964,13 @@ function setupRecorder(i){
         timerEl.textContent = '';
         currentStream.getTracks().forEach(t=>t.stop());
         document.querySelectorAll('.dots span')[i]?.classList.add('done');
-        const finalize = ()=>{ state.transcripts[i] = recognizedText.trim(); renderComparison(i, state.transcripts[i]); };
-        if(recognition){
-          let done=false;
-          recognition.onend = ()=>{ if(!done){ done=true; finalize(); } };
-          setTimeout(()=>{ if(!done){ done=true; finalize(); } }, 900);
-        } else { setTimeout(finalize, 200); }
+        stopRecognitionSession(()=>{
+          state.transcripts[i] = recognizedText.trim();
+          renderComparison(i, state.transcripts[i]);
+        });
       };
       mediaRecorder.start();
-
-      if(SpeechRec){
-        recognition = new SpeechRec();
-        recognition.lang = 'it-IT';
-        recognition.continuous = true;
-        recognition.interimResults = false;
-        recognition.onresult = (e)=>{
-          let text=''; for(let r=0;r<e.results.length;r++) text += e.results[r][0].transcript + ' ';
-          recognizedText = text;
-        };
-        recognition.onerror = ()=>{};
-        try{ recognition.start(); }catch(e){}
-      }
+      startRecognitionSession();
 
       recBtn.classList.add('recording');
       recLabel.textContent = 'Stop';
@@ -779,8 +992,8 @@ function renderSummary(){
   const recordedCount = Object.keys(state.recordings).length;
   app.innerHTML = `
     <div class="summary"><div class="missal">
-      <h2>Mass Completed</h2>
-      <p>You recorded ${recordedCount} of ${STEPS.length} responses.</p>
+      <h2>Missa Completa</h2>
+      <p>You recorded ${recordedCount} of ${STEPS.length} responses as ${state.role==='ac1'?'Acolyte 1 (Epistle side)':'Acolyte 2 (Gospel side)'}.</p>
       ${STEPS.map((s,idx)=>`
         <div class="summary-item">
           <div class="sec">${idx+1}. ${s.section}</div>
@@ -792,7 +1005,7 @@ function renderSummary(){
       <button class="begin-btn restart-btn" id="restartBtn">Practice Again</button>
     </div></div>`;
   document.getElementById('restartBtn').onclick = ()=>{
-    state.view='cover'; state.step=0; state.recordings={}; state.transcripts={};
+    state.view='cover'; state.step=0; state.recordings={}; state.transcripts={}; state.movementAnswers={};
     render();
   };
 }
