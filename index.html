@@ -191,15 +191,11 @@
   <p>Traditional Latin Rite · Missa Lecta</p>
 </div>
 
-<div id="app">
-  <div class="cover"><div class="missal"><p style="text-align:center;font-style:italic;">Loading…</p></div></div>
-</div>
+<div id="app"></div>
 <footer>Speak clearly and unhurried, as at the altar rail.</footer>
-<noscript><p style="color:#b9ab8a;text-align:center;">JavaScript is required. Please enable it and reload.</p></noscript>
 
 <script>
-/* ... STEPS, MOVEMENTS, and all JS continue in Part 2 ... */
-  /* ============ FULL MASS SEQUENCE (server's parts) ============ */
+/* ============ FULL MASS SEQUENCE (server's parts) ============ */
 const STEPS = [
 {section:"Sign of the Cross", priest:"In nómine Patris, et Fílii, et Spíritus Sancti.", priestT:"In the name of the Father, and of the Son, and of the Holy Ghost.",
  server:"Amen.", serverT:"Amen."},
@@ -300,7 +296,7 @@ const STEPS = [
 {section:"End of the Canon", priest:"(The Priest, having consecrated in silence, concludes aloud:) ...Per ómnia sǽcula sæculórum.", priestT:"(silent Canon, then aloud) ...world without end.",
  server:"Amen.", serverT:"Amen."},
 
-{section:"Pater Noster", priest:"Pater noster, qui es in cælis: sanctificétur nomen tuum: advéniat regnum tuum: fiat volúntas tua, sicut in cælo, et in terra. Panem nostrum quotidiánam da nobis hódie: et dimítte nobis débita nostra, sicut et nos dimíttimus debitóribus nostris. Et ne nos indúcas in tentatiónem.", priestT:"Our Father, who art in heaven... and lead us not into temptation.",
+{section:"Pater Noster", priest:"Pater noster, qui es in cælis: sanctificétur nomen tuum: advéniat regnum tuum: fiat volúntas tua, sicut in cælo, et in terra. Panem nostrum quotidiánum da nobis hódie: et dimítte nobis débita nostra, sicut et nos dimíttimus debitóribus nostris. Et ne nos indúcas in tentatiónem.", priestT:"Our Father, who art in heaven... and lead us not into temptation.",
  server:"Sed líbera nos a malo.", serverT:"But deliver us from evil."},
 
 {section:"Pater Noster", priest:"(The Priest continues silently, then concludes aloud:) ...Per ómnia sǽcula sæculórum.", priestT:"(silent embolism, then aloud) ...world without end.",
@@ -341,7 +337,9 @@ const STEPS = [
  server:"Deo grátias.", serverT:"Thanks be to God."}
 ];
 
-/* ============ ACOLYTE MOVEMENTS (rubrics, 1962 Missale Romanum — Low Mass, two servers) ============ */
+/* ============ ACOLYTE MOVEMENTS (rubrics, 1962 Missale Romanum — Low Mass, two servers) ============
+   insertBefore = index in STEPS this question precedes. role = 'both' | 'ac1' | 'ac2'.
+   Common parish custom for a two-server Low Mass; some houses vary slightly in who does what. */
 const MOVEMENTS = [
   {id:'mv1', insertBefore:0, role:'both', section:"Before Mass Begins",
    q:"As Mass begins, where do both acolytes kneel for the Prayers at the Foot of the Altar?",
@@ -416,25 +414,13 @@ const MOVEMENTS = [
 
 /* ============ STATE ============ */
 const app = document.getElementById('app');
-
-function safeGetStorage(type, key, fallback){
-  try{
-    const store = type === 'session' ? sessionStorage : localStorage;
-    const v = store.getItem(key);
-    return (v === null || v === undefined) ? fallback : v;
-  }catch(e){ return fallback; }
+function lsGet(key, fallback){
+  try{ return localStorage.getItem(key) || fallback; }catch(e){ return fallback; }
 }
-function safeSetStorage(type, key, val){
-  try{
-    const store = type === 'session' ? sessionStorage : localStorage;
-    store.setItem(key, val);
-  }catch(e){}
-}
-
 let state = {
-  view: 'cover',
-  level: safeGetStorage('local', 'altar_level', '1'),
-  role: safeGetStorage('local', 'altar_role', 'ac1'),
+  view: 'cover', // cover | settings | recordPriest | practice | summary
+  level: lsGet('altar_level', '1'),
+  role: lsGet('altar_role', 'ac1'), // ac1 | ac2
   step: 0,
   sequence: [],
   movementResults: {},
@@ -442,10 +428,10 @@ let state = {
   transcripts: {},
   priestRecordings: {},
   showTranslation: false,
-  priestMode: safeGetStorage('local', 'altar_priestMode', 'browser'),
-  voiceURI: safeGetStorage('local', 'altar_voiceURI', ''),
-  elevenKey: safeGetStorage('local', 'altar_elevenKey', ''),
-  elevenVoiceId: safeGetStorage('local', 'altar_elevenVoiceId', ''),
+  priestMode: lsGet('altar_priestMode', 'browser'), // browser | custom | eleven
+  voiceURI: lsGet('altar_voiceURI', ''),
+  elevenKey: lsGet('altar_elevenKey', ''),
+  elevenVoiceId: lsGet('altar_elevenVoiceId', ''),
   elevenCache: {}
 };
 
@@ -586,19 +572,433 @@ function renderCover(){
       <button class="begin-btn ghost" id="recPriestBtn" style="margin-left:8px;">🎙 Record the Priest</button>
     </div></div>`;
   app.querySelectorAll('.seg button[data-lvl]').forEach(b=>{
-    b.onclick = ()=>{ state.level = b.dataset.lvl; safeSetStorage('local', 'altar_level', state.level); renderCover(); };
+    b.onclick = ()=>{ state.level = b.dataset.lvl; localStorage.setItem('altar_level', state.level); renderCover(); };
   });
   app.querySelectorAll('.seg button[data-role]').forEach(b=>{
-    b.onclick = ()=>{ state.role = b.dataset.role; safeSetStorage('local', 'altar_role', state.role); renderCover(); };
+    b.onclick = ()=>{ state.role = b.dataset.role; localStorage.setItem('altar_role', state.role); renderCover(); };
   });
   document.getElementById('beginBtn').onclick = ()=>{
     state.sequence = buildSequence(state.role);
-    state.movementResults = {};
     state.view='practice'; state.step=0; render();
   };
   document.getElementById('settingsBtn').onclick = ()=>{ state.view='settings'; render(); };
   document.getElementById('recPriestBtn').onclick = ()=>{ state.view='recordPriest'; render(); };
 }
 
-/* ... continues with renderSettings, renderRecordPriest, renderPracticeItem,
-   renderMovementStep, setupRecorder (fixed voice recognition), renderSummary, render() ... */
+/* ============ SETTINGS ============ */
+function renderSettings(){
+  const voiceOptions = availableVoices.map(v=>`<option value="${v.voiceURI}" ${v.voiceURI===state.voiceURI?'selected':''}>${v.name} (${v.lang})</option>`).join('');
+  app.innerHTML = `
+    <div class="settings-view"><div class="missal">
+      <h2>Voice Settings — the Priest</h2>
+      <p>Choose how you'd like to hear the priest's lines.</p>
+      <div class="seg" style="margin:10px 0;">
+        <button data-mode="browser" class="${state.priestMode==='browser'?'active':''}">Browser Voice</button>
+        <button data-mode="custom" class="${state.priestMode==='custom'?'active':''}">My Recording</button>
+        <button data-mode="eleven" class="${state.priestMode==='eleven'?'active':''}">ElevenLabs</button>
+      </div>
+
+      <div id="modeDetail"></div>
+
+      <button class="begin-btn" id="doneSettingsBtn" style="margin-top:18px;">Done</button>
+    </div></div>`;
+
+  function renderModeDetail(){
+    const holder = document.getElementById('modeDetail');
+    if(state.priestMode === 'browser'){
+      holder.innerHTML = `
+        <label class="field-label">Voice</label>
+        <select class="text-input" id="voiceSelect">
+          <option value="">Auto (Italian-leaning, best default)</option>
+          ${voiceOptions}
+        </select>
+        <div class="settings-note">Your browser's available voices vary by device. Italian voices tend to sound closest to ecclesiastical Latin.</div>`;
+      document.getElementById('voiceSelect').onchange = (e)=>{ state.voiceURI = e.target.value; localStorage.setItem('altar_voiceURI', state.voiceURI); };
+    } else if(state.priestMode === 'custom'){
+      holder.innerHTML = `<div class="settings-note">Read every priest's line aloud once, in your own voice — use the "Record the Priest" button on the main screen. Those recordings will play back during practice instead of a synthetic voice.</div>`;
+    } else {
+      holder.innerHTML = `
+        <label class="field-label">ElevenLabs API Key</label>
+        <input class="text-input" id="elevenKeyInput" type="password" placeholder="sk-..." value="${state.elevenKey}">
+        <label class="field-label">Voice ID</label>
+        <input class="text-input" id="elevenVoiceInput" type="text" placeholder="e.g. 21m00Tcm4TlvDq8ikWAM" value="${state.elevenVoiceId}">
+        <div class="settings-note">Stored only in your browser (localStorage) and sent directly from your browser to ElevenLabs — never through any server of ours. Generated audio is cached per line to save credits.</div>`;
+      document.getElementById('elevenKeyInput').onchange = (e)=>{ state.elevenKey = e.target.value.trim(); localStorage.setItem('altar_elevenKey', state.elevenKey); state.elevenCache = {}; };
+      document.getElementById('elevenVoiceInput').onchange = (e)=>{ state.elevenVoiceId = e.target.value.trim(); localStorage.setItem('altar_elevenVoiceId', state.elevenVoiceId); state.elevenCache = {}; };
+    }
+  }
+  renderModeDetail();
+
+  app.querySelectorAll('.seg button').forEach(b=>{
+    b.onclick = ()=>{ state.priestMode = b.dataset.mode; localStorage.setItem('altar_priestMode', state.priestMode); renderSettings(); };
+  });
+  document.getElementById('doneSettingsBtn').onclick = ()=>{ state.view='cover'; render(); };
+}
+
+/* ============ RECORD-THE-PRIEST BOOTH ============ */
+let rpMediaRecorder, rpChunks=[], rpStream;
+function renderRecordPriest(){
+  app.innerHTML = `
+    <div class="recordpriest-view"><div class="missal">
+      <h2>Record the Priest</h2>
+      <p style="font-size:15px;">Read each line aloud, in order — your voice will stand in for the priest during practice. This only matters if "My Recording" is selected in Voice Settings.</p>
+      <div id="rpList"></div>
+      <button class="begin-btn" id="rpDoneBtn" style="margin-top:14px;">Done — Back</button>
+    </div></div>`;
+
+  const list = document.getElementById('rpList');
+  list.innerHTML = STEPS.map((s,idx)=>`
+    <div class="rp-item" data-idx="${idx}">
+      <div class="sec">${idx+1}. ${s.section}</div>
+      <div class="lat">${s.priest}</div>
+      <div class="rp-controls">
+        <button class="mini-btn rp-rec-btn" data-idx="${idx}">🎙 Record</button>
+        <span class="rp-playback"></span>
+      </div>
+    </div>
+  `).join('');
+
+  list.querySelectorAll('.rp-rec-btn').forEach(btn=>{
+    btn.onclick = async ()=>{
+      const idx = parseInt(btn.dataset.idx);
+      if(rpMediaRecorder && rpMediaRecorder.state === 'recording'){
+        rpMediaRecorder.stop();
+        return;
+      }
+      try{
+        rpStream = await navigator.mediaDevices.getUserMedia({audio:true});
+        rpChunks = [];
+        rpMediaRecorder = new MediaRecorder(rpStream);
+        rpMediaRecorder.ondataavailable = e=>rpChunks.push(e.data);
+        rpMediaRecorder.onstop = ()=>{
+          const blob = new Blob(rpChunks, {type: rpChunks[0]?.type || 'audio/webm'});
+          const url = URL.createObjectURL(blob);
+          state.priestRecordings[idx] = url;
+          const item = list.querySelector(`.rp-item[data-idx="${idx}"] .rp-playback`);
+          item.innerHTML = `<audio controls src="${url}"></audio>`;
+          btn.textContent = '🎙 Re-record';
+          btn.classList.remove('rec-active');
+          rpStream.getTracks().forEach(t=>t.stop());
+        };
+        rpMediaRecorder.start();
+        btn.textContent = '⏹ Stop';
+        btn.classList.add('rec-active');
+      }catch(err){
+        alert('Microphone access denied.');
+      }
+    };
+  });
+
+  document.getElementById('rpDoneBtn').onclick = ()=>{ state.view='cover'; render(); };
+}
+
+/* ============ PRACTICE STEP ============ */
+function renderPracticeItem(){
+  const item = state.sequence[state.step];
+  if(item.type === 'movement') renderMovementStep();
+  else renderPrayerStep();
+}
+
+function navRow(seqPos){
+  const total = state.sequence.length;
+  const pct = Math.round(((seqPos+1)/total)*100);
+  return `
+    <div class="nav-row">
+      <button class="nav-btn" id="prevBtn" ${seqPos===0?'disabled':''}>&larr; Prev</button>
+      <div class="progress-track"><div class="progress-fill" style="width:${pct}%"></div></div>
+      <button class="nav-btn" id="nextBtn">${seqPos===total-1?'Finish':'Next →'}</button>
+    </div>`;
+}
+function wireNav(seqPos){
+  document.getElementById('prevBtn').onclick = ()=>{ state.step = Math.max(0, seqPos-1); render(); };
+  document.getElementById('nextBtn').onclick = ()=>{
+    if(seqPos===state.sequence.length-1){ state.view='summary'; render(); }
+    else { state.step = seqPos+1; render(); }
+  };
+}
+
+function renderPrayerStep(){
+  const seqPos = state.step;
+  const i = state.sequence[seqPos].idx;
+  const total = state.sequence.length;
+  const s = STEPS[i];
+  const ribbonTop = 8 + (seqPos/(total-1))*86;
+
+  app.innerHTML = `
+    <div class="controls">
+      <div class="seg">
+        <button data-lvl="1" class="${state.level==='1'?'active':''}">Level I · Reveal</button>
+        <button data-lvl="2" class="${state.level==='2'?'active':''}">Level II · Memory</button>
+      </div>
+      <button class="toggle-link ${state.showTranslation?'active':''}" id="transToggle">English</button>
+      <button class="toggle-link" id="settingsLink">⚙ Voice</button>
+    </div>
+    <div class="missal-wrap">
+      <div class="ribbon" style="top:${ribbonTop}%"></div>
+      <div class="missal">
+        <div class="meta-row">
+          <span class="step-count">Step ${seqPos+1} of ${total}</span>
+          <span class="section-label">${s.section}</span>
+        </div>
+
+        <div class="block">
+          <div class="role"><span class="dot"></span>Priest</div>
+          <div class="latin">${s.priest}${s.varies ? '<span class="varies-tag">varies by day</span>' : ''}</div>
+          ${state.showTranslation ? `<div class="translation">${s.priestT}</div>` : ''}
+          <div class="hear-row">
+            <button class="hear-btn" id="hearBtn">🔊 Hear the Priest</button>
+            <span class="voice-note" id="hearStatus"></span>
+          </div>
+        </div>
+
+        <div class="block server-block">
+          <div class="role"><span class="dot" style="background:var(--gold);"></span>Your Response</div>
+          <div id="serverArea"></div>
+
+          <div class="record-row">
+            <button class="rec-btn" id="recBtn" disabled>
+              <span class="rec-dot"></span><span id="recLabel">Record</span>
+            </button>
+            <span class="timer" id="timer"></span>
+            <span id="playbackHolder"></span>
+            <span class="status-chip" id="statusChip"></span>
+          </div>
+          <div id="compareHolder"></div>
+          ${state.showTranslation ? `<div class="translation" style="margin-top:10px;">${s.serverT}</div>` : ''}
+        </div>
+      </div>
+    </div>
+
+    ${navRow(seqPos)}
+  `;
+
+  document.getElementById('transToggle').onclick = ()=>{ state.showTranslation = !state.showTranslation; renderPrayerStep(); };
+  document.getElementById('settingsLink').onclick = ()=>{ state.view='settings'; render(); };
+  app.querySelectorAll('.seg button').forEach(b=>{
+    b.onclick = ()=>{ state.level = b.dataset.lvl; localStorage.setItem('altar_level', state.level); renderPrayerStep(); };
+  });
+  document.getElementById('hearBtn').onclick = ()=> playPriestLine(i, document.getElementById('hearStatus'));
+  wireNav(seqPos);
+
+  setupServerArea(i, s);
+  setupRecorder(i);
+
+  setTimeout(()=>playPriestLine(i, document.getElementById('hearStatus')), 250);
+}
+
+function renderMovementStep(){
+  const seqPos = state.step;
+  const mq = state.sequence[seqPos].mq;
+  const total = state.sequence.length;
+  const ribbonTop = 8 + (seqPos/(total-1))*86;
+  const roleTag = mq.role==='both' ? 'Both Acolytes' : (mq.role==='ac1' ? 'Acolyte 1' : 'Acolyte 2');
+  const prevAnswer = state.movementResults[mq.id];
+
+  app.innerHTML = `
+    <div class="controls">
+      <button class="toggle-link" id="settingsLink">⚙ Voice</button>
+    </div>
+    <div class="missal-wrap">
+      <div class="ribbon" style="top:${ribbonTop}%"></div>
+      <div class="missal">
+        <div class="meta-row">
+          <span class="step-count">Step ${seqPos+1} of ${total}</span>
+          <span class="section-label">${mq.section} · ${roleTag}</span>
+        </div>
+        <div class="block">
+          <div class="role"><span class="dot" style="background:var(--gold);"></span>Movements</div>
+          <p style="font-size:17px; line-height:1.5; margin-top:0;">${mq.q}</p>
+          <div id="mqOptions"></div>
+          <div id="mqFeedback"></div>
+        </div>
+      </div>
+    </div>
+    ${navRow(seqPos)}
+  `;
+
+  const optHolder = document.getElementById('mqOptions');
+  optHolder.innerHTML = mq.options.map((opt,idx)=>`<button class="mini-btn mq-opt" data-idx="${idx}" style="display:block; width:100%; text-align:left; margin-bottom:8px; padding:10px 14px;">${opt}</button>`).join('');
+
+  function lockIn(idx){
+    const correct = idx === mq.correct;
+    state.movementResults[mq.id] = correct;
+    optHolder.querySelectorAll('.mq-opt').forEach((btn,bi)=>{
+      btn.disabled = true;
+      if(bi === mq.correct) btn.style.background = 'rgba(47,107,47,.18)', btn.style.borderColor = '#2f6b2f';
+      else if(bi === idx) btn.style.background = 'rgba(124,18,32,.12)', btn.style.borderColor = 'var(--rubric)';
+    });
+    document.getElementById('mqFeedback').innerHTML = `
+      <div class="compare-box" style="margin-top:12px;">
+        <div class="score-chip ${correct?'score-good':'score-low'}">${correct ? 'Correct' : 'Not quite'}</div>
+        <div class="translation" style="margin-top:8px;">${mq.explain}</div>
+      </div>`;
+  }
+
+  if(prevAnswer !== undefined){
+    // already answered this session — show state immediately
+    const chosenIdx = prevAnswer ? mq.correct : -1;
+    optHolder.querySelectorAll('.mq-opt').forEach((btn,bi)=>{
+      btn.disabled = true;
+      if(bi === mq.correct) btn.style.background = 'rgba(47,107,47,.18)', btn.style.borderColor = '#2f6b2f';
+    });
+    document.getElementById('mqFeedback').innerHTML = `
+      <div class="compare-box" style="margin-top:12px;">
+        <div class="score-chip ${prevAnswer?'score-good':'score-low'}">${prevAnswer ? 'You answered this correctly' : 'Reviewed'}</div>
+        <div class="translation" style="margin-top:8px;">${mq.explain}</div>
+      </div>`;
+  } else {
+    optHolder.querySelectorAll('.mq-opt').forEach(btn=>{
+      btn.onclick = ()=> lockIn(parseInt(btn.dataset.idx));
+    });
+  }
+
+  document.getElementById('settingsLink').onclick = ()=>{ state.view='settings'; render(); };
+  wireNav(seqPos);
+}
+
+function setupServerArea(i, s){
+  const area = document.getElementById('serverArea');
+  const recBtn = document.getElementById('recBtn');
+
+  if(state.level === '1'){
+    area.innerHTML = `
+      <div class="reveal-wrap">
+        <div class="reveal-bar"><div class="reveal-bar-fill" id="revealFill"></div></div>
+        <div class="latin" id="revealText">${s.server}</div>
+      </div>`;
+    const fill = document.getElementById('revealFill');
+    fill.style.animation = 'shrink 5s linear forwards';
+    recBtn.disabled = true;
+    setTimeout(()=>{
+      const txt = document.getElementById('revealText');
+      if(txt){ txt.classList.add('fading'); setTimeout(()=>{ if(txt) txt.style.display='none'; },450); }
+      recBtn.disabled = false;
+      document.getElementById('statusChip').textContent = 'Now record from memory';
+    }, 5000);
+  } else {
+    area.innerHTML = `<div class="locked-msg">— text hidden · recall the response, then record —</div>`;
+    recBtn.disabled = false;
+  }
+}
+
+let mediaRecorder, chunks=[], recTimerInterval, recSeconds=0, currentStream;
+let recognition, recognizedText='';
+const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+function setupRecorder(i){
+  const recBtn = document.getElementById('recBtn');
+  const recLabel = document.getElementById('recLabel');
+  const timerEl = document.getElementById('timer');
+  const playbackHolder = document.getElementById('playbackHolder');
+  const statusChip = document.getElementById('statusChip');
+
+  if(state.recordings[i]){
+    playbackHolder.innerHTML = `<audio controls src="${state.recordings[i].url}"></audio>`;
+    recLabel.textContent = 'Re-record';
+    renderComparison(i, state.transcripts[i]);
+  }
+
+  recBtn.onclick = async ()=>{
+    if(mediaRecorder && mediaRecorder.state === 'recording'){
+      mediaRecorder.stop();
+      return;
+    }
+    try{
+      const stream = await navigator.mediaDevices.getUserMedia({audio:true});
+      currentStream = stream;
+      chunks = [];
+      recognizedText = '';
+      document.getElementById('compareHolder').innerHTML = '';
+      mediaRecorder = new MediaRecorder(stream);
+      mediaRecorder.ondataavailable = e => chunks.push(e.data);
+      mediaRecorder.onstop = ()=>{
+        const blob = new Blob(chunks, {type: chunks[0]?.type || 'audio/webm'});
+        const url = URL.createObjectURL(blob);
+        state.recordings[i] = {url, blob};
+        playbackHolder.innerHTML = `<audio controls src="${url}"></audio>`;
+        recBtn.classList.remove('recording');
+        recLabel.textContent = 'Re-record';
+        statusChip.textContent = 'Saved';
+        clearInterval(recTimerInterval);
+        timerEl.textContent = '';
+        currentStream.getTracks().forEach(t=>t.stop());
+        document.querySelectorAll('.dots span')[i]?.classList.add('done');
+        const finalize = ()=>{
+          state.transcripts[i] = recognizedText.trim();
+          renderComparison(i, state.transcripts[i]);
+        };
+        if(recognition){
+          let done = false;
+          const finish = ()=>{ if(!done){ done=true; finalize(); } };
+          recognition.onend = finish;
+          try{ recognition.stop(); }catch(e){ finish(); }
+          setTimeout(finish, 1200);
+        } else {
+          finalize();
+        }
+      };
+      mediaRecorder.start();
+
+      if(SpeechRec){
+        recognition = new SpeechRec();
+        recognition.lang = 'it-IT';
+        recognition.continuous = true;
+        recognition.interimResults = true;
+        recognition.onresult = (e)=>{
+          for(let r= e.resultIndex; r < e.results.length; r++){
+            if(e.results[r].isFinal) recognizedText += e.results[r][0].transcript + ' ';
+          }
+        };
+        recognition.onerror = ()=>{};
+        try{ recognition.start(); }catch(e){}
+      }
+
+      recBtn.classList.add('recording');
+      recLabel.textContent = 'Stop';
+      recSeconds = 0;
+      timerEl.textContent = '0:00';
+      recTimerInterval = setInterval(()=>{
+        recSeconds++;
+        const m = Math.floor(recSeconds/60), sec = String(recSeconds%60).padStart(2,'0');
+        timerEl.textContent = `${m}:${sec}`;
+      },1000);
+    }catch(err){
+      statusChip.textContent = 'Microphone access denied';
+    }
+  };
+}
+
+/* ============ SUMMARY ============ */
+function renderSummary(){
+  const recordedCount = Object.keys(state.recordings).length;
+  app.innerHTML = `
+    <div class="summary"><div class="missal">
+      <h2>Mass Completed</h2>
+      <p>You recorded ${recordedCount} of ${STEPS.length} responses.</p>
+      ${STEPS.map((s,idx)=>`
+        <div class="summary-item">
+          <div class="sec">${idx+1}. ${s.section}</div>
+          <div class="lat">${s.server}</div>
+          ${state.recordings[idx] ? `<audio controls src="${state.recordings[idx].url}"></audio>` : `<span style="color:var(--ink-soft); font-style:italic; font-size:14px;">— not recorded —</span>`}
+          ${(state.recordings[idx] && state.transcripts[idx]) ? (()=>{ const r=alignAndScore(s.server, state.transcripts[idx]); const cls=r.score>=85?'score-good':r.score>=55?'score-mid':'score-low'; return `<div class="score-chip ${cls}" style="margin-top:8px;">${r.score}% match</div>`; })() : ''}
+        </div>
+      `).join('')}
+      <button class="begin-btn restart-btn" id="restartBtn">Practice Again</button>
+    </div></div>`;
+  document.getElementById('restartBtn').onclick = ()=>{
+    state.view='cover'; state.step=0; state.recordings={}; state.transcripts={};
+    render();
+  };
+}
+
+function render(){
+  if(state.view === 'cover') renderCover();
+  else if(state.view === 'settings') renderSettings();
+  else if(state.view === 'recordPriest') renderRecordPriest();
+  else if(state.view === 'summary') renderSummary();
+  else renderPracticeItem();
+}
+render();
+</script>
+</body>
+</html>
