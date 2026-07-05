@@ -443,24 +443,34 @@ const STEPS = [
 
 /* ============ STATE ============ */
 const app = document.getElementById('app');
+
+function safeGetStorage(store, key, fallback){
+  try{ const v = store.getItem(key); return (v === null || v === undefined) ? fallback : v; }
+  catch(e){ return fallback; }
+}
+function safeSetStorage(store, key, val){
+  try{ store.setItem(key, val); }catch(e){}
+}
+function safeParseJSON(str, fallback){
+  try{ return JSON.parse(str); }catch(e){ return fallback; }
+}
+
 let state = {
   view: 'cover', // cover | settings | recordPriest | practice | summary
-  level: localStorage.getItem('altar_level') || '1',
-  role: localStorage.getItem('altar_role') || 'ac1', // ac1 | ac2
+  level: safeGetStorage(localStorage, 'altar_level', '1'),
+  role: safeGetStorage(localStorage, 'altar_role', 'ac1'), // ac1 | ac2
   step: 0,
   recordings: {},
   transcripts: {},
   movementAnswers: {},
-  priestRecordings: JSON.parse(sessionStorage.getItem('altar_priestRecUrls') || '{}'),
+  priestRecordings: {},
   showTranslation: false,
-  priestMode: localStorage.getItem('altar_priestMode') || 'browser',
-  voiceURI: localStorage.getItem('altar_voiceURI') || '',
-  elevenKey: localStorage.getItem('altar_elevenKey') || '',
-  elevenVoiceId: localStorage.getItem('altar_elevenVoiceId') || '',
+  priestMode: safeGetStorage(localStorage, 'altar_priestMode', 'browser'),
+  voiceURI: safeGetStorage(localStorage, 'altar_voiceURI', ''),
+  elevenKey: safeGetStorage(localStorage, 'altar_elevenKey', ''),
+  elevenVoiceId: safeGetStorage(localStorage, 'altar_elevenVoiceId', ''),
   elevenCache: {}
 };
-// blob objects can't survive reload via sessionStorage — reset the recording map fresh each load
-state.priestRecordings = {};
 
 function stripAccents(s){ return s.normalize('NFD').replace(/[\u0300-\u036f]/g,''); }
 
@@ -589,10 +599,10 @@ function renderCover(){
       <button class="begin-btn ghost" id="recPriestBtn" style="margin-left:8px;">🎙 Record the Priest</button>
     </div></div>`;
   app.querySelectorAll('.seg button[data-lvl]').forEach(b=>{
-    b.onclick = ()=>{ state.level = b.dataset.lvl; localStorage.setItem('altar_level', state.level); renderCover(); };
+    b.onclick = ()=>{ state.level = b.dataset.lvl; safeSetStorage(localStorage, 'altar_level', state.level); renderCover(); };
   });
   app.querySelectorAll('.seg button[data-role]').forEach(b=>{
-    b.onclick = ()=>{ state.role = b.dataset.role; localStorage.setItem('altar_role', state.role); renderCover(); };
+    b.onclick = ()=>{ state.role = b.dataset.role; safeSetStorage(localStorage, 'altar_role', state.role); renderCover(); };
   });
   document.getElementById('beginBtn').onclick = ()=>{ state.view='practice'; state.step=0; state.movementAnswers={}; render(); };
   document.getElementById('settingsBtn').onclick = ()=>{ state.view='settings'; render(); };
@@ -627,7 +637,7 @@ function renderSettings(){
           ${voiceOptions}
         </select>
         <div class="settings-note">Your browser's available voices vary by device. Italian voices tend to sound closest to ecclesiastical Latin.</div>`;
-      document.getElementById('voiceSelect').onchange = (e)=>{ state.voiceURI = e.target.value; localStorage.setItem('altar_voiceURI', state.voiceURI); };
+      document.getElementById('voiceSelect').onchange = (e)=>{ state.voiceURI = e.target.value; safeSetStorage(localStorage, 'altar_voiceURI', state.voiceURI); };
     } else if(state.priestMode === 'custom'){
       holder.innerHTML = `<div class="settings-note">Read every priest's line aloud once, in your own voice — use the "Record the Priest" button on the main screen. Those recordings will play back during practice instead of a synthetic voice.</div>`;
     } else {
@@ -637,14 +647,14 @@ function renderSettings(){
         <label class="field-label">Voice ID</label>
         <input class="text-input" id="elevenVoiceInput" type="text" placeholder="e.g. 21m00Tcm4TlvDq8ikWAM" value="${state.elevenVoiceId}">
         <div class="settings-note">Stored only in your browser (localStorage) and sent directly from your browser to ElevenLabs — never through any server of ours. Generated audio is cached per line to save credits.</div>`;
-      document.getElementById('elevenKeyInput').onchange = (e)=>{ state.elevenKey = e.target.value.trim(); localStorage.setItem('altar_elevenKey', state.elevenKey); state.elevenCache = {}; };
-      document.getElementById('elevenVoiceInput').onchange = (e)=>{ state.elevenVoiceId = e.target.value.trim(); localStorage.setItem('altar_elevenVoiceId', state.elevenVoiceId); state.elevenCache = {}; };
+      document.getElementById('elevenKeyInput').onchange = (e)=>{ state.elevenKey = e.target.value.trim(); safeSetStorage(localStorage, 'altar_elevenKey', state.elevenKey); state.elevenCache = {}; };
+      document.getElementById('elevenVoiceInput').onchange = (e)=>{ state.elevenVoiceId = e.target.value.trim(); safeSetStorage(localStorage, 'altar_elevenVoiceId', state.elevenVoiceId); state.elevenCache = {}; };
     }
   }
   renderModeDetail();
 
   app.querySelectorAll('.seg button').forEach(b=>{
-    b.onclick = ()=>{ state.priestMode = b.dataset.mode; localStorage.setItem('altar_priestMode', state.priestMode); renderSettings(); };
+    b.onclick = ()=>{ state.priestMode = b.dataset.mode; safeSetStorage(localStorage, 'altar_priestMode', state.priestMode); renderSettings(); };
   });
   document.getElementById('doneSettingsBtn').onclick = ()=>{ state.view='cover'; render(); };
 }
@@ -773,10 +783,10 @@ function renderStep(){
   document.getElementById('transToggle').onclick = ()=>{ state.showTranslation = !state.showTranslation; renderStep(); };
   document.getElementById('settingsLink').onclick = ()=>{ state.view='settings'; render(); };
   app.querySelectorAll('.seg button[data-lvl]').forEach(b=>{
-    b.onclick = ()=>{ state.level = b.dataset.lvl; localStorage.setItem('altar_level', state.level); renderStep(); };
+    b.onclick = ()=>{ state.level = b.dataset.lvl; safeSetStorage(localStorage, 'altar_level', state.level); renderStep(); };
   });
   app.querySelectorAll('.seg button[data-role]').forEach(b=>{
-    b.onclick = ()=>{ state.role = b.dataset.role; localStorage.setItem('altar_role', state.role); renderStep(); };
+    b.onclick = ()=>{ state.role = b.dataset.role; safeSetStorage(localStorage, 'altar_role', state.role); renderStep(); };
   });
   document.getElementById('hearBtn').onclick = ()=> playPriestLine(i, document.getElementById('hearStatus'));
   document.getElementById('prevBtn').onclick = ()=>{ state.step = Math.max(0, state.step-1); render(); };
@@ -1011,13 +1021,23 @@ function renderSummary(){
 }
 
 function render(){
+  if(!app) return;
   if(state.view === 'cover') renderCover();
   else if(state.view === 'settings') renderSettings();
   else if(state.view === 'recordPriest') renderRecordPriest();
   else if(state.view === 'summary') renderSummary();
   else renderStep();
 }
-render();
+
+try{
+  render();
+}catch(err){
+  app.innerHTML = `<div class="cover"><div class="missal"><h2>Something went wrong</h2>
+    <p>The app failed to start. Try a hard refresh, or open the file directly from the repo instead of a partial copy.</p>
+    <p style="font-size:14px;color:var(--ink-soft);">${err.message || err}</p>
+    <button class="begin-btn" onclick="location.reload()">Reload</button></div></div>`;
+  console.error(err);
+}
 </script>
 </body>
 </html>
