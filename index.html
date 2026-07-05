@@ -337,79 +337,133 @@ const STEPS = [
  server:"Deo grátias.", serverT:"Thanks be to God."}
 ];
 
-/* ============ ACOLYTE MOVEMENTS (rubrics, 1962 Missale Romanum — Low Mass, two servers) ============
-   insertBefore = index in STEPS this question precedes. role = 'both' | 'ac1' | 'ac2'.
-   Common parish custom for a two-server Low Mass; some houses vary slightly in who does what. */
+/* ============ ACOLYTE MOVEMENTS (FSSP-style Low Mass, two servers — El Paso TX parish custom) ============
+   insertBefore = index in STEPS this question precedes. role = 'both' | 'ac1' | 'ac2'. */
 const MOVEMENTS = [
-  {id:'mv1', insertBefore:0, role:'both', section:"Before Mass Begins",
-   q:"As Mass begins, where do both acolytes kneel for the Prayers at the Foot of the Altar?",
+  {id:'mv0a', insertBefore:0, role:'ac1', section:"Sacristy — Before Mass",
+   q:"In the sacristy, when the Priest gives the blessing before Mass, what does Acolyte 1 do first?",
+   options:["Kiss the Priest's hand","Put on his biretta immediately","Ring the sacristy bell","Go straight to the credence table"],
+   correct:0, explain:"Acolyte 1 kisses the Priest's hand first when receiving the blessing — the solita oscula."},
+
+  {id:'mv0b', insertBefore:0, role:'ac2', section:"Sacristy — Before Mass",
+   q:"In the sacristy, when the Priest gives the blessing before Mass, what does Acolyte 2 do first?",
+   options:["Kiss the Priest's hand","Put on his biretta immediately","Ring the sacristy bell","Fetch the cruets"],
+   correct:0, explain:"Acolyte 2 likewise kisses the Priest's hand when receiving the blessing."},
+
+  {id:'mv0c', insertBefore:0, role:'both', section:"Entering the Church",
+   q:"When leaving the sacristy to enter the church, what do both acolytes do with their birettas?",
+   options:["Put them on before entering","Carry them folded until the Gospel","Leave them in the sacristy","Hand them to the Priest at once"],
+   correct:0, explain:"Both servers don the biretta before entering the church."},
+
+  {id:'mv0d', insertBefore:0, role:'ac1', section:"Arrival at the Altar",
+   q:"When the Priest arrives at the altar wearing his biretta, what does Acolyte 1 do?",
+   options:["Receives the biretta, kissing the Priest's hand first, then the biretta","Takes the biretta without kissing and places it on the credence","Keeps his own biretta on and kneels","Rings the bell three times"],
+   correct:0, explain:"Acolyte 1 receives the Priest's biretta with the solita oscula — hand first, then biretta — and sets it aside on the step or credence."},
+
+  {id:'mv1', insertBefore:0, role:'both', section:"Prayers at the Foot of the Altar",
+   q:"As Mass begins at the foot of the altar, where do both acolytes kneel?",
    options:["On the floor at the foot of the altar steps","On the topmost altar step","In the sanctuary chairs","At the credence table"],
-   correct:0, explain:"Both kneel side by side on the floor (predella/pavement), not on the altar steps themselves, until it is time to ascend."},
+   correct:0, explain:"Both kneel side by side on the floor at the foot of the altar for the Prayers at the Foot of the Altar."},
+
+  {id:'mv_conf1', insertBefore:8, role:'both', section:"Ascending for the Confiteor",
+   q:"When it is time for the Confiteor at the middle of the altar, what do both acolytes do first?",
+   options:["Ascend to the top step and kiss the altar","Remain kneeling at the foot","Go to the credence for the cruets","Stand at the side walls of the sanctuary"],
+   correct:0, explain:"Both ascend and kiss the altar before the Confiteor at the middle of the altar."},
+
+  {id:'mv_conf2', insertBefore:8, role:'both', section:"Confiteor at the Altar",
+   q:"During the Confiteor and the prayers at the middle of the altar, where do both acolytes kneel?",
+   options:["On the top step at the sides of the Priest","On the floor at the foot of the altar","In the pews","Standing behind the Priest"],
+   correct:0, explain:"Both kneel on the top step at the Priest's sides for the Confiteor and the prayers that follow at the altar."},
 
   {id:'mv2', insertBefore:21, role:'ac1', section:"After the Epistle",
    q:"The Epistle has just been read. What does Acolyte 1 do now?",
-   options:["Rings the bell three times","Carries the Missal from the Epistle (right) side to the Gospel (left) side","Brings the cruets to the altar","Kneels and does nothing"],
-   correct:1, explain:"The senior server transfers the Missal to the Gospel side while the Gradual is read, so the Priest can proceed directly to the Gospel."},
+   options:["Carries the Missal from the Epistle (right) side to the Gospel (left) side","Rings the bell three times","Brings the cruets to the altar","Kneels and does nothing"],
+   correct:0, explain:"Acolyte 1 transfers the Missal to the Gospel side while the Gradual is read."},
 
   {id:'mv3', insertBefore:21, role:'ac2', section:"After the Epistle",
    q:"While Acolyte 1 moves the Missal to the Gospel side, what does Acolyte 2 do?",
-   options:["Also carries a candle ahead of him and returns to place","Goes to fetch the cruets immediately","Rings the Sanctus bell","Leaves the sanctuary"],
-   correct:0, explain:"Acolyte 2 commonly accompanies him — often carrying a candle — then returns to his place at the foot of the altar."},
+   options:["Accompanies him and returns to place at the foot of the altar","Goes immediately to fetch the cruets","Rings the Sanctus bell","Leaves the sanctuary"],
+   correct:0, explain:"Acolyte 2 commonly accompanies Acolyte 1, then both return to their places at the foot of the altar."},
+
+  {id:'mv_stand', insertBefore:21, role:'both', section:"Before the Gospel",
+   q:"When the Priest is about to read the Gospel, what do both acolytes do?",
+   options:["Stand up and remain in place at the foot of the altar","Ascend to the top step","Go fetch the cruets from the credence","Kneel on the bottom step"],
+   correct:0, explain:"Both rise from kneeling and stand in place at the foot of the altar for the Gospel and the Creed that follows."},
+
+  {id:'mv_off', insertBefore:25, role:'both', section:"Offertory — Wine & Water",
+   q:"When presenting the wine and water at the Offertory, how are the cruets held?",
+   options:["Acolyte 1 on the Priest's right holds the wine; Acolyte 2 on his left holds the water","Acolyte 2 holds both cruets alone","Both kneel at the foot with cruets on the floor","Acolyte 1 holds the water; Acolyte 2 holds the wine"],
+   correct:0, explain:"On the Epistle side of the altar, Acolyte 1 stands to the Priest's right with the wine cruet; Acolyte 2 stands to his left with the water cruet."},
 
   {id:'mv4', insertBefore:25, role:'ac2', section:"Offertory",
-   q:"At the Offertory, who brings the cruets of wine and water to the Priest?",
-   options:["Acolyte 1","Acolyte 2","Both together, one on each side","The Priest fetches them himself"],
-   correct:1, explain:"Handling the cruets is customarily the junior server's (Acolyte 2's) duty."},
-
-  {id:'mv5', insertBefore:25, role:'ac2', section:"Offertory — Lavabo",
-   q:"During the Lavabo, who pours the water over the Priest's fingers?",
-   options:["Acolyte 1","Acolyte 2","The Priest pours it himself","Neither — the Lavabo is silent and requires no water"],
-   correct:1, explain:"Acolyte 2, having brought the cruets, also pours the water for the ceremonial hand-washing."},
+   q:"Who brings the cruets from the credence table to the altar at the Offertory?",
+   options:["Acolyte 2","Acolyte 1","Both together from opposite ends of the sanctuary","The Priest fetches them himself"],
+   correct:0, explain:"Acolyte 2 customarily fetches the cruets; Acolyte 1 may bring both in some houses, but the junior server normally handles the cruets."},
 
   {id:'mv6', insertBefore:25, role:'ac1', section:"Offertory — Lavabo",
    q:"During the Lavabo, what does Acolyte 1 do?",
-   options:["Holds the finger towel for the Priest to dry his hands","Rings the bell","Goes to ring the sanctuary bell outside","Kneels apart and waits"],
-   correct:0, explain:"Acolyte 1 holds the towel (manutergium) while Acolyte 2 pours the water."},
+   options:["Holds the finger towel (manutergium) for the Priest","Pours the water over the Priest's fingers","Rings the bell","Kneels apart at the foot"],
+   correct:0, explain:"Acolyte 1 holds the manutergium while Acolyte 2 pours the water."},
 
-  {id:'mv7', insertBefore:30, role:'ac2', section:"Sanctus",
-   q:"Who rings the small bell at the beginning of the Sanctus?",
+  {id:'mv5', insertBefore:25, role:'ac2', section:"Offertory — Lavabo",
+   q:"During the Lavabo, who pours the water over the Priest's fingers?",
+   options:["Acolyte 2","Acolyte 1","The Priest pours it himself","Neither — no water is used"],
+   correct:0, explain:"Acolyte 2 pours the water from the cruet for the ceremonial hand-washing."},
+
+  {id:'mv_bell', insertBefore:25, role:'ac1', section:"After the Lavabo",
+   q:"After the Lavabo, what does Acolyte 1 fetch from the credence before returning to kneel?",
+   options:["The altar bell","The thurible","The processional cross","The biretta"],
+   correct:0, explain:"Acolyte 1 takes the bell from the credence; both then return to kneel on the lowest step for the Canon."},
+
+  {id:'mv7', insertBefore:30, role:'ac1', section:"Sanctus",
+   q:"Who rings the bell at the Sanctus?",
    options:["Acolyte 1","Acolyte 2","Both acolytes together","No bell is rung at the Sanctus"],
-   correct:1, explain:"Acolyte 2 rings the bell as the Sanctus begins, signaling the approach of the Consecration to the church."},
+   correct:0, explain:"Acolyte 1 rings the bell at the Sanctus — customarily three strokes."},
 
-  {id:'mv8', insertBefore:31, role:'ac2', section:"Before the Consecration",
+  {id:'mv_hanc', insertBefore:31, role:'ac1', section:"Hanc Igitur",
+   q:"When the Priest extends his hands over the chalice at the Hanc igitur, who rings the bell once?",
+   options:["Acolyte 1","Acolyte 2","The Priest rings it himself","No bell is rung at the Hanc igitur"],
+   correct:0, explain:"Acolyte 1 gives one ring (a double stroke) when the Priest spreads his hands over the chalice at the Hanc igitur."},
+
+  {id:'mv8', insertBefore:31, role:'ac1', section:"Before the Consecration",
    q:"Just before the words of Consecration, a single warning ring is given. Who rings it?",
    options:["Acolyte 1","Acolyte 2","The Priest rings it himself","No warning bell is used"],
-   correct:1, explain:"A single ring shortly before the Consecration alerts the faithful that the most sacred moment of the Mass is at hand."},
+   correct:0, explain:"Acolyte 1 gives a warning ring shortly before the Consecration."},
 
-  {id:'mv9', insertBefore:31, role:'both', section:"The Elevation",
-   q:"At the elevation of the Host, and again at the elevation of the Chalice, how many times is the bell rung?",
-   options:["Once each time","Three times each time","Continuously until the Priest genuflects","Not rung — only at the Sanctus"],
-   correct:1, explain:"Custom (and many local directories) calls for three rings at each elevation — of the Host, then of the Chalice."},
+  {id:'mv9', insertBefore:31, role:'ac1', section:"The Elevation",
+   q:"At each Elevation (Host and Chalice), who rings the bell three times?",
+   options:["Acolyte 1","Acolyte 2","Both acolytes together","The bell is not rung at the Elevation"],
+   correct:0, explain:"Acolyte 1 rings three distinct double-strokes at each Elevation."},
 
   {id:'mv10', insertBefore:31, role:'both', section:"The Elevation",
    q:"What is the correct posture of both acolytes during the Elevation itself?",
-   options:["Standing and bowing the head","Kneeling upright, hands joined, eyes on the Sacred Host or Chalice","Kneeling with heads bowed to the floor","Sitting"],
-   correct:1, explain:"Both kneel upright with hands joined, adoring, looking at the Host and then the Chalice as each is elevated."},
+   options:["Kneeling upright, hands joined, eyes on the Sacred Host or Chalice","Standing and bowing the head","Kneeling with heads bowed to the floor","Sitting"],
+   correct:0, explain:"Both kneel upright with hands joined, adoring the Host and then the Chalice as each is elevated."},
 
-  {id:'mv11', insertBefore:36, role:'ac2', section:"Domine, non sum dignus",
-   q:"How many times is the bell rung at the threefold Domine, non sum dignus, just before Communion?",
-   options:["Not rung","Once, at the very end","Three times, once with each repetition","Continuously"],
-   correct:2, explain:"The bell is rung once with each of the three repetitions of the Domine, non sum dignus."},
+  {id:'mv11', insertBefore:36, role:'ac1', section:"Domine, non sum dignus",
+   q:"At the threefold Domine, non sum dignus before Communion, who rings the bell?",
+   options:["Acolyte 1 — once with each repetition","Acolyte 2 — once with each repetition","Acolyte 1 — only once at the end","The bell is not rung"],
+   correct:0, explain:"Acolyte 1 rings once with each of the three repetitions."},
 
   {id:'mv12', insertBefore:37, role:'ac1', section:"Before the Postcommunion",
-   q:"Before the Postcommunion prayer, the Missal must be moved again. To which side?",
-   options:["It stays on the Gospel (left) side","Back to the Epistle (right) side","To the center of the altar","It is closed and set aside"],
-   correct:1, explain:"The Missal returns to the Epistle side, since the Postcommunion — like the Collect — is prayed there."},
+   q:"Before the Postcommunion prayer, the Missal must be moved again. What does Acolyte 1 do?",
+   options:["Carries the Missal back to the Epistle (right) side","Leaves it on the Gospel (left) side","Closes it and sets it on the credence","Hands it to Acolyte 2"],
+   correct:0, explain:"Acolyte 1 returns the Missal to the Epistle side for the Postcommunion, as for the Collect."},
 
   {id:'mv13', insertBefore:41, role:'both', section:"The Final Blessing",
    q:"As the Priest turns to give the final blessing, what do both acolytes do?",
-   options:["Remain standing silently","Kneel and make the Sign of the Cross with him","Ring the bell three times","Bow only, without kneeling"],
-   correct:1, explain:"Both kneel and sign themselves along with the Priest's blessing."},
+   options:["Kneel and make the Sign of the Cross with him","Remain standing silently","Ring the bell three times","Bow only, without kneeling"],
+   correct:0, explain:"Both kneel and sign themselves along with the Priest's blessing."},
 
   {id:'mv14', insertBefore:42, role:'both', section:"The Last Gospel",
    q:"During the Last Gospel, what is the correct posture for both acolytes?",
-   options:["Kneel throughout","Sit and listen","Stand, briefly genuflecting at \"Et Verbum caro factum est\"","Remain bowed the entire time"],
-   correct:2, explain:"The Last Gospel is heard standing, as with any Gospel, with a brief genuflection at the words of the Incarnation."}
+   options:["Stand, briefly genuflecting at \"Et Verbum caro factum est\"","Kneel throughout","Sit and listen","Remain bowed the entire time"],
+   correct:0, explain:"The Last Gospel is heard standing, with a brief genuflection at the words of the Incarnation."},
+
+  {id:'mv15', insertBefore:45, role:'ac1', section:"End of Mass",
+   q:"After Mass, when returning the Priest's biretta, what does Acolyte 1 do?",
+   options:["Kisses the biretta first, then the Priest's hand","Kisses the hand first, then the biretta","Hands it to him without kissing","Places it on the credence table"],
+   correct:0, explain:"When returning the biretta the order is reversed: biretta first, then the Priest's hand."}
 ];
 
 /* ============ STATE ============ */
