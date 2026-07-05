@@ -989,8 +989,3 @@ function renderSummary(){
           <div class="lat">${s.server}</div>
           ${state.recordings[idx] ? `<audio controls src="${state.recordings[idx].url}"></audio>` : `<span style="color:var(--ink-soft); font-style:italic; font-size:14px;">— not recorded —</span>`}
           ${(state.recordings[idx] && state.transcripts[idx]) ? (()=>{ const r=alignAndScore(s.server, state.transcripts[idx]); const cls=r.score>=85?'score-good':r.score>=55?'score-mid':'score-low'; return `<div class="score-chip ${cls}" style="margin
-
-
-
-
-
