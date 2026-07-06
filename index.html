@@ -146,9 +146,9 @@
   }
   .toggle-link.active{color:var(--gold-bright); border-color:var(--gold-bright);}
 
-  .cover, .summary, .settings-view, .recordpriest-view, .rubric-view, .flash-view, .section-view{max-width:660px; width:100%;}
-  .cover .missal, .summary .missal, .settings-view .missal, .recordpriest-view .missal, .rubric-view .missal, .flash-view .missal, .section-view .missal{padding:38px 40px 34px 46px;}
-  .cover h2, .summary h2, .settings-view h2, .recordpriest-view h2, .rubric-view h2, .flash-view h2, .section-view h2{
+  .cover, .summary, .settings-view, .recordpriest-view, .rubric-view, .flash-view, .section-view, .learn-view{max-width:660px; width:100%;}
+  .cover .missal, .summary .missal, .settings-view .missal, .recordpriest-view .missal, .rubric-view .missal, .flash-view .missal, .section-view .missal, .learn-view .missal{padding:38px 40px 34px 46px;}
+  .cover h2, .summary h2, .settings-view h2, .recordpriest-view h2, .rubric-view h2, .flash-view h2, .section-view h2, .learn-view h2{
     font-family:'Cinzel', serif; font-size:20px; letter-spacing:1.5px; color:var(--rubric); text-transform:uppercase; margin-top:0;
   }
   .cover p, .settings-view p{line-height:1.6; font-size:16px;}
@@ -215,9 +215,39 @@
   }
   .section-btn:hover{background:rgba(42,82,152,.12);}
 
+  .home-tabs{display:flex; border:1px solid var(--border-soft); border-radius:24px; overflow:hidden; margin:14px 0;}
+  .home-tabs button{flex:1; background:none; border:none; font-family:'Cinzel',serif; font-size:10px; letter-spacing:1px; text-transform:uppercase; padding:10px 6px; cursor:pointer; color:#9aa8c4;}
+  .home-tabs button.active{background:var(--rubric); color:#fff;}
+  .home-panel{margin-top:4px;}
+
+  .guide-item{border-bottom:1px solid var(--border-soft); padding:16px 0;}
+  .guide-item.guide-movement{background:var(--tint); margin:0 -12px; padding:14px 12px; border-radius:8px; border-bottom:none; margin-bottom:8px;}
+  .guide-scroll{max-height:70vh; overflow-y:auto; padding-right:4px;}
+
+  .glossary-row{border-bottom:1px solid var(--border-soft); padding:12px 0;}
+  .glossary-row .lat{font-size:17px; font-style:italic;}
+  .glossary-row .eng{font-size:14px; color:var(--ink-soft);}
+  .glossary-row .when{font-size:12px; color:var(--gold); font-family:'Cinzel',serif; letter-spacing:1px; text-transform:uppercase; margin-top:4px;}
+
+  .bell-row{display:flex; gap:12px; border-bottom:1px solid var(--border-soft); padding:12px 0; align-items:flex-start;}
+  .bell-row .moment{flex:1; font-size:15px;}
+  .bell-row .action{flex:1; font-size:14px; color:var(--rubric); font-weight:500;}
+
+  .check-row{display:flex; align-items:flex-start; gap:10px; padding:10px 0; border-bottom:1px solid var(--border-soft); cursor:pointer;}
+  .check-row input{margin-top:4px; accent-color:var(--rubric);}
+  .check-row.done label{color:var(--ink-soft); text-decoration:line-through;}
+
+  .stat-block{margin:14px 0; padding:14px; background:var(--tint); border-radius:8px; border:1px solid var(--border-soft);}
+  .stat-block .label{font-family:'Cinzel',serif; font-size:10px; letter-spacing:1.5px; text-transform:uppercase; color:var(--ink-soft);}
+  .stat-block .value{font-size:22px; color:var(--rubric); margin-top:4px;}
+  .stat-bar{height:8px; background:rgba(42,82,152,.15); border-radius:4px; margin-top:8px; overflow:hidden;}
+  .stat-bar-fill{height:100%; background:var(--ic-blue-light); border-radius:4px;}
+  .weak-item{display:flex; justify-content:space-between; align-items:center; padding:10px 0; border-bottom:1px solid var(--border-soft); gap:10px;}
+  .weak-item .lat{font-size:14px; font-style:italic; flex:1;}
+
   @media (max-width:480px){
     .mode-grid{grid-template-columns:1fr;}
-    .missal, .cover .missal, .summary .missal, .settings-view .missal, .recordpriest-view .missal, .rubric-view .missal, .flash-view .missal, .section-view .missal{padding:28px 20px 22px 28px;}
+    .missal, .cover .missal, .summary .missal, .settings-view .missal, .recordpriest-view .missal, .rubric-view .missal, .flash-view .missal, .section-view .missal, .learn-view .missal{padding:28px 20px 22px 28px;}
     .latin{font-size:18px;}
     .meta-row{flex-direction:column; align-items:flex-start; gap:4px;}
     .section-label{text-align:left;}
@@ -502,8 +532,51 @@ const PRACTICE_MODES = [
   {id:'movements', label:'Movements Only', desc:'All rubric MCQs for your role'},
   {id:'canon', label:'Canon & Bells', desc:'Sanctus through Domine non sum dignus'},
   {id:'flashcards', label:'Flashcards', desc:'Tap to flip Latin ↔ English'},
-  {id:'section', label:'By Section', desc:'Pick one part of the Mass'},
-  {id:'rubric', label:'Rubric Sheet', desc:'Read-only movement reference'}
+  {id:'section', label:'By Section', desc:'Pick one part of the Mass'}
+];
+
+const LEARN_ITEMS = [
+  {id:'massGuide', label:'Mass Guide', desc:'Read the whole Mass — priest, server, movements'},
+  {id:'glossary', label:'Latin Glossary', desc:'Key phrases every server must know'},
+  {id:'bellChart', label:'Bells & Canon', desc:'When AC1 rings and what to do'},
+  {id:'rubric', label:'Rubric Sheet', desc:'All movement notes for your role'}
+];
+
+const GLOSSARY = [
+  {latin:'Amen', english:'So be it', when:'Throughout the Mass'},
+  {latin:'Et cum spiritu tuo', english:'And with thy spirit', when:'Reply to the Priest\'s Dominus vobiscum'},
+  {latin:'Deo gratias', english:'Thanks be to God', when:'After the Epistle and Last Gospel'},
+  {latin:'Glória tibi, Dómine', english:'Glory be to Thee, O Lord', when:'Before the Gospel is read'},
+  {latin:'Et cum spiritu tuo', english:'And with thy spirit', when:'Server response at foot of altar'},
+  {latin:'Suscípiat Dóminus…', english:'May the Lord receive the sacrifice…', when:'Reply to Orate, fratres'},
+  {latin:'Sed líbera nos a malo', english:'But deliver us from evil', when:'End of the Pater Noster (server alone)'},
+  {latin:'Dómine, non sum dignus…', english:'Lord, I am not worthy…', when:'Three times before Communion'},
+  {latin:'Misereátur tui…', english:'May almighty God have mercy on thee…', when:'Confiteor (to priest)'},
+  {latin:'Orámus te, Dómine…', english:'We beseech Thee, O Lord…', when:'At the foot of the altar (kiss of relics)'},
+  {latin:'Adjutórium nostrum…', english:'Our help is in the name of the Lord', when:'Versicle at foot of altar'},
+  {latin:'Introíbo ad altáre Dei', english:'I will go in unto the altar of God', when:'Psalm 42 dialogue'},
+  {latin:'Confíteor…', english:'I confess to almighty God…', when:'Confiteor (server\'s part)'},
+  {latin:'Ite, missa est / Benedicámus Dómino', english:'Go, the Mass is ended / Let us bless the Lord', when:'Dismissal (reply: Deo grátias)'}
+];
+
+const BELL_CHART = [
+  {moment:'Sanctus begins', action:'AC1 rings 3 strokes'},
+  {moment:'Hanc igitur — Priest extends hands over chalice', action:'AC1 rings once'},
+  {moment:'After Hanc igitur — Priest lifts his hands', action:'Both go to center, genuflect, ascend, kneel on either side of Father'},
+  {moment:'Hoc est enim Corpus Meum', action:'AC1 rings 3 strokes'},
+  {moment:'Consecration of the Chalice', action:'AC1 rings 3 strokes'},
+  {moment:'Domine, non sum dignus (×3)', action:'AC1 rings once with each repetition'}
+];
+
+const PREMASS_ITEMS = [
+  {id:'time', label:'Arrive in the sacristy on time'},
+  {id:'hand', label:"Kiss the Priest's hand when he gives the blessing"},
+  {id:'vest', label:'Cassock and surplice on (no biretta for acolytes)'},
+  {id:'role', label:'Know today\'s role — AC1 or AC2'},
+  {id:'cruets', label:'Cruets filled and on the credence'},
+  {id:'bell', label:'Altar bell on the credence'},
+  {id:'missal', label:'Missal open to the correct place'},
+  {id:'review', label:'Review any special feasts or changes with the MC'}
 ];
 
 /* ============ STATE ============ */
@@ -511,8 +584,19 @@ const app = document.getElementById('app');
 function lsGet(key, fallback){
   try{ return localStorage.getItem(key) || fallback; }catch(e){ return fallback; }
 }
+function lsSet(key, val){
+  try{ localStorage.setItem(key, val); }catch(e){}
+}
+function lsGetJSON(key, fallback){
+  try{ const v = localStorage.getItem(key); return v ? JSON.parse(v) : fallback; }catch(e){ return fallback; }
+}
+function lsSetJSON(key, val){
+  try{ localStorage.setItem(key, JSON.stringify(val)); }catch(e){}
+}
+
 let state = {
   view: 'cover',
+  homeTab: lsGet('altar_homeTab', 'practice'),
   practiceMode: lsGet('altar_practiceMode', 'full'),
   level: lsGet('altar_level', '1'),
   role: lsGet('altar_role', 'ac1'),
@@ -532,6 +616,50 @@ let state = {
   elevenVoiceId: lsGet('altar_elevenVoiceId', ''),
   elevenCache: {}
 };
+
+function loadProgress(){
+  return lsGetJSON('altar_progress', {
+    sessions: 0, lastSession: null, bestScores: {}, movementStats: {}, recordedOnce: {}
+  });
+}
+function saveSessionProgress(){
+  const p = loadProgress();
+  p.sessions = (p.sessions || 0) + 1;
+  p.lastSession = new Date().toISOString();
+  Object.entries(state.transcripts).forEach(([idx, text])=>{
+    if(!text) return;
+    const s = STEPS[idx];
+    const {score} = alignAndScore(s.server, text);
+    const prev = p.bestScores[idx] || 0;
+    if(score > prev) p.bestScores[idx] = score;
+    p.recordedOnce[idx] = true;
+  });
+  Object.entries(state.movementResults).forEach(([id, ok])=>{
+    if(!p.movementStats[id]) p.movementStats[id] = {correct:0, total:0};
+    p.movementStats[id].total++;
+    if(ok) p.movementStats[id].correct++;
+  });
+  lsSetJSON('altar_progress', p);
+}
+function getChecklist(){
+  return lsGetJSON('altar_checklist', {});
+}
+function setChecklistItem(id, checked){
+  const c = getChecklist();
+  c[id] = checked;
+  lsSetJSON('altar_checklist', c);
+}
+function goHome(){
+  state.view = 'cover';
+  render();
+}
+function openLearn(id){
+  if(id === 'rubric') state.view = 'rubric';
+  else if(id === 'massGuide') state.view = 'massGuide';
+  else if(id === 'glossary') state.view = 'glossary';
+  else if(id === 'bellChart') state.view = 'bellChart';
+  render();
+}
 
 function stripAccents(s){ return s.normalize('NFD').replace(/[\u0300-\u036f]/g,''); }
 
@@ -571,7 +699,6 @@ function startPractice(mode, range=null){
   try{ localStorage.setItem('altar_practiceMode', mode); }catch(e){}
   state.movementResults = {};
   state.step = 0;
-  if(mode === 'rubric'){ state.view = 'rubric'; render(); return; }
   if(mode === 'flashcards'){ state.view = 'flashcards'; state.flashIdx = 0; state.flashFlipped = false; render(); return; }
   if(mode === 'section'){ state.view = 'sectionPick'; render(); return; }
   state.sequence = buildSequence(state.role, mode, range);
@@ -680,51 +807,236 @@ function renderComparison(i, transcript){
     </div>`;
 }
 
-/* ============ COVER ============ */
-function renderCover(){
+/* ============ HOME ============ */
+function renderRoleSelector(){
+  return `<div style="margin:12px 0;">
+    <label class="field-label" style="margin-top:0;">Your Role</label>
+    <div class="seg">
+      <button data-role="ac1" class="${state.role==='ac1'?'active':''}">Acolyte 1 (Senior)</button>
+      <button data-role="ac2" class="${state.role==='ac2'?'active':''}">Acolyte 2 (Junior)</button>
+    </div>
+  </div>`;
+}
+function wireRoleButtons(){
+  app.querySelectorAll('.seg button[data-role]').forEach(b=>{
+    b.onclick = ()=>{ state.role = b.dataset.role; lsSet('altar_role', state.role); render(); };
+  });
+}
+
+function renderPracticePanel(){
   const modeCards = PRACTICE_MODES.map(m=>`
     <button class="mode-btn ${state.practiceMode===m.id?'active':''}" data-mode="${m.id}">
       ${m.label}<span>${m.desc}</span>
     </button>`).join('');
+  return `
+    <label class="field-label">Practice Mode</label>
+    <div class="mode-grid">${modeCards}</div>
+    <div id="levelBlock" style="${['full','responses','section'].includes(state.practiceMode)?'':'display:none;'}">
+      <label class="field-label">Response Level</label>
+      <div class="seg" style="margin-bottom:8px;">
+        <button data-lvl="1" class="${state.level==='1'?'active':''}">Level I · Reveal</button>
+        <button data-lvl="2" class="${state.level==='2'?'active':''}">Level II · Memory</button>
+      </div>
+      <p style="font-size:14px; color:var(--ink-soft); margin:0 0 12px;">Level I shows the text five seconds before recording. Level II hides it entirely.</p>
+    </div>
+    <button class="begin-btn" id="beginBtn">Start Practice</button>`;
+}
+
+function renderLearnPanel(){
+  const cards = LEARN_ITEMS.map(m=>`
+    <button class="mode-btn" data-learn="${m.id}">
+      ${m.label}<span>${m.desc}</span>
+    </button>`).join('');
+  return `<label class="field-label">Study & Reference</label><div class="mode-grid">${cards}</div>`;
+}
+
+function renderPreparePanel(){
+  const checks = getChecklist();
+  const rows = PREMASS_ITEMS.map(item=>{
+    const done = !!checks[item.id];
+    return `<div class="check-row ${done?'done':''}" data-id="${item.id}">
+      <input type="checkbox" id="chk_${item.id}" ${done?'checked':''}>
+      <label for="chk_${item.id}">${item.label}</label>
+    </div>`;
+  }).join('');
+  return `
+    <p style="font-size:15px; margin-top:0;">Before each Mass — tap to check off.</p>
+    ${rows}
+    <button class="begin-btn ghost" id="resetChecklistBtn" style="margin-top:14px;">Reset Checklist</button>`;
+}
+
+function renderProgressPanel(){
+  const p = loadProgress();
+  const recorded = Object.keys(p.recordedOnce || {}).length;
+  const total = STEPS.length;
+  const pct = total ? Math.round((recorded / total) * 100) : 0;
+  const last = p.lastSession ? new Date(p.lastSession).toLocaleDateString() : 'Never';
+  const weak = Object.entries(p.bestScores || {})
+    .map(([idx, score])=>({idx: parseInt(idx), score}))
+    .filter(x=> x.score < 85)
+    .sort((a,b)=> a.score - b.score)
+    .slice(0, 5);
+  return `
+    <div class="stat-block">
+      <div class="label">Responses Recorded</div>
+      <div class="value">${recorded} / ${total}</div>
+      <div class="stat-bar"><div class="stat-bar-fill" style="width:${pct}%"></div></div>
+    </div>
+    <div class="stat-block">
+      <div class="label">Practice Sessions</div>
+      <div class="value">${p.sessions || 0}</div>
+      <div style="font-size:13px; color:var(--ink-soft); margin-top:4px;">Last: ${last}</div>
+    </div>
+    ${weak.length ? `<label class="field-label">Lines to Review</label>
+      ${weak.map(w=>`<div class="weak-item">
+        <span class="lat">${STEPS[w.idx].server.slice(0, 50)}${STEPS[w.idx].server.length>50?'…':''}</span>
+        <span class="score-chip score-mid">${w.score}%</span>
+        <button class="mini-btn" data-practice-idx="${w.idx}">Practice</button>
+      </div>`).join('')}` : '<p style="font-size:14px;color:var(--ink-soft);">Complete a practice session to see your weakest lines here.</p>'}`;
+}
+
+function renderHome(){
+  const tabs = [
+    {id:'practice', label:'Practice'},
+    {id:'learn', label:'Learn'},
+    {id:'prepare', label:'Prepare'},
+    {id:'progress', label:'Progress'}
+  ];
+  const tabBar = tabs.map(t=>`<button data-tab="${t.id}" class="${state.homeTab===t.id?'active':''}">${t.label}</button>`).join('');
+  let panel = '';
+  if(state.homeTab === 'practice') panel = renderPracticePanel();
+  else if(state.homeTab === 'learn') panel = renderLearnPanel();
+  else if(state.homeTab === 'prepare') panel = renderPreparePanel();
+  else panel = renderProgressPanel();
 
   app.innerHTML = `
     <div class="cover"><div class="missal">
-      <h2>Before You Begin</h2>
-      <p>Practice Latin responses and FSSP acolyte movements for the <em>Missa Lecta</em> — Immaculate Conception Church, El Paso.</p>
-      <div style="margin:12px 0;">
-        <label class="field-label" style="margin-top:0;">Your Role</label>
-        <div class="seg">
-          <button data-role="ac1" class="${state.role==='ac1'?'active':''}">Acolyte 1 (Senior)</button>
-          <button data-role="ac2" class="${state.role==='ac2'?'active':''}">Acolyte 2 (Junior)</button>
-        </div>
+      <h2>Acolyte Training</h2>
+      <p>Immaculate Conception Church · FSSP · El Paso — <em>Missa Lecta</em>, two acolytes.</p>
+      ${renderRoleSelector()}
+      <div class="home-tabs">${tabBar}</div>
+      <div class="home-panel">${panel}</div>
+      <div style="margin-top:16px;">
+        <button class="begin-btn ghost" id="settingsBtn">⚙ Voice</button>
+        <button class="begin-btn ghost" id="recPriestBtn" style="margin-left:8px;">🎙 Priest</button>
       </div>
-      <label class="field-label">Practice Mode</label>
-      <div class="mode-grid">${modeCards}</div>
-      <div id="levelBlock" style="${['full','responses','section'].includes(state.practiceMode)?'':'display:none;'}">
-        <label class="field-label">Response Level</label>
-        <div class="seg" style="margin-bottom:8px;">
-          <button data-lvl="1" class="${state.level==='1'?'active':''}">Level I · Reveal</button>
-          <button data-lvl="2" class="${state.level==='2'?'active':''}">Level II · Memory</button>
-        </div>
-        <p style="font-size:14px; color:var(--ink-soft); margin:0;">Level I shows the text five seconds before recording. Level II hides it entirely.</p>
-      </div>
-      <button class="begin-btn" id="beginBtn">Start</button>
-      <button class="begin-btn ghost" id="settingsBtn" style="margin-left:8px;">⚙ Voice</button>
-      <button class="begin-btn ghost" id="recPriestBtn" style="margin-left:8px;">🎙 Priest</button>
     </div></div>`;
 
-  app.querySelectorAll('.mode-btn').forEach(b=>{
-    b.onclick = ()=>{ state.practiceMode = b.dataset.mode; try{ localStorage.setItem('altar_practiceMode', state.practiceMode); }catch(e){} renderCover(); };
+  app.querySelectorAll('.home-tabs button').forEach(b=>{
+    b.onclick = ()=>{ state.homeTab = b.dataset.tab; lsSet('altar_homeTab', state.homeTab); render(); };
   });
-  app.querySelectorAll('.seg button[data-lvl]').forEach(b=>{
-    b.onclick = ()=>{ state.level = b.dataset.lvl; try{ localStorage.setItem('altar_level', state.level); }catch(e){} renderCover(); };
-  });
-  app.querySelectorAll('.seg button[data-role]').forEach(b=>{
-    b.onclick = ()=>{ state.role = b.dataset.role; try{ localStorage.setItem('altar_role', state.role); }catch(e){} renderCover(); };
-  });
-  document.getElementById('beginBtn').onclick = ()=> startPractice(state.practiceMode);
+  wireRoleButtons();
+
+  if(state.homeTab === 'practice'){
+    app.querySelectorAll('.mode-btn[data-mode]').forEach(b=>{
+      b.onclick = ()=>{ state.practiceMode = b.dataset.mode; lsSet('altar_practiceMode', state.practiceMode); render(); };
+    });
+    app.querySelectorAll('.seg button[data-lvl]').forEach(b=>{
+      b.onclick = ()=>{ state.level = b.dataset.lvl; lsSet('altar_level', state.level); render(); };
+    });
+    document.getElementById('beginBtn').onclick = ()=> startPractice(state.practiceMode);
+  } else if(state.homeTab === 'learn'){
+    app.querySelectorAll('.mode-btn[data-learn]').forEach(b=>{
+      b.onclick = ()=> openLearn(b.dataset.learn);
+    });
+  } else if(state.homeTab === 'prepare'){
+    app.querySelectorAll('.check-row').forEach(row=>{
+      row.onclick = (e)=>{
+        if(e.target.tagName === 'INPUT') return;
+        const id = row.dataset.id;
+        const cb = row.querySelector('input');
+        cb.checked = !cb.checked;
+        setChecklistItem(id, cb.checked);
+        render();
+      };
+      row.querySelector('input').onchange = (e)=>{
+        setChecklistItem(row.dataset.id, e.target.checked);
+        render();
+      };
+    });
+    document.getElementById('resetChecklistBtn').onclick = ()=>{
+      lsSetJSON('altar_checklist', {});
+      render();
+    };
+  } else {
+    app.querySelectorAll('[data-practice-idx]').forEach(b=>{
+      b.onclick = ()=>{
+        const idx = parseInt(b.dataset.practiceIdx);
+        state.homeTab = 'practice';
+        state.practiceMode = 'responses';
+        state.sequence = [{type:'prayer', idx}];
+        state.view = 'practice';
+        state.step = 0;
+        render();
+      };
+    });
+  }
   document.getElementById('settingsBtn').onclick = ()=>{ state.view='settings'; render(); };
   document.getElementById('recPriestBtn').onclick = ()=>{ state.view='recordPriest'; render(); };
+}
+
+/* ============ LEARN VIEWS ============ */
+function renderMassGuide(){
+  const role = state.role;
+  let body = '';
+  for(let idx=0; idx<=STEPS.length; idx++){
+    MOVEMENTS.filter(m=> m.insertBefore===idx && (m.role==='both'||m.role===role))
+      .forEach(m=>{
+        body += `<div class="guide-item guide-movement">
+          <div class="sec">Movement · ${m.section}</div>
+          <div class="q">${m.q}</div>
+          <div class="ans">→ ${m.options[m.correct]}</div>
+        </div>`;
+      });
+    if(idx < STEPS.length){
+      const s = STEPS[idx];
+      body += `<div class="guide-item">
+        <div class="sec">${idx+1}. ${s.section}</div>
+        <div class="role" style="margin-top:8px;"><span class="dot"></span>Priest</div>
+        <div class="latin" style="font-size:16px;">${s.priest}${s.varies?'<span class="varies-tag">varies</span>':''}</div>
+        <div class="role" style="margin-top:10px;"><span class="dot" style="background:var(--gold);"></span>Your Response</div>
+        <div class="latin" style="font-size:16px;">${s.server}</div>
+        <div class="translation">${s.serverT}</div>
+      </div>`;
+    }
+  }
+  app.innerHTML = `
+    <div class="learn-view"><div class="missal">
+      <h2>Mass Guide</h2>
+      <p style="font-size:14px;">Read-only walkthrough for ${role==='ac1'?'Acolyte 1':'Acolyte 2'}.</p>
+      <div class="guide-scroll">${body}</div>
+      <button class="begin-btn" id="guideBackBtn" style="margin-top:16px;">← Home</button>
+    </div></div>`;
+  document.getElementById('guideBackBtn').onclick = goHome;
+}
+
+function renderGlossary(){
+  app.innerHTML = `
+    <div class="learn-view"><div class="missal">
+      <h2>Latin Glossary</h2>
+      <p style="font-size:14px;">Phrases every server should know.</p>
+      ${GLOSSARY.map(g=>`<div class="glossary-row">
+        <div class="lat">${g.latin}</div>
+        <div class="eng">${g.english}</div>
+        <div class="when">${g.when}</div>
+      </div>`).join('')}
+      <button class="begin-btn" id="glossaryBackBtn" style="margin-top:16px;">← Home</button>
+    </div></div>`;
+  document.getElementById('glossaryBackBtn').onclick = goHome;
+}
+
+function renderBellChart(){
+  app.innerHTML = `
+    <div class="learn-view"><div class="missal">
+      <h2>Bells & Canon</h2>
+      <p style="font-size:14px;">Acolyte 1 bell duties — FSSP El Paso custom.</p>
+      ${BELL_CHART.map(r=>`<div class="bell-row">
+        <div class="moment">${r.moment}</div>
+        <div class="action">${r.action}</div>
+      </div>`).join('')}
+      <button class="begin-btn" id="bellBackBtn" style="margin-top:16px;">← Home</button>
+    </div></div>`;
+  document.getElementById('bellBackBtn').onclick = goHome;
 }
 
 /* ============ RUBRIC SHEET ============ */
@@ -745,7 +1057,7 @@ function renderRubricSheet(){
       }).join('')}
       <button class="begin-btn" id="rubricBackBtn" style="margin-top:16px;">← Back</button>
     </div></div>`;
-  document.getElementById('rubricBackBtn').onclick = ()=>{ state.view='cover'; render(); };
+  document.getElementById('rubricBackBtn').onclick = goHome;
 }
 
 /* ============ FLASHCARDS ============ */
@@ -777,9 +1089,9 @@ function renderFlashcards(){
   document.getElementById('flashPrev').onclick = ()=>{ if(state.flashIdx>0){ state.flashIdx--; state.flashFlipped=false; renderFlashcards(); } };
   document.getElementById('flashNext').onclick = ()=>{
     if(state.flashIdx < total-1){ state.flashIdx++; state.flashFlipped=false; renderFlashcards(); }
-    else { state.view='cover'; render(); }
+    else { goHome(); }
   };
-  document.getElementById('flashBack').onclick = ()=>{ state.view='cover'; render(); };
+  document.getElementById('flashBack').onclick = goHome;
 }
 
 /* ============ SECTION PICKER ============ */
@@ -804,7 +1116,7 @@ function renderSectionPick(){
       render();
     };
   });
-  document.getElementById('sectionBackBtn').onclick = ()=>{ state.view='cover'; render(); };
+  document.getElementById('sectionBackBtn').onclick = goHome;
 }
 
 /* ============ SETTINGS ============ */
@@ -854,7 +1166,7 @@ function renderSettings(){
   app.querySelectorAll('.seg button').forEach(b=>{
     b.onclick = ()=>{ state.priestMode = b.dataset.mode; localStorage.setItem('altar_priestMode', state.priestMode); renderSettings(); };
   });
-  document.getElementById('doneSettingsBtn').onclick = ()=>{ state.view='cover'; render(); };
+  document.getElementById('doneSettingsBtn').onclick = goHome;
 }
 
 /* ============ RECORD-THE-PRIEST BOOTH ============ */
@@ -911,7 +1223,7 @@ function renderRecordPriest(){
     };
   });
 
-  document.getElementById('rpDoneBtn').onclick = ()=>{ state.view='cover'; render(); };
+  document.getElementById('rpDoneBtn').onclick = goHome;
 }
 
 /* ============ PRACTICE STEP ============ */
@@ -1231,20 +1543,24 @@ function renderSummary(){
         <button class="begin-btn restart-btn" id="restartBtn">Practice Again</button>
       </div></div>`;
   }
+  saveSessionProgress();
   document.getElementById('restartBtn').onclick = ()=>{
     state.view='cover'; state.step=0;
-    if(!isMovement){ state.recordings={}; state.transcripts={}; }
+    state.recordings={}; state.transcripts={};
     state.movementResults={};
     render();
   };
 }
 
 function render(){
-  if(state.view === 'cover') renderCover();
+  if(state.view === 'cover') renderHome();
   else if(state.view === 'settings') renderSettings();
   else if(state.view === 'recordPriest') renderRecordPriest();
   else if(state.view === 'summary') renderSummary();
   else if(state.view === 'rubric') renderRubricSheet();
+  else if(state.view === 'massGuide') renderMassGuide();
+  else if(state.view === 'glossary') renderGlossary();
+  else if(state.view === 'bellChart') renderBellChart();
   else if(state.view === 'flashcards') renderFlashcards();
   else if(state.view === 'sectionPick') renderSectionPick();
   else renderPracticeItem();
