@@ -3,29 +3,34 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Server's Responses — The Holy Mass</title>
+<title>Acolyte Practice — Immaculate Conception · El Paso</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap" rel="stylesheet">
 <style>
   :root{
-    --bg: #14100e;
-    --bg-vignette: #0b0908;
-    --page: #f4ecd8;
-    --page-edge: #e6d8b3;
-    --rubric: #7c1220;
-    --rubric-soft: #98283a;
-    --gold: #ab8a3f;
-    --gold-bright: #c9a94f;
-    --ink: #26201a;
-    --ink-soft: #5a4e3d;
-    --shadow: rgba(0,0,0,.45);
+    --bg: #0c1220;
+    --bg-vignette: #060a12;
+    --page: #f7f4ec;
+    --page-edge: #e8e2d4;
+    --rubric: #1a3a6e;
+    --rubric-soft: #2a5298;
+    --gold: #8b7355;
+    --gold-bright: #c4a35a;
+    --ink: #1a1820;
+    --ink-soft: #4a5568;
+    --ic-blue: #1e4080;
+    --ic-blue-light: #4a7bc8;
+    --ic-white: #f0f4fa;
+    --shadow: rgba(0,0,0,.5);
+    --tint: rgba(26,58,110,.08);
+    --border-soft: rgba(26,58,110,.22);
   }
   *{box-sizing:border-box;}
   html,body{margin:0;padding:0;}
   body{
     min-height:100vh;
     background:
-      radial-gradient(ellipse at 50% -10%, #241c17 0%, var(--bg) 45%, var(--bg-vignette) 100%);
+      radial-gradient(ellipse at 50% -10%, #152040 0%, var(--bg) 45%, var(--bg-vignette) 100%);
     color:var(--ink);
     font-family:'EB Garamond', serif;
     display:flex;
@@ -34,12 +39,13 @@
     padding:36px 16px 60px;
   }
   .brand{text-align:center; margin-bottom:24px;}
-  .brand .cross{font-size:22px; color:var(--gold-bright); display:block; margin-bottom:6px; letter-spacing:2px;}
+  .brand .cross{font-size:22px; color:var(--ic-white); display:block; margin-bottom:6px; letter-spacing:2px;}
   .brand h1{
-    font-family:'Cinzel', serif; font-weight:600; font-size:clamp(20px,3.2vw,32px);
-    letter-spacing:2.5px; color:#f1e6c8; margin:0 0 6px; text-transform:uppercase;
+    font-family:'Cinzel', serif; font-weight:600; font-size:clamp(18px,3vw,28px);
+    letter-spacing:2px; color:var(--ic-white); margin:0 0 4px; text-transform:uppercase;
   }
-  .brand p{font-family:'EB Garamond', serif; font-style:italic; color:#b9ab8a; margin:0; font-size:14.5px; letter-spacing:.5px;}
+  .brand .parish{font-family:'Cinzel', serif; font-size:clamp(12px,2vw,15px); letter-spacing:1.5px; color:var(--ic-blue-light); margin:0 0 6px; text-transform:uppercase;}
+  .brand p{font-family:'EB Garamond', serif; font-style:italic; color:#9aa8c4; margin:0; font-size:14.5px; letter-spacing:.5px;}
 
   .missal-wrap{position:relative; width:100%; max-width:660px;}
   .ribbon{
@@ -58,8 +64,8 @@
     padding:38px 40px 30px 46px;
     overflow:hidden;
   }
-  .missal::before{content:""; position:absolute; left:0;top:0;bottom:0; width:6px; background:linear-gradient(180deg, var(--rubric), var(--gold));}
-  .meta-row{display:flex; justify-content:space-between; align-items:baseline; border-bottom:1px solid rgba(124,18,32,.25); padding-bottom:10px; margin-bottom:20px;}
+  .missal::before{content:""; position:absolute; left:0;top:0;bottom:0; width:6px; background:linear-gradient(180deg, var(--ic-blue), var(--ic-blue-light));}
+  .meta-row{display:flex; justify-content:space-between; align-items:baseline; border-bottom:1px solid var(--border-soft); padding-bottom:10px; margin-bottom:20px;}
   .step-count{font-family:'Cinzel', serif; font-size:11px; letter-spacing:2px; color:var(--ink-soft); text-transform:uppercase;}
   .section-label{font-family:'Cinzel', serif; font-size:13px; letter-spacing:1.5px; color:var(--rubric); text-transform:uppercase; font-weight:600; text-align:right;}
 
@@ -81,9 +87,9 @@
   .mini-btn.rec-active{background:#8f0e0e; color:#fff; border-color:#8f0e0e;}
   .voice-note{font-size:12px; color:var(--ink-soft); font-style:italic;}
 
-  .server-block{border-top:1px dashed rgba(124,18,32,.3); padding-top:18px;}
+  .server-block{border-top:1px dashed var(--border-soft); padding-top:18px;}
   .reveal-wrap{position:relative;}
-  .reveal-bar{height:3px; width:100%; background:rgba(124,18,32,.15); border-radius:2px; overflow:hidden; margin-bottom:12px;}
+  .reveal-bar{height:3px; width:100%; background:var(--tint); border-radius:2px; overflow:hidden; margin-bottom:12px;}
   .reveal-bar-fill{height:100%; background:var(--rubric); width:100%; transform-origin:left;}
   @keyframes shrink{from{transform:scaleX(1);}to{transform:scaleX(0);}}
   .locked-msg{font-style:italic; color:var(--ink-soft); font-size:15px; padding:10px 0 4px;}
@@ -105,7 +111,7 @@
   audio{height:34px; max-width:220px;}
   .status-chip{font-size:12px; font-family:'Cinzel', serif; letter-spacing:1px; color:var(--gold); text-transform:uppercase;}
 
-  .compare-box{margin-top:14px; background:rgba(124,18,32,.05); border:1px solid rgba(124,18,32,.18); border-radius:8px; padding:14px 16px;}
+  .compare-box{margin-top:14px; background:var(--tint); border:1px solid var(--border-soft); border-radius:8px; padding:14px 16px;}
   .compare-row{margin-bottom:10px;}
   .compare-label{font-family:'Cinzel', serif; font-size:10px; letter-spacing:1.5px; text-transform:uppercase; color:var(--ink-soft); display:block; margin-bottom:4px;}
   .compare-latin{font-size:17px;}
@@ -121,28 +127,28 @@
   .nav-row{display:flex; justify-content:space-between; align-items:center; max-width:660px; width:100%; margin-top:22px; gap:10px;}
   .nav-btn{
     font-family:'Cinzel', serif; letter-spacing:1.5px; font-size:12px; text-transform:uppercase; background:none;
-    border:1px solid var(--gold); color:#e7d9b3; padding:9px 18px; border-radius:24px; cursor:pointer; white-space:nowrap;
+    border:1px solid var(--gold); color:#c8d8f0; padding:9px 18px; border-radius:24px; cursor:pointer; white-space:nowrap;
   }
   .nav-btn:hover{background:rgba(171,138,63,.15);}
   .nav-btn:disabled{opacity:.35; cursor:not-allowed;}
   .dots{display:flex; gap:4px; flex-wrap:wrap; max-width:280px; justify-content:center;}
   .dots span{width:6px;height:6px;border-radius:50%;background:#443a2f;}
   .dots span.done{background:var(--gold-bright);}
-  .dots span.current{background:var(--rubric-soft); box-shadow:0 0 0 3px rgba(124,18,32,.25);}
+  .dots span.current{background:var(--rubric-soft); box-shadow:0 0 0 3px rgba(42,82,152,.25);}
 
   .controls{display:flex; gap:10px; align-items:center; margin-bottom:18px; flex-wrap:wrap; justify-content:center; max-width:660px;}
   .seg{display:flex; border:1px solid var(--gold); border-radius:24px; overflow:hidden;}
-  .seg button{background:none; border:none; color:#d9c9a0; font-family:'Cinzel', serif; font-size:11px; letter-spacing:1.5px; text-transform:uppercase; padding:8px 14px; cursor:pointer;}
+  .seg button{background:none; border:none; color:#b8c8e0; font-family:'Cinzel', serif; font-size:11px; letter-spacing:1.5px; text-transform:uppercase; padding:8px 14px; cursor:pointer;}
   .seg button.active{background:var(--rubric); color:#fff5e6;}
   .toggle-link{
-    font-size:12px; font-family:'Cinzel', serif; letter-spacing:1px; color:#b9ab8a; text-transform:uppercase; cursor:pointer;
+    font-size:12px; font-family:'Cinzel', serif; letter-spacing:1px; color:#9aa8c4; text-transform:uppercase; cursor:pointer;
     background:none; border:1px solid rgba(185,171,138,.4); border-radius:24px; padding:8px 14px;
   }
   .toggle-link.active{color:var(--gold-bright); border-color:var(--gold-bright);}
 
-  .cover, .summary, .settings-view, .recordpriest-view{max-width:660px; width:100%;}
-  .cover .missal, .summary .missal, .settings-view .missal, .recordpriest-view .missal{padding:38px 40px 34px 46px;}
-  .cover h2, .summary h2, .settings-view h2, .recordpriest-view h2{
+  .cover, .summary, .settings-view, .recordpriest-view, .rubric-view, .flash-view, .section-view{max-width:660px; width:100%;}
+  .cover .missal, .summary .missal, .settings-view .missal, .recordpriest-view .missal, .rubric-view .missal, .flash-view .missal, .section-view .missal{padding:38px 40px 34px 46px;}
+  .cover h2, .summary h2, .settings-view h2, .recordpriest-view h2, .rubric-view h2, .flash-view h2, .section-view h2{
     font-family:'Cinzel', serif; font-size:20px; letter-spacing:1.5px; color:var(--rubric); text-transform:uppercase; margin-top:0;
   }
   .cover p, .settings-view p{line-height:1.6; font-size:16px;}
@@ -152,20 +158,20 @@
   }
   .begin-btn:hover{background:var(--rubric-soft);}
   .begin-btn.ghost{background:none; border:1px solid var(--gold); color:var(--rubric-soft);}
-  .summary-item{border-bottom:1px solid rgba(124,18,32,.15); padding:12px 0;}
+  .summary-item{border-bottom:1px solid var(--border-soft); padding:12px 0;}
   .summary-item .sec{font-family:'Cinzel',serif; font-size:11px; letter-spacing:1px; color:var(--gold); text-transform:uppercase;}
   .summary-item .lat{font-style:italic; margin:4px 0 8px; font-size:15px;}
   .restart-btn{margin-top:18px;}
 
   .field-label{font-family:'Cinzel', serif; font-size:11px; letter-spacing:1.5px; text-transform:uppercase; color:var(--ink-soft); display:block; margin:16px 0 6px;}
   .text-input{
-    width:100%; padding:9px 12px; border:1px solid rgba(124,18,32,.3); border-radius:6px; font-family:'EB Garamond', serif;
+    width:100%; padding:9px 12px; border:1px solid var(--border-soft); border-radius:6px; font-family:'EB Garamond', serif;
     font-size:15px; background:#fffdf6;
   }
   select.text-input{cursor:pointer;}
   .settings-note{font-size:13px; color:var(--ink-soft); font-style:italic; margin-top:4px;}
 
-  .rp-item{border-bottom:1px solid rgba(124,18,32,.15); padding:14px 0;}
+  .rp-item{border-bottom:1px solid var(--border-soft); padding:14px 0;}
   .rp-item .sec{font-family:'Cinzel',serif; font-size:10px; letter-spacing:1px; color:var(--gold); text-transform:uppercase;}
   .rp-item .lat{font-style:italic; margin:4px 0 10px; font-size:15px;}
   .rp-controls{display:flex; align-items:center; gap:10px; flex-wrap:wrap;}
@@ -173,10 +179,45 @@
   .progress-track{flex:1; height:4px; background:rgba(171,138,63,.25); border-radius:2px; max-width:200px;}
   .progress-fill{height:100%; background:var(--gold-bright); border-radius:2px; transition:width .3s;}
 
-  footer{margin-top:30px; font-size:12px; color:#5f5748; font-style:italic; text-align:center;}
+  footer{margin-top:30px; font-size:12px; color:#7a8aa8; font-style:italic; text-align:center;}
+
+  .mode-grid{display:grid; grid-template-columns:1fr 1fr; gap:10px; margin:16px 0;}
+  .mode-btn{
+    font-family:'Cinzel', serif; font-size:11px; letter-spacing:1px; text-transform:uppercase;
+    background:var(--tint); border:1px solid var(--border-soft); color:var(--rubric);
+    border-radius:10px; padding:14px 10px; cursor:pointer; text-align:left; line-height:1.4;
+  }
+  .mode-btn:hover{background:rgba(42,82,152,.14); border-color:var(--ic-blue-light);}
+  .mode-btn.active{background:var(--rubric); color:#fff; border-color:var(--rubric);}
+  .mode-btn span{display:block; font-family:'EB Garamond', serif; font-size:12px; text-transform:none; letter-spacing:0; color:var(--ink-soft); margin-top:4px; font-style:italic;}
+  .mode-btn.active span{color:rgba(255,255,255,.8);}
+
+  .rubric-item{border-bottom:1px solid var(--border-soft); padding:14px 0;}
+  .rubric-item .sec{font-family:'Cinzel',serif; font-size:10px; letter-spacing:1px; color:var(--gold); text-transform:uppercase;}
+  .rubric-item .q{font-size:15px; margin:6px 0 4px;}
+  .rubric-item .ans{font-size:14px; color:var(--rubric); font-weight:500;}
+  .rubric-item .exp{font-size:13px; color:var(--ink-soft); font-style:italic; margin-top:4px;}
+
+  .flash-card{
+    min-height:180px; display:flex; flex-direction:column; justify-content:center; align-items:center;
+    text-align:center; cursor:pointer; padding:24px 16px; border:1px solid var(--border-soft);
+    border-radius:10px; background:#fffdf8; margin:16px 0;
+  }
+  .flash-card .hint{font-family:'Cinzel',serif; font-size:10px; letter-spacing:1.5px; text-transform:uppercase; color:var(--ink-soft); margin-bottom:12px;}
+  .flash-card .main{font-size:20px; line-height:1.5;}
+  .flash-nav{display:flex; justify-content:space-between; align-items:center; margin-top:12px;}
+
+  .section-list{display:flex; flex-direction:column; gap:8px; margin:14px 0;}
+  .section-btn{
+    font-family:'EB Garamond', serif; font-size:16px; text-align:left;
+    background:var(--tint); border:1px solid var(--border-soft); border-radius:8px;
+    padding:12px 14px; cursor:pointer; color:var(--ink);
+  }
+  .section-btn:hover{background:rgba(42,82,152,.12);}
 
   @media (max-width:480px){
-    .missal, .cover .missal, .summary .missal, .settings-view .missal, .recordpriest-view .missal{padding:28px 20px 22px 28px;}
+    .mode-grid{grid-template-columns:1fr;}
+    .missal, .cover .missal, .summary .missal, .settings-view .missal, .recordpriest-view .missal, .rubric-view .missal, .flash-view .missal, .section-view .missal{padding:28px 20px 22px 28px;}
     .latin{font-size:18px;}
     .meta-row{flex-direction:column; align-items:flex-start; gap:4px;}
     .section-label{text-align:left;}
@@ -186,13 +227,14 @@
 <body>
 
 <div class="brand">
-  <span class="cross">✝</span>
-  <h1>Server's Responses — The Holy Mass</h1>
-  <p>Traditional Latin Rite · Missa Lecta</p>
+  <span class="cross">✠</span>
+  <h1>Acolyte Practice</h1>
+  <p class="parish">Immaculate Conception Church · FSSP · El Paso, Texas</p>
+  <p>Traditional Latin Rite · Missa Lecta · Two Acolytes</p>
 </div>
 
 <div id="app"></div>
-<footer>Speak clearly and unhurried, as at the altar rail.</footer>
+<footer>Immaculate Conception Church · El Paso, TX · FSSP</footer>
 
 <script>
 /* ============ FULL MASS SEQUENCE (server's parts) ============ */
@@ -441,23 +483,50 @@ const MOVEMENTS = [
    correct:0, explain:"Both kneel and sign themselves along with the Priest's blessing."}
 ];
 
+const CANON_MV_IDS = ['mv7','mv_hanc','mv_ascend','mv_corpus','mv_calix','mv11'];
+
+const MASS_SECTIONS = [
+  {id:'foot', label:'Prayers at the Foot of the Altar', from:0, to:7},
+  {id:'confiteor', label:'Confiteor at the Altar', from:8, to:11},
+  {id:'altar', label:'Versicles & Collect', from:12, to:20},
+  {id:'gospel', label:'Gospel & Creed', from:21, to:23},
+  {id:'offertory', label:'Offertory', from:24, to:26},
+  {id:'preface', label:'Preface & Sanctus', from:27, to:30},
+  {id:'canon', label:'Canon & Communion', from:31, to:36},
+  {id:'closing', label:'Dismissal & Last Gospel', from:37, to:44}
+];
+
+const PRACTICE_MODES = [
+  {id:'full', label:'Full Mass', desc:'Responses + movements woven in'},
+  {id:'responses', label:'Responses Only', desc:'Latin server parts, no movement breaks'},
+  {id:'movements', label:'Movements Only', desc:'All rubric MCQs for your role'},
+  {id:'canon', label:'Canon & Bells', desc:'Sanctus through Domine non sum dignus'},
+  {id:'flashcards', label:'Flashcards', desc:'Tap to flip Latin ↔ English'},
+  {id:'section', label:'By Section', desc:'Pick one part of the Mass'},
+  {id:'rubric', label:'Rubric Sheet', desc:'Read-only movement reference'}
+];
+
 /* ============ STATE ============ */
 const app = document.getElementById('app');
 function lsGet(key, fallback){
   try{ return localStorage.getItem(key) || fallback; }catch(e){ return fallback; }
 }
 let state = {
-  view: 'cover', // cover | settings | recordPriest | practice | summary
+  view: 'cover',
+  practiceMode: lsGet('altar_practiceMode', 'full'),
   level: lsGet('altar_level', '1'),
-  role: lsGet('altar_role', 'ac1'), // ac1 | ac2
+  role: lsGet('altar_role', 'ac1'),
   step: 0,
   sequence: [],
+  sectionRange: null,
+  flashIdx: 0,
+  flashFlipped: false,
   movementResults: {},
   recordings: {},
   transcripts: {},
   priestRecordings: {},
   showTranslation: false,
-  priestMode: lsGet('altar_priestMode', 'browser'), // browser | custom | eleven
+  priestMode: lsGet('altar_priestMode', 'browser'),
   voiceURI: lsGet('altar_voiceURI', ''),
   elevenKey: lsGet('altar_elevenKey', ''),
   elevenVoiceId: lsGet('altar_elevenVoiceId', ''),
@@ -466,14 +535,48 @@ let state = {
 
 function stripAccents(s){ return s.normalize('NFD').replace(/[\u0300-\u036f]/g,''); }
 
-function buildSequence(role){
+function inSection(idx, range){
+  return idx >= range.from && idx <= range.to;
+}
+
+function buildSequence(role, mode='full', range=null){
+  if(mode === 'movements'){
+    return MOVEMENTS.filter(m=> m.role==='both' || m.role===role)
+      .map(m=>({type:'movement', mq:m}));
+  }
+  if(mode === 'canon'){
+    return MOVEMENTS.filter(m=>(m.role==='both'||m.role===role) && CANON_MV_IDS.includes(m.id))
+      .sort((a,b)=> a.insertBefore - b.insertBefore || a.id.localeCompare(b.id))
+      .map(m=>({type:'movement', mq:m}));
+  }
+  if(mode === 'responses'){
+    return STEPS.map((_, idx)=> idx)
+      .filter(idx=> !range || inSection(idx, range))
+      .map(idx=>({type:'prayer', idx}));
+  }
   const seq = [];
   for(let idx=0; idx<=STEPS.length; idx++){
-    MOVEMENTS.filter(m=> m.insertBefore===idx && (m.role==='both' || m.role===role))
+    MOVEMENTS.filter(m=> m.insertBefore===idx && (m.role==='both'||m.role===role))
+      .filter(m=> !range || (m.insertBefore >= range.from && m.insertBefore <= range.to + 1))
       .forEach(m=> seq.push({type:'movement', mq:m}));
-    if(idx < STEPS.length) seq.push({type:'prayer', idx});
+    if(idx < STEPS.length && (!range || inSection(idx, range)))
+      seq.push({type:'prayer', idx});
   }
   return seq;
+}
+
+function startPractice(mode, range=null){
+  state.practiceMode = mode;
+  state.sectionRange = range;
+  try{ localStorage.setItem('altar_practiceMode', mode); }catch(e){}
+  state.movementResults = {};
+  state.step = 0;
+  if(mode === 'rubric'){ state.view = 'rubric'; render(); return; }
+  if(mode === 'flashcards'){ state.view = 'flashcards'; state.flashIdx = 0; state.flashFlipped = false; render(); return; }
+  if(mode === 'section'){ state.view = 'sectionPick'; render(); return; }
+  state.sequence = buildSequence(state.role, mode, range);
+  state.view = 'practice';
+  render();
 }
 
 /* ============ BROWSER TTS ============ */
@@ -579,16 +682,15 @@ function renderComparison(i, transcript){
 
 /* ============ COVER ============ */
 function renderCover(){
+  const modeCards = PRACTICE_MODES.map(m=>`
+    <button class="mode-btn ${state.practiceMode===m.id?'active':''}" data-mode="${m.id}">
+      ${m.label}<span>${m.desc}</span>
+    </button>`).join('');
+
   app.innerHTML = `
     <div class="cover"><div class="missal">
       <h2>Before You Begin</h2>
-      <p>Practice the server's responses for the whole of the Holy Mass — from the Prayers at the Foot of the Altar to the Last Gospel. Multiple-choice questions on the acolyte's movements are woven in at the right moments for your role.</p>
-      <p><strong>Level I — Reveal:</strong> the response appears for five seconds, then hides before you record.<br>
-      <strong>Level II — Memory:</strong> the response is never shown. Recall it and record.</p>
-      <div class="seg" style="margin:16px 0;">
-        <button data-lvl="1" class="${state.level==='1'?'active':''}">Level I</button>
-        <button data-lvl="2" class="${state.level==='2'?'active':''}">Level II</button>
-      </div>
+      <p>Practice Latin responses and FSSP acolyte movements for the <em>Missa Lecta</em> — Immaculate Conception Church, El Paso.</p>
       <div style="margin:12px 0;">
         <label class="field-label" style="margin-top:0;">Your Role</label>
         <div class="seg">
@@ -596,22 +698,113 @@ function renderCover(){
           <button data-role="ac2" class="${state.role==='ac2'?'active':''}">Acolyte 2 (Junior)</button>
         </div>
       </div>
-      <button class="begin-btn" id="beginBtn">Begin</button>
-      <button class="begin-btn ghost" id="settingsBtn" style="margin-left:8px;">⚙ Voice Settings</button>
-      <button class="begin-btn ghost" id="recPriestBtn" style="margin-left:8px;">🎙 Record the Priest</button>
+      <label class="field-label">Practice Mode</label>
+      <div class="mode-grid">${modeCards}</div>
+      <div id="levelBlock" style="${['full','responses','section'].includes(state.practiceMode)?'':'display:none;'}">
+        <label class="field-label">Response Level</label>
+        <div class="seg" style="margin-bottom:8px;">
+          <button data-lvl="1" class="${state.level==='1'?'active':''}">Level I · Reveal</button>
+          <button data-lvl="2" class="${state.level==='2'?'active':''}">Level II · Memory</button>
+        </div>
+        <p style="font-size:14px; color:var(--ink-soft); margin:0;">Level I shows the text five seconds before recording. Level II hides it entirely.</p>
+      </div>
+      <button class="begin-btn" id="beginBtn">Start</button>
+      <button class="begin-btn ghost" id="settingsBtn" style="margin-left:8px;">⚙ Voice</button>
+      <button class="begin-btn ghost" id="recPriestBtn" style="margin-left:8px;">🎙 Priest</button>
     </div></div>`;
+
+  app.querySelectorAll('.mode-btn').forEach(b=>{
+    b.onclick = ()=>{ state.practiceMode = b.dataset.mode; try{ localStorage.setItem('altar_practiceMode', state.practiceMode); }catch(e){} renderCover(); };
+  });
   app.querySelectorAll('.seg button[data-lvl]').forEach(b=>{
-    b.onclick = ()=>{ state.level = b.dataset.lvl; localStorage.setItem('altar_level', state.level); renderCover(); };
+    b.onclick = ()=>{ state.level = b.dataset.lvl; try{ localStorage.setItem('altar_level', state.level); }catch(e){} renderCover(); };
   });
   app.querySelectorAll('.seg button[data-role]').forEach(b=>{
-    b.onclick = ()=>{ state.role = b.dataset.role; localStorage.setItem('altar_role', state.role); renderCover(); };
+    b.onclick = ()=>{ state.role = b.dataset.role; try{ localStorage.setItem('altar_role', state.role); }catch(e){} renderCover(); };
   });
-  document.getElementById('beginBtn').onclick = ()=>{
-    state.sequence = buildSequence(state.role);
-    state.view='practice'; state.step=0; render();
-  };
+  document.getElementById('beginBtn').onclick = ()=> startPractice(state.practiceMode);
   document.getElementById('settingsBtn').onclick = ()=>{ state.view='settings'; render(); };
   document.getElementById('recPriestBtn').onclick = ()=>{ state.view='recordPriest'; render(); };
+}
+
+/* ============ RUBRIC SHEET ============ */
+function renderRubricSheet(){
+  const items = MOVEMENTS.filter(m=> m.role==='both' || m.role===state.role);
+  app.innerHTML = `
+    <div class="rubric-view"><div class="missal">
+      <h2>Rubric Reference</h2>
+      <p style="font-size:15px;">Movement notes for ${state.role==='ac1'?'Acolyte 1 (Senior)':'Acolyte 2 (Junior)'} — FSSP El Paso custom.</p>
+      ${items.map(m=>{
+        const ans = m.options[m.correct];
+        return `<div class="rubric-item">
+          <div class="sec">${m.section}</div>
+          <div class="q">${m.q}</div>
+          <div class="ans">→ ${ans}</div>
+          <div class="exp">${m.explain}</div>
+        </div>`;
+      }).join('')}
+      <button class="begin-btn" id="rubricBackBtn" style="margin-top:16px;">← Back</button>
+    </div></div>`;
+  document.getElementById('rubricBackBtn').onclick = ()=>{ state.view='cover'; render(); };
+}
+
+/* ============ FLASHCARDS ============ */
+function getFlashSteps(){
+  if(state.sectionRange) return STEPS.map((_,i)=>i).filter(i=> inSection(i, state.sectionRange));
+  return STEPS.map((_,i)=>i);
+}
+
+function renderFlashcards(){
+  const steps = getFlashSteps();
+  const i = steps[state.flashIdx];
+  const s = STEPS[i];
+  const total = steps.length;
+  app.innerHTML = `
+    <div class="flash-view"><div class="missal">
+      <h2>Flashcards</h2>
+      <p style="font-size:14px; color:var(--ink-soft);">${state.flashIdx+1} of ${total} · ${s.section}</p>
+      <div class="flash-card" id="flashCard">
+        <div class="hint">${state.flashFlipped ? 'English' : 'Latin — tap to flip'}</div>
+        <div class="main ${state.flashFlipped?'':'latin'}">${state.flashFlipped ? s.serverT : s.server}</div>
+      </div>
+      <div class="flash-nav">
+        <button class="nav-btn" id="flashPrev" ${state.flashIdx===0?'disabled':''}>← Prev</button>
+        <button class="nav-btn" id="flashBack">Home</button>
+        <button class="nav-btn" id="flashNext">${state.flashIdx===total-1?'Done':'Next →'}</button>
+      </div>
+    </div></div>`;
+  document.getElementById('flashCard').onclick = ()=>{ state.flashFlipped = !state.flashFlipped; renderFlashcards(); };
+  document.getElementById('flashPrev').onclick = ()=>{ if(state.flashIdx>0){ state.flashIdx--; state.flashFlipped=false; renderFlashcards(); } };
+  document.getElementById('flashNext').onclick = ()=>{
+    if(state.flashIdx < total-1){ state.flashIdx++; state.flashFlipped=false; renderFlashcards(); }
+    else { state.view='cover'; render(); }
+  };
+  document.getElementById('flashBack').onclick = ()=>{ state.view='cover'; render(); };
+}
+
+/* ============ SECTION PICKER ============ */
+function renderSectionPick(){
+  app.innerHTML = `
+    <div class="section-view"><div class="missal">
+      <h2>Practice by Section</h2>
+      <p style="font-size:15px;">Choose a part of the Mass. You'll get responses and any movements for that section.</p>
+      <div class="section-list">
+        ${MASS_SECTIONS.map(sec=>`<button class="section-btn" data-from="${sec.from}" data-to="${sec.to}">${sec.label}</button>`).join('')}
+      </div>
+      <button class="begin-btn ghost" id="sectionBackBtn">← Back</button>
+    </div></div>`;
+  app.querySelectorAll('.section-btn').forEach(b=>{
+    b.onclick = ()=>{
+      state.sectionRange = {from: parseInt(b.dataset.from), to: parseInt(b.dataset.to)};
+      state.sequence = buildSequence(state.role, 'full', state.sectionRange);
+      state.practiceMode = 'section';
+      state.movementResults = {};
+      state.step = 0;
+      state.view = 'practice';
+      render();
+    };
+  });
+  document.getElementById('sectionBackBtn').onclick = ()=>{ state.view='cover'; render(); };
 }
 
 /* ============ SETTINGS ============ */
@@ -999,23 +1192,49 @@ function setupRecorder(i){
 
 /* ============ SUMMARY ============ */
 function renderSummary(){
+  const isMovement = state.practiceMode==='movements' || state.practiceMode==='canon';
+  const movementCount = Object.keys(state.movementResults).length;
+  const correctCount = Object.values(state.movementResults).filter(Boolean).length;
   const recordedCount = Object.keys(state.recordings).length;
-  app.innerHTML = `
-    <div class="summary"><div class="missal">
-      <h2>Mass Completed</h2>
-      <p>You recorded ${recordedCount} of ${STEPS.length} responses.</p>
-      ${STEPS.map((s,idx)=>`
-        <div class="summary-item">
-          <div class="sec">${idx+1}. ${s.section}</div>
-          <div class="lat">${s.server}</div>
-          ${state.recordings[idx] ? `<audio controls src="${state.recordings[idx].url}"></audio>` : `<span style="color:var(--ink-soft); font-style:italic; font-size:14px;">— not recorded —</span>`}
-          ${(state.recordings[idx] && state.transcripts[idx]) ? (()=>{ const r=alignAndScore(s.server, state.transcripts[idx]); const cls=r.score>=85?'score-good':r.score>=55?'score-mid':'score-low'; return `<div class="score-chip ${cls}" style="margin-top:8px;">${r.score}% match</div>`; })() : ''}
-        </div>
-      `).join('')}
-      <button class="begin-btn restart-btn" id="restartBtn">Practice Again</button>
-    </div></div>`;
+
+  if(isMovement){
+    app.innerHTML = `
+      <div class="summary"><div class="missal">
+        <h2>Drill Complete</h2>
+        <p>You answered ${movementCount} movement questions — ${correctCount} correct on first try.</p>
+        ${state.sequence.filter(x=>x.type==='movement').map(item=>{
+          const m = item.mq;
+          const ok = state.movementResults[m.id];
+          return `<div class="summary-item">
+            <div class="sec">${m.section}</div>
+            <div class="lat" style="font-style:normal;font-size:14px;">${m.q}</div>
+            <div class="score-chip ${ok?'score-good':'score-mid'}" style="margin-top:6px;">${ok?'Correct':'Reviewed'}</div>
+          </div>`;
+        }).join('')}
+        <button class="begin-btn restart-btn" id="restartBtn">Practice Again</button>
+      </div></div>`;
+  } else {
+    app.innerHTML = `
+      <div class="summary"><div class="missal">
+        <h2>Practice Complete</h2>
+        <p>You recorded ${recordedCount} of ${state.sequence.filter(x=>x.type==='prayer').length} responses.</p>
+        ${state.sequence.filter(x=>x.type==='prayer').map(item=>{
+          const idx = item.idx;
+          const s = STEPS[idx];
+          return `<div class="summary-item">
+            <div class="sec">${idx+1}. ${s.section}</div>
+            <div class="lat">${s.server}</div>
+            ${state.recordings[idx] ? `<audio controls src="${state.recordings[idx].url}"></audio>` : `<span style="color:var(--ink-soft); font-style:italic; font-size:14px;">— not recorded —</span>`}
+            ${(state.recordings[idx] && state.transcripts[idx]) ? (()=>{ const r=alignAndScore(s.server, state.transcripts[idx]); const cls=r.score>=85?'score-good':r.score>=55?'score-mid':'score-low'; return `<div class="score-chip ${cls}" style="margin-top:8px;">${r.score}% match</div>`; })() : ''}
+          </div>`;
+        }).join('')}
+        <button class="begin-btn restart-btn" id="restartBtn">Practice Again</button>
+      </div></div>`;
+  }
   document.getElementById('restartBtn').onclick = ()=>{
-    state.view='cover'; state.step=0; state.recordings={}; state.transcripts={};
+    state.view='cover'; state.step=0;
+    if(!isMovement){ state.recordings={}; state.transcripts={}; }
+    state.movementResults={};
     render();
   };
 }
@@ -1025,6 +1244,9 @@ function render(){
   else if(state.view === 'settings') renderSettings();
   else if(state.view === 'recordPriest') renderRecordPriest();
   else if(state.view === 'summary') renderSummary();
+  else if(state.view === 'rubric') renderRubricSheet();
+  else if(state.view === 'flashcards') renderFlashcards();
+  else if(state.view === 'sectionPick') renderSectionPick();
   else renderPracticeItem();
 }
 render();
