@@ -555,7 +555,13 @@ const GLOSSARY = [
   {latin:'Adjutórium nostrum…', english:'Our help is in the name of the Lord', when:'Versicle at foot of altar'},
   {latin:'Introíbo ad altáre Dei', english:'I will go in unto the altar of God', when:'Psalm 42 dialogue'},
   {latin:'Confíteor…', english:'I confess to almighty God…', when:'Confiteor (server\'s part)'},
-  {latin:'Ite, missa est / Benedicámus Dómino', english:'Go, the Mass is ended / Let us bless the Lord', when:'Dismissal (reply: Deo grátias)'}
+  {latin:'Ite, missa est / Benedicámus Dómino', english:'Go, the Mass is ended / Let us bless the Lord', when:'Dismissal (reply: Deo grátias)'},
+  {latin:'Dóminus vobíscum', english:'The Lord be with you', when:'Priest\'s greeting — you reply Et cum spiritu tuo'},
+  {latin:'Kyrie, eléison', english:'Lord, have mercy', when:'Ninefold Kyrie (each time)'},
+  {latin:'Pater noster', english:'Our Father', when:'Canon — server alone on final line'},
+  {latin:'Agnus Dei, qui tollis…', english:'Lamb of God, who takest away…', when:'Before Communion (three times)'},
+  {latin:'Benedicámus Dómino', english:'Let us bless the Lord', when:'Dismissal when no Gloria (reply: Deo grátias)'},
+  {latin:'Et cum spiritu tuo', english:'And with thy spirit', when:'Reply after Orate, fratres and other versicles'}
 ];
 
 const BELL_CHART = [
@@ -569,13 +575,10 @@ const BELL_CHART = [
 
 const PREMASS_ITEMS = [
   {id:'time', label:'Arrive in the sacristy on time'},
-  {id:'hand', label:"Kiss the Priest's hand when he gives the blessing"},
-  {id:'vest', label:'Cassock and surplice on (no biretta for acolytes)'},
   {id:'role', label:'Know today\'s role — AC1 or AC2'},
   {id:'cruets', label:'Cruets filled and on the credence'},
   {id:'bell', label:'Altar bell on the credence'},
-  {id:'missal', label:'Missal open to the correct place'},
-  {id:'review', label:'Review any special feasts or changes with the MC'}
+  {id:'missal', label:'Missal open to the correct place'}
 ];
 
 /* ============ STATE ============ */
@@ -870,6 +873,12 @@ function renderProgressPanel(){
   const total = STEPS.length;
   const pct = total ? Math.round((recorded / total) * 100) : 0;
   const last = p.lastSession ? new Date(p.lastSession).toLocaleDateString() : 'Never';
+  let mvTotal = 0, mvCorrect = 0;
+  Object.values(p.movementStats || {}).forEach(s=>{
+    mvTotal += s.total || 0;
+    mvCorrect += s.correct || 0;
+  });
+  const mvPct = mvTotal ? Math.round((mvCorrect / mvTotal) * 100) : 0;
   const weak = Object.entries(p.bestScores || {})
     .map(([idx, score])=>({idx: parseInt(idx), score}))
     .filter(x=> x.score < 85)
@@ -885,6 +894,12 @@ function renderProgressPanel(){
       <div class="label">Practice Sessions</div>
       <div class="value">${p.sessions || 0}</div>
       <div style="font-size:13px; color:var(--ink-soft); margin-top:4px;">Last: ${last}</div>
+    </div>
+    <div class="stat-block">
+      <div class="label">Movement Accuracy</div>
+      <div class="value">${mvTotal ? mvPct + '%' : '—'}</div>
+      <div class="stat-bar"><div class="stat-bar-fill" style="width:${mvPct}%"></div></div>
+      ${mvTotal ? `<div style="font-size:13px; color:var(--ink-soft); margin-top:4px;">${mvCorrect} / ${mvTotal} correct</div>` : ''}
     </div>
     ${weak.length ? `<label class="field-label">Lines to Review</label>
       ${weak.map(w=>`<div class="weak-item">
@@ -1013,13 +1028,20 @@ function renderGlossary(){
     <div class="learn-view"><div class="missal">
       <h2>Latin Glossary</h2>
       <p style="font-size:14px;">Phrases every server should know.</p>
-      ${GLOSSARY.map(g=>`<div class="glossary-row">
+      <input type="search" id="glossarySearch" placeholder="Search Latin or English…" style="width:100%; padding:10px 12px; margin-bottom:12px; border:1px solid var(--border-soft); border-radius:8px; font-family:'EB Garamond',serif; font-size:16px; background:var(--tint);">
+      <div id="glossaryList">${GLOSSARY.map(g=>`<div class="glossary-row">
         <div class="lat">${g.latin}</div>
         <div class="eng">${g.english}</div>
         <div class="when">${g.when}</div>
-      </div>`).join('')}
+      </div>`).join('')}</div>
       <button class="begin-btn" id="glossaryBackBtn" style="margin-top:16px;">← Home</button>
     </div></div>`;
+  document.getElementById('glossarySearch').oninput = (e)=>{
+    const q = stripAccents(e.target.value.toLowerCase().trim());
+    document.querySelectorAll('#glossaryList .glossary-row').forEach(row=>{
+      row.style.display = !q || stripAccents(row.textContent.toLowerCase()).includes(q) ? '' : 'none';
+    });
+  };
   document.getElementById('glossaryBackBtn').onclick = goHome;
 }
 
