@@ -297,25 +297,23 @@
 <footer>Immaculate Conception Church · El Paso, TX · FSSP</footer>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="supabase-config.js"></script>
-<script src="schedule-supabase.js"></script>
-<script src="obrien-data.js"></script>
+<script src="supabase/supabase-config.js"></script>
+<script src="supabase/schedule-supabase.js"></script>
+<script src="supabase/obrien-data.js"></script>
 <script>
 const app = document.getElementById('app');
 
 function showBootError(title, detail){
-  app.innerHTML = `<div class="cover"><div class="missal"><h2>${title}</h2><p style="color:var(--ink-soft);">${detail}</p><p style="color:var(--ink-soft); font-size:14px; margin-top:16px;">If you maintain this site, ensure <code>obrien-data.js</code>, <code>schedule-supabase.js</code>, and <code>supabase-config.js</code> are deployed alongside <code>index.html</code>.</p></div></div>`;
+  app.innerHTML = `<div class="cover"><div class="missal"><h2>${title}</h2><p style="color:var(--ink-soft);">${detail}</p><p style="color:var(--ink-soft); font-size:14px; margin-top:16px;">If you maintain this site, ensure <code>supabase/obrien-data.js</code>, <code>supabase/schedule-supabase.js</code>, and <code>supabase/supabase-config.js</code> are deployed alongside <code>index.html</code>.</p></div></div>`;
 }
 
-const REQUIRED_SCRIPTS = [
-  ['initScheduleBackend', 'schedule-supabase.js'],
-  ['O_BRIEN_MOVEMENTS', 'obrien-data.js']
-];
-for(const [sym, file] of REQUIRED_SCRIPTS){
-  if(typeof window[sym] === 'undefined'){
-    showBootError('App failed to load', `Missing <strong>${file}</strong> (could not find <code>${sym}</code>).`);
-    throw new Error(`Missing ${file}`);
-  }
+if(typeof initScheduleBackend !== 'function'){
+  showBootError('App failed to load', 'Missing <strong>supabase/schedule-supabase.js</strong> (could not find <code>initScheduleBackend</code>).');
+  throw new Error('Missing supabase/schedule-supabase.js');
+}
+if(typeof O_BRIEN_MOVEMENTS === 'undefined'){
+  showBootError('App failed to load', 'Missing <strong>supabase/obrien-data.js</strong> (could not find <code>O_BRIEN_MOVEMENTS</code>).');
+  throw new Error('Missing supabase/obrien-data.js');
 }
 
 /* ============ FULL MASS SEQUENCE (server's parts) ============ */
