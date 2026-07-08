@@ -245,6 +245,37 @@
   .weak-item{display:flex; justify-content:space-between; align-items:center; padding:10px 0; border-bottom:1px solid var(--border-soft); gap:10px;}
   .weak-item .lat{font-size:14px; font-style:italic; flex:1;}
 
+  .phonetic{font-size:14px; color:var(--gold); line-height:1.45; margin-top:6px; font-style:normal;}
+  .ref-block{margin:14px 0;}
+  .ref-table{width:100%; border-collapse:collapse; font-size:14px;}
+  .ref-table th,.ref-table td{border-bottom:1px solid var(--border-soft); padding:8px 6px; text-align:left; vertical-align:top;}
+  .ref-table th{font-family:'Cinzel',serif; font-size:10px; letter-spacing:1px; text-transform:uppercase; color:var(--ink-soft);}
+  .lesson-body{white-space:pre-wrap; font-size:15px; line-height:1.55; margin:12px 0;}
+  .source-note{font-size:12px; color:var(--ink-soft); font-style:italic; margin-bottom:14px;}
+
+  .home-tabs{flex-wrap:wrap;}
+  .home-tabs button{min-width:calc(33.33% - 2px); font-size:9px; padding:9px 4px;}
+
+  .sched-card{border:1px solid var(--border-soft); border-radius:10px; padding:14px; margin-bottom:12px; background:#fffdf8;}
+  .sched-card.mine{border-color:var(--ic-blue-light); background:var(--tint);}
+  .sched-card.trade-offer{border-color:var(--gold-bright);}
+  .sched-head{display:flex; justify-content:space-between; align-items:flex-start; gap:10px; margin-bottom:10px;}
+  .sched-date{font-family:'Cinzel',serif; font-size:13px; color:var(--rubric); letter-spacing:1px;}
+  .sched-meta{font-size:13px; color:var(--ink-soft);}
+  .slot-row{display:flex; align-items:center; justify-content:space-between; gap:8px; padding:8px 0; border-top:1px dashed var(--border-soft);}
+  .slot-row:first-of-type{border-top:none;}
+  .slot-label{font-family:'Cinzel',serif; font-size:10px; letter-spacing:1px; text-transform:uppercase; color:var(--ink-soft); min-width:36px;}
+  .slot-name{flex:1; font-size:15px;}
+  .slot-open{color:var(--ink-soft); font-style:italic;}
+  .slot-trade{font-size:11px; color:var(--gold); font-family:'Cinzel',serif; letter-spacing:1px; text-transform:uppercase;}
+  .slot-actions{display:flex; flex-wrap:wrap; gap:6px; justify-content:flex-end;}
+  .profile-header{text-align:center; margin-bottom:18px;}
+  .profile-avatar{width:64px; height:64px; border-radius:50%; background:linear-gradient(135deg,var(--ic-blue),var(--ic-blue-light)); color:#fff; font-family:'Cinzel',serif; font-size:24px; line-height:64px; margin:0 auto 10px;}
+  .points-badge{display:inline-block; background:var(--gold-bright); color:#1a1820; font-family:'Cinzel',serif; font-size:12px; letter-spacing:1px; padding:4px 12px; border-radius:16px; margin-top:6px;}
+  .sched-subtabs{display:flex; gap:6px; margin-bottom:12px; flex-wrap:wrap;}
+  .sched-subtabs button{font-family:'Cinzel',serif; font-size:10px; letter-spacing:1px; text-transform:uppercase; padding:7px 12px; border:1px solid var(--border-soft); border-radius:20px; background:none; cursor:pointer; color:var(--ink-soft);}
+  .sched-subtabs button.active{background:var(--rubric); color:#fff; border-color:var(--rubric);}
+
   @media (max-width:480px){
     .mode-grid{grid-template-columns:1fr;}
     .missal, .cover .missal, .summary .missal, .settings-view .missal, .recordpriest-view .missal, .rubric-view .missal, .flash-view .missal, .section-view .missal, .learn-view .missal{padding:28px 20px 22px 28px;}
@@ -260,12 +291,15 @@
   <span class="cross">✠</span>
   <h1>Acolyte Practice</h1>
   <p class="parish">Immaculate Conception Church · FSSP · El Paso, Texas</p>
-  <p>Traditional Latin Rite · Missa Lecta · Two Acolytes</p>
 </div>
 
 <div id="app"></div>
 <footer>Immaculate Conception Church · El Paso, TX · FSSP</footer>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase-config.js"></script>
+<script src="schedule-supabase.js"></script>
+<script src="obrien-data.js"></script>
 <script>
 /* ============ FULL MASS SEQUENCE (server's parts) ============ */
 const STEPS = [
@@ -409,111 +443,10 @@ const STEPS = [
  server:"Deo grátias.", serverT:"Thanks be to God."}
 ];
 
-/* ============ ACOLYTE MOVEMENTS (FSSP-style Low Mass, two servers — El Paso TX parish custom) ============
-   insertBefore = index in STEPS this question precedes. role = 'both' | 'ac1' | 'ac2'. */
-const MOVEMENTS = [
-  {id:'mv0a', insertBefore:0, role:'ac1', section:"Sacristy — Before Mass",
-   q:"In the sacristy, when the Priest gives the blessing before Mass, what does Acolyte 1 do first?",
-   options:["Kiss the Priest's hand","Bow to the cross and leave immediately","Ring the sacristy bell","Go straight to the credence table"],
-   correct:0, explain:"Acolyte 1 kisses the Priest's hand when receiving the blessing — the solita oscula."},
+/* ============ ACOLYTE MOVEMENTS (O'Brien, How to Serve Low Mass) ============ */
+const MOVEMENTS = O_BRIEN_MOVEMENTS;
 
-  {id:'mv0b', insertBefore:0, role:'ac2', section:"Sacristy — Before Mass",
-   q:"In the sacristy, when the Priest gives the blessing before Mass, what does Acolyte 2 do first?",
-   options:["Kiss the Priest's hand","Bow to the cross and leave immediately","Ring the sacristy bell","Fetch the cruets"],
-   correct:0, explain:"Acolyte 2 likewise kisses the Priest's hand when receiving the blessing."},
-
-  {id:'mv1', insertBefore:0, role:'both', section:"Prayers at the Foot of the Altar",
-   q:"As Mass begins at the foot of the altar, where do both acolytes kneel?",
-   options:["On the floor at the foot of the altar steps","On the topmost altar step","In the sanctuary chairs","At the credence table"],
-   correct:0, explain:"Both kneel side by side on the floor at the foot of the altar for the Prayers at the Foot of the Altar."},
-
-  {id:'mv_conf2', insertBefore:8, role:'both', section:"Confiteor at the Altar",
-   q:"During the Confiteor and the prayers at the middle of the altar, where do both acolytes kneel?",
-   options:["On the top step at the sides of the Priest","On the floor at the foot of the altar","In the pews","Standing behind the Priest"],
-   correct:0, explain:"Both kneel on the top step at the Priest's sides for the Confiteor and the prayers that follow at the altar."},
-
-  {id:'mv2', insertBefore:21, role:'ac1', section:"After the Epistle",
-   q:"The Epistle has just been read. What does Acolyte 1 do now?",
-   options:["Carries the Missal from the Epistle (right) side to the Gospel (left) side","Rings the bell three times","Brings the cruets to the altar","Kneels and does nothing"],
-   correct:0, explain:"Acolyte 1 transfers the Missal to the Gospel side while the Gradual is read."},
-
-  {id:'mv3', insertBefore:21, role:'ac2', section:"After the Epistle",
-   q:"While Acolyte 1 moves the Missal to the Gospel side, what does Acolyte 2 do?",
-   options:["Accompanies him and returns to place at the foot of the altar","Goes immediately to fetch the cruets","Rings the Sanctus bell","Leaves the sanctuary"],
-   correct:0, explain:"Acolyte 2 commonly accompanies Acolyte 1, then both return to their places at the foot of the altar."},
-
-  {id:'mv_stand', insertBefore:21, role:'both', section:"Before the Gospel",
-   q:"When the Priest is about to read the Gospel, what do both acolytes do?",
-   options:["Stand up and remain in place at the foot of the altar","Ascend to the top step","Go fetch the cruets from the credence","Kneel on the bottom step"],
-   correct:0, explain:"Both rise from kneeling and stand in place at the foot of the altar for the Gospel and the Creed that follows."},
-
-  {id:'mv_off', insertBefore:26, role:'both', section:"Offertory — Wine & Water",
-   q:"When presenting the wine and water at the Offertory, how are the cruets held?",
-   options:["Acolyte 1 on the Priest's right holds the wine; Acolyte 2 on his left holds the water","Acolyte 2 holds both cruets alone","Both kneel at the foot with cruets on the floor","Acolyte 1 holds the water; Acolyte 2 holds the wine"],
-   correct:0, explain:"On the Epistle side of the altar, Acolyte 1 stands to the Priest's right with the wine cruet; Acolyte 2 stands to his left with the water cruet."},
-
-  {id:'mv4', insertBefore:26, role:'ac2', section:"Offertory",
-   q:"Who brings the cruets from the credence table to the altar at the Offertory?",
-   options:["Acolyte 2","Acolyte 1","Both together from opposite ends of the sanctuary","The Priest fetches them himself"],
-   correct:0, explain:"Acolyte 2 customarily fetches the cruets; Acolyte 1 may bring both in some houses, but the junior server normally handles the cruets."},
-
-  {id:'mv6', insertBefore:26, role:'ac1', section:"Offertory — Lavabo",
-   q:"During the Lavabo, what does Acolyte 1 do?",
-   options:["Holds the finger towel (manutergium) for the Priest","Pours the water over the Priest's fingers","Rings the bell","Kneels apart at the foot"],
-   correct:0, explain:"Acolyte 1 holds the manutergium while Acolyte 2 pours the water."},
-
-  {id:'mv5', insertBefore:26, role:'ac2', section:"Offertory — Lavabo",
-   q:"During the Lavabo, who pours the water over the Priest's fingers?",
-   options:["Acolyte 2","Acolyte 1","The Priest pours it himself","Neither — no water is used"],
-   correct:0, explain:"Acolyte 2 pours the water from the cruet for the ceremonial hand-washing."},
-
-  {id:'mv_bell', insertBefore:26, role:'ac1', section:"After the Lavabo",
-   q:"After the Lavabo, what does Acolyte 1 fetch from the credence before returning to kneel?",
-   options:["The altar bell","The thurible","The processional cross","The finger towel"],
-   correct:0, explain:"Acolyte 1 takes the bell from the credence; both then return to kneel on the lowest step for the Canon."},
-
-  {id:'mv7', insertBefore:30, role:'ac1', section:"Sanctus",
-   q:"Who rings the bell at the Sanctus?",
-   options:["Acolyte 1","Acolyte 2","Both acolytes together","No bell is rung at the Sanctus"],
-   correct:0, explain:"Acolyte 1 rings the bell at the Sanctus — customarily three strokes."},
-
-  {id:'mv_hanc', insertBefore:31, role:'ac1', section:"Hanc Igitur",
-   q:"At the Hanc igitur, when the Priest extends his hands over the chalice, who rings the bell?",
-   options:["Acolyte 1","Acolyte 2","The Priest rings it himself","No bell is rung at the Hanc igitur"],
-   correct:0, explain:"Acolyte 1 rings once at the Hanc igitur when the Priest extends his hands over the chalice."},
-
-  {id:'mv_ascend', insertBefore:31, role:'both', section:"After the Hanc Igitur",
-   q:"When the Priest lifts his hands after the Hanc igitur, what do both acolytes do?",
-   options:["Go to the center, genuflect together, then ascend and kneel on either side of the Priest","Remain kneeling on the lowest step","Return to the credence table","Stand at the foot of the altar"],
-   correct:0, explain:"Both go to the center and genuflect, then ascend to the top step and kneel on either side of the Priest. Acolyte 1 rings the bells during the Canon."},
-
-  {id:'mv_corpus', insertBefore:31, role:'ac1', section:"Hoc est enim Corpus Meum",
-   q:"At the words \"Hoc est enim Corpus Meum,\" what does Acolyte 1 do?",
-   options:["Rings the bell three times","Rings the bell once","Remains silent — no bell is rung","Hands the bell to Acolyte 2"],
-   correct:0, explain:"Acolyte 1 rings three strokes at the Consecration of the Host."},
-
-  {id:'mv_calix', insertBefore:31, role:'ac1', section:"Hoc est enim Calix",
-   q:"At the Consecration of the Chalice, what does Acolyte 1 do?",
-   options:["Rings the bell three times","Rings the bell once","Rings only at the elevation, not at the words","Does not ring the bell"],
-   correct:0, explain:"Acolyte 1 rings three strokes at the Consecration of the Chalice."},
-
-  {id:'mv11', insertBefore:36, role:'ac1', section:"Domine, non sum dignus",
-   q:"At the threefold Domine, non sum dignus before Communion, who rings the bell?",
-   options:["Acolyte 1 — once with each repetition","Acolyte 2 — once with each repetition","Acolyte 1 — only once at the end","The bell is not rung"],
-   correct:0, explain:"Acolyte 1 rings once with each of the three repetitions."},
-
-  {id:'mv12', insertBefore:37, role:'ac1', section:"Before the Postcommunion",
-   q:"Before the Postcommunion prayer, the Missal must be moved again. What does Acolyte 1 do?",
-   options:["Carries the Missal back to the Epistle (right) side","Leaves it on the Gospel (left) side","Closes it and sets it on the credence","Hands it to Acolyte 2"],
-   correct:0, explain:"Acolyte 1 returns the Missal to the Epistle side for the Postcommunion, as for the Collect."},
-
-  {id:'mv13', insertBefore:41, role:'both', section:"The Final Blessing",
-   q:"As the Priest turns to give the final blessing, what do both acolytes do?",
-   options:["Kneel and make the Sign of the Cross with him","Remain standing silently","Ring the bell three times","Bow only, without kneeling"],
-   correct:0, explain:"Both kneel and sign themselves along with the Priest's blessing."}
-];
-
-const CANON_MV_IDS = ['mv7','mv_hanc','mv_ascend','mv_corpus','mv_calix','mv11'];
+const CANON_MV_IDS = ['ob11','ob12','ob13','ob14','ob15'];
 
 const MASS_SECTIONS = [
   {id:'foot', label:'Prayers at the Foot of the Altar', from:0, to:7},
@@ -536,48 +469,23 @@ const PRACTICE_MODES = [
 ];
 
 const LEARN_ITEMS = [
+  {id:'obrienLessons', label:'Five Lessons', desc:'O\'Brien — Lessons I through V'},
+  {id:'obrienTwoServers', label:'Two Altar Boys', desc:'Duty chart from O\'Brien'},
+  {id:'obrienSacristy', label:'The Sacristy', desc:'Arrival, setup, furnishings'},
+  {id:'obrienSanctuary', label:'The Sanctuary', desc:'Altar furniture and names'},
+  {id:'obrienVestments', label:'Vestments & Chalice', desc:'How the Priest vests'},
+  {id:'obrienPostures', label:'Postures', desc:'Genuflect, kneel, bow'},
   {id:'massGuide', label:'Mass Guide', desc:'Read the whole Mass — priest, server, movements'},
-  {id:'glossary', label:'Latin Glossary', desc:'Key phrases every server must know'},
-  {id:'bellChart', label:'Bells & Canon', desc:'When AC1 rings and what to do'},
+  {id:'glossary', label:'Latin Glossary', desc:'Key phrases with O\'Brien pronunciation'},
+  {id:'bellChart', label:'Bells & Canon', desc:'Bell and elevation duties'},
   {id:'rubric', label:'Rubric Sheet', desc:'All movement notes for your role'}
 ];
 
-const GLOSSARY = [
-  {latin:'Amen', english:'So be it', when:'Throughout the Mass'},
-  {latin:'Et cum spiritu tuo', english:'And with thy spirit', when:'Reply to the Priest\'s Dominus vobiscum'},
-  {latin:'Deo gratias', english:'Thanks be to God', when:'After the Epistle and Last Gospel'},
-  {latin:'Glória tibi, Dómine', english:'Glory be to Thee, O Lord', when:'Before the Gospel is read'},
-  {latin:'Et cum spiritu tuo', english:'And with thy spirit', when:'Server response at foot of altar'},
-  {latin:'Suscípiat Dóminus…', english:'May the Lord receive the sacrifice…', when:'Reply to Orate, fratres'},
-  {latin:'Sed líbera nos a malo', english:'But deliver us from evil', when:'End of the Pater Noster (server alone)'},
-  {latin:'Dómine, non sum dignus…', english:'Lord, I am not worthy…', when:'Three times before Communion'},
-  {latin:'Misereátur tui…', english:'May almighty God have mercy on thee…', when:'Confiteor (to priest)'},
-  {latin:'Orámus te, Dómine…', english:'We beseech Thee, O Lord…', when:'At the foot of the altar (kiss of relics)'},
-  {latin:'Adjutórium nostrum…', english:'Our help is in the name of the Lord', when:'Versicle at foot of altar'},
-  {latin:'Introíbo ad altáre Dei', english:'I will go in unto the altar of God', when:'Psalm 42 dialogue'},
-  {latin:'Confíteor…', english:'I confess to almighty God…', when:'Confiteor (server\'s part)'},
-  {latin:'Ite, missa est / Benedicámus Dómino', english:'Go, the Mass is ended / Let us bless the Lord', when:'Dismissal (reply: Deo grátias)'}
-];
+const GLOSSARY = O_BRIEN_GLOSSARY;
 
-const BELL_CHART = [
-  {moment:'Sanctus begins', action:'AC1 rings 3 strokes'},
-  {moment:'Hanc igitur — Priest extends hands over chalice', action:'AC1 rings once'},
-  {moment:'After Hanc igitur — Priest lifts his hands', action:'Both go to center, genuflect, ascend, kneel on either side of Father'},
-  {moment:'Hoc est enim Corpus Meum', action:'AC1 rings 3 strokes'},
-  {moment:'Consecration of the Chalice', action:'AC1 rings 3 strokes'},
-  {moment:'Domine, non sum dignus (×3)', action:'AC1 rings once with each repetition'}
-];
+const BELL_CHART = O_BRIEN_BELL_CHART;
 
-const PREMASS_ITEMS = [
-  {id:'time', label:'Arrive in the sacristy on time'},
-  {id:'hand', label:"Kiss the Priest's hand when he gives the blessing"},
-  {id:'vest', label:'Cassock and surplice on (no biretta for acolytes)'},
-  {id:'role', label:'Know today\'s role — AC1 or AC2'},
-  {id:'cruets', label:'Cruets filled and on the credence'},
-  {id:'bell', label:'Altar bell on the credence'},
-  {id:'missal', label:'Missal open to the correct place'},
-  {id:'review', label:'Review any special feasts or changes with the MC'}
-];
+const PREMASS_ITEMS = O_BRIEN_PREMASS;
 
 /* ============ STATE ============ */
 const app = document.getElementById('app');
@@ -614,7 +522,8 @@ let state = {
   voiceURI: lsGet('altar_voiceURI', ''),
   elevenKey: lsGet('altar_elevenKey', ''),
   elevenVoiceId: lsGet('altar_elevenVoiceId', ''),
-  elevenCache: {}
+  elevenCache: {},
+  scheduleSubTab: lsGet('altar_scheduleSubTab', 'upcoming')
 };
 
 function loadProgress(){
@@ -654,14 +563,31 @@ function goHome(){
   render();
 }
 function openLearn(id){
-  if(id === 'rubric') state.view = 'rubric';
-  else if(id === 'massGuide') state.view = 'massGuide';
-  else if(id === 'glossary') state.view = 'glossary';
-  else if(id === 'bellChart') state.view = 'bellChart';
+  const map = {
+    rubric:'rubric', massGuide:'massGuide', glossary:'glossary', bellChart:'bellChart',
+    obrienLessons:'obrienLessons', obrienTwoServers:'obrienTwoServers', obrienSacristy:'obrienSacristy',
+    obrienSanctuary:'obrienSanctuary', obrienVestments:'obrienVestments', obrienPostures:'obrienPostures'
+  };
+  state.view = map[id] || 'cover';
   render();
 }
 
 function stripAccents(s){ return s.normalize('NFD').replace(/[\u0300-\u036f]/g,''); }
+function getPhonetic(text){
+  if(!text) return '';
+  if(O_BRIEN_PHONETICS[text]) return O_BRIEN_PHONETICS[text];
+  const plain = stripAccents(text);
+  for(const [k,v] of Object.entries(O_BRIEN_PHONETICS)){
+    if(stripAccents(k) === plain) return v;
+  }
+  return '';
+}
+function obrienBackBtn(){
+  return `<button class="begin-btn" id="obrienBackBtn" style="margin-top:16px;">← Home</button>`;
+}
+function wireObrienBack(){
+  document.getElementById('obrienBackBtn').onclick = goHome;
+}
 
 function inSection(idx, range){
   return idx >= range.from && idx <= range.to;
@@ -871,6 +797,12 @@ function renderProgressPanel(){
   const total = STEPS.length;
   const pct = total ? Math.round((recorded / total) * 100) : 0;
   const last = p.lastSession ? new Date(p.lastSession).toLocaleDateString() : 'Never';
+  let mvTotal = 0, mvCorrect = 0;
+  Object.values(p.movementStats || {}).forEach(s=>{
+    mvTotal += s.total || 0;
+    mvCorrect += s.correct || 0;
+  });
+  const mvPct = mvTotal ? Math.round((mvCorrect / mvTotal) * 100) : 0;
   const weak = Object.entries(p.bestScores || {})
     .map(([idx, score])=>({idx: parseInt(idx), score}))
     .filter(x=> x.score < 85)
@@ -887,6 +819,12 @@ function renderProgressPanel(){
       <div class="value">${p.sessions || 0}</div>
       <div style="font-size:13px; color:var(--ink-soft); margin-top:4px;">Last: ${last}</div>
     </div>
+    <div class="stat-block">
+      <div class="label">Movement Accuracy</div>
+      <div class="value">${mvTotal ? mvPct + '%' : '—'}</div>
+      <div class="stat-bar"><div class="stat-bar-fill" style="width:${mvPct}%"></div></div>
+      ${mvTotal ? `<div style="font-size:13px; color:var(--ink-soft); margin-top:4px;">${mvCorrect} / ${mvTotal} correct</div>` : ''}
+    </div>
     ${weak.length ? `<label class="field-label">Lines to Review</label>
       ${weak.map(w=>`<div class="weak-item">
         <span class="lat">${STEPS[w.idx].server.slice(0, 50)}${STEPS[w.idx].server.length>50?'…':''}</span>
@@ -895,10 +833,184 @@ function renderProgressPanel(){
       </div>`).join('')}` : '<p style="font-size:14px;color:var(--ink-soft);">Complete a practice session to see your weakest lines here.</p>'}`;
 }
 
+function renderSlotRow(slot, role){
+  const label = role === 'ac1' ? 'AC1' : 'AC2';
+  const assign = slotAssignee(slot, role);
+  const mine = isMySlot(slot, role);
+  const past = isPastSlot(slot);
+  let nameHtml = assign
+    ? `<span class="slot-name">${assign.name}${mine ? ' (you)' : ''}${assign.tradeOffer ? ' <span class="slot-trade">· trade offered</span>' : ''}</span>`
+    : `<span class="slot-name slot-open">Open — tap Take</span>`;
+  let actions = '';
+  if(!past && !slot.served){
+    if(!assign){
+      actions = `<button class="mini-btn" data-sched-action="take" data-id="${slot.id}" data-role="${role}">Take</button>`;
+    } else if(mine){
+      actions = assign.tradeOffer
+        ? `<button class="mini-btn" data-sched-action="withdraw" data-id="${slot.id}" data-role="${role}">Withdraw</button>`
+        : `<button class="mini-btn" data-sched-action="trade" data-id="${slot.id}" data-role="${role}">Trade</button>
+           <button class="mini-btn" data-sched-action="cancel" data-id="${slot.id}" data-role="${role}">Cancel</button>`;
+    } else if(assign.tradeOffer){
+      actions = `<button class="mini-btn" data-sched-action="accept-trade" data-id="${slot.id}" data-role="${role}">Take Trade</button>`;
+    }
+  }
+  return `<div class="slot-row">
+    <span class="slot-label">${label}</span>
+    ${nameHtml}
+    <div class="slot-actions">${actions}</div>
+  </div>`;
+}
+
+function renderSchedCard(slot){
+  const mine = isMySlot(slot,'ac1') || isMySlot(slot,'ac2');
+  const trade = (slot.ac1 && slot.ac1.tradeOffer) || (slot.ac2 && slot.ac2.tradeOffer);
+  const past = isPastSlot(slot);
+  let extra = '';
+  if(mine && !slot.served && past){
+    extra = `<button class="begin-btn" style="margin-top:10px; width:100%;" data-sched-action="served" data-id="${slot.id}">Mark Served (+${SCHEDULE_POINTS.serve} pts)</button>`;
+  } else if(slot.served){
+    extra = `<div class="score-chip score-good" style="margin-top:8px;">Served ✓</div>`;
+  }
+  return `<div class="sched-card ${mine?'mine':''} ${trade?'trade-offer':''}">
+    <div class="sched-head">
+      <div>
+        <div class="sched-date">${formatSchedDate(slot.date)} · ${slot.time}</div>
+        <div class="sched-meta">${slot.label} · ${slot.priest}</div>
+      </div>
+    </div>
+    ${renderSlotRow(slot,'ac1')}
+    ${renderSlotRow(slot,'ac2')}
+    ${extra}
+  </div>`;
+}
+
+function renderSchedulePanel(){
+  const sub = state.scheduleSubTab;
+  const slots = (loadSchedule() || []).filter(s=> !s.served || sub === 'my-shifts');
+  const upcoming = slots.filter(s=> !isPastSlot(s)).sort((a,b)=> a.date.localeCompare(b.date) || a.time.localeCompare(b.time));
+  const past = slots.filter(s=> isPastSlot(s) && (isMySlot(s,'ac1') || isMySlot(s,'ac2'))).slice(0,5);
+
+  let list = '';
+  if(sub === 'upcoming'){
+    list = upcoming.length ? upcoming.map(renderSchedCard).join('') : '<p style="color:var(--ink-soft);">No upcoming Masses on the schedule.</p>';
+  } else if(sub === 'my-shifts'){
+    const mine = upcoming.filter(s=> isMySlot(s,'ac1') || isMySlot(s,'ac2'));
+    list = mine.length ? mine.map(renderSchedCard).join('') : '<p style="color:var(--ink-soft);">You have no upcoming assignments. Take an open spot from the Schedule tab.</p>';
+    if(past.length){
+      list += `<label class="field-label" style="margin-top:16px;">Recent — mark served for points</label>${past.map(renderSchedCard).join('')}`;
+    }
+  } else {
+    const board = getTradeBoard();
+    list = board.length ? board.map(renderSchedCard).join('') : '<p style="color:var(--ink-soft);">No open spots or trade offers right now.</p>';
+  }
+
+  const subtabs = [
+    {id:'upcoming', label:'All Masses'},
+    {id:'my-shifts', label:'My Shifts'},
+    {id:'trades', label:'Open & Trades'}
+  ];
+  return `
+    <p style="font-size:13px; color:var(--ink-soft); margin-top:0;">${getScheduleStatus()}</p>
+    <p style="font-size:14px;">Sign up, cancel, or offer a trade — shared with all servers when Supabase is connected.</p>
+    <div class="sched-subtabs">${subtabs.map(t=>
+      `<button data-sched-sub="${t.id}" class="${sub===t.id?'active':''}">${t.label}</button>`
+    ).join('')}</div>
+    <div class="guide-scroll" style="max-height:55vh;">${list}</div>
+    <button class="begin-btn ghost" id="refreshScheduleBtn" style="margin-top:14px;">Refresh Schedule</button>`;
+}
+
+function renderProfilePanel(){
+  const p = loadProfile();
+  const initial = (p.name || 'S').charAt(0).toUpperCase();
+  const upcoming = getMyUpcomingSlots().length;
+  return `
+    <div class="profile-header">
+      <div class="profile-avatar">${initial}</div>
+      <input type="text" id="profileName" placeholder="Your name" value="${p.name || ''}"
+        style="width:100%; max-width:240px; padding:10px 12px; border:1px solid var(--border-soft); border-radius:8px; font-family:'EB Garamond',serif; font-size:18px; text-align:center; background:var(--tint);">
+      <div class="points-badge">${p.points || 0} points</div>
+    </div>
+    <div class="stat-block">
+      <div class="label">Masses Served</div>
+      <div class="value">${p.massesServed || 0}</div>
+    </div>
+    <div class="stat-block">
+      <div class="label">Upcoming Shifts</div>
+      <div class="value">${upcoming}</div>
+    </div>
+    <div class="stat-block">
+      <div class="label">How Points Work</div>
+      <div style="font-size:14px; color:var(--ink-soft); margin-top:6px; line-height:1.5;">
+        +${SCHEDULE_POINTS.serve} pts when you mark a Mass served<br>
+        +${SCHEDULE_POINTS.pickup} pts when you pick up a trade offer<br>
+        Practice progress is separate under Progress tab
+      </div>
+    </div>
+    <button class="begin-btn ghost" id="refreshScheduleBtn" style="margin-top:14px;">Refresh Schedule</button>`;
+}
+
+function wireSchedulePanel(){
+  app.querySelectorAll('[data-sched-sub]').forEach(b=>{
+    b.onclick = ()=>{ state.scheduleSubTab = b.dataset.schedSub; lsSet('altar_scheduleSubTab', state.scheduleSubTab); render(); };
+  });
+  app.querySelectorAll('[data-sched-action]').forEach(b=>{
+    b.onclick = async ()=>{
+      const {schedAction: action, id, role} = b.dataset;
+      b.disabled = true;
+      try{
+        if(action === 'take') await claimSlot(id, role);
+        else if(action === 'cancel') await cancelSlot(id, role);
+        else if(action === 'trade') await offerTrade(id, role);
+        else if(action === 'withdraw') await withdrawTrade(id, role);
+        else if(action === 'accept-trade') await takeTrade(id, role);
+        else if(action === 'served') await markMassServed(id);
+      }catch(e){
+        alert(e.message || 'Could not update schedule');
+      }
+      render();
+    };
+  });
+  const refreshBtn = document.getElementById('refreshScheduleBtn');
+  if(refreshBtn){
+    refreshBtn.onclick = async ()=>{
+      refreshBtn.disabled = true;
+      try{
+        if(getScheduleBackend() === 'supabase') await refreshFromSupabase();
+      }catch(e){ alert(e.message); }
+      render();
+    };
+  }
+}
+
+function wireProfilePanel(){
+  const inp = document.getElementById('profileName');
+  if(inp){
+    inp.onchange = inp.onblur = async ()=>{
+      try{ await saveProfileName(inp.value.trim()); }catch(e){ alert(e.message); }
+      render();
+    };
+  }
+  const resetBtn = document.getElementById('resetScheduleBtn');
+  if(resetBtn){
+    resetBtn.onclick = async ()=>{
+      if(getScheduleBackend() === 'supabase'){
+        alert('Schedule is shared in Supabase. Ask the MC to manage slots in the dashboard.');
+        return;
+      }
+      if(confirm('Reset the local demo schedule? Your points and name are kept.')){
+        await resetDemoScheduleLocal();
+        render();
+      }
+    };
+  }
+}
+
 function renderHome(){
   const tabs = [
     {id:'practice', label:'Practice'},
     {id:'learn', label:'Learn'},
+    {id:'schedule', label:'Schedule'},
+    {id:'profile', label:'Profile'},
     {id:'prepare', label:'Prepare'},
     {id:'progress', label:'Progress'}
   ];
@@ -906,13 +1018,14 @@ function renderHome(){
   let panel = '';
   if(state.homeTab === 'practice') panel = renderPracticePanel();
   else if(state.homeTab === 'learn') panel = renderLearnPanel();
+  else if(state.homeTab === 'schedule') panel = renderSchedulePanel();
+  else if(state.homeTab === 'profile') panel = renderProfilePanel();
   else if(state.homeTab === 'prepare') panel = renderPreparePanel();
   else panel = renderProgressPanel();
 
   app.innerHTML = `
     <div class="cover"><div class="missal">
       <h2>Acolyte Training</h2>
-      <p>Immaculate Conception Church · FSSP · El Paso — <em>Missa Lecta</em>, two acolytes.</p>
       ${renderRoleSelector()}
       <div class="home-tabs">${tabBar}</div>
       <div class="home-panel">${panel}</div>
@@ -939,6 +1052,10 @@ function renderHome(){
     app.querySelectorAll('.mode-btn[data-learn]').forEach(b=>{
       b.onclick = ()=> openLearn(b.dataset.learn);
     });
+  } else if(state.homeTab === 'schedule'){
+    wireSchedulePanel();
+  } else if(state.homeTab === 'profile'){
+    wireProfilePanel();
   } else if(state.homeTab === 'prepare'){
     app.querySelectorAll('.check-row').forEach(row=>{
       row.onclick = (e)=>{
@@ -996,6 +1113,7 @@ function renderMassGuide(){
         <div class="latin" style="font-size:16px;">${s.priest}${s.varies?'<span class="varies-tag">varies</span>':''}</div>
         <div class="role" style="margin-top:10px;"><span class="dot" style="background:var(--gold);"></span>Your Response</div>
         <div class="latin" style="font-size:16px;">${s.server}</div>
+        ${getPhonetic(s.server) ? `<div class="phonetic">${getPhonetic(s.server)}</div>` : ''}
         <div class="translation">${s.serverT}</div>
       </div>`;
     }
@@ -1003,7 +1121,8 @@ function renderMassGuide(){
   app.innerHTML = `
     <div class="learn-view"><div class="missal">
       <h2>Mass Guide</h2>
-      <p style="font-size:14px;">Read-only walkthrough for ${role==='ac1'?'Acolyte 1':'Acolyte 2'}.</p>
+      <p class="source-note">${O_BRIEN_SOURCE} — movements from O'Brien; Latin responses with pronunciation where given in the book.</p>
+      <p style="font-size:14px;">Read-only walkthrough for ${role==='ac1'?'Altar Boy No. 1 (Epistle)':'Altar Boy No. 2 (Gospel)'}.</p>
       <div class="guide-scroll">${body}</div>
       <button class="begin-btn" id="guideBackBtn" style="margin-top:16px;">← Home</button>
     </div></div>`;
@@ -1015,13 +1134,21 @@ function renderGlossary(){
     <div class="learn-view"><div class="missal">
       <h2>Latin Glossary</h2>
       <p style="font-size:14px;">Phrases every server should know.</p>
-      ${GLOSSARY.map(g=>`<div class="glossary-row">
+      <input type="search" id="glossarySearch" placeholder="Search Latin or English…" style="width:100%; padding:10px 12px; margin-bottom:12px; border:1px solid var(--border-soft); border-radius:8px; font-family:'EB Garamond',serif; font-size:16px; background:var(--tint);">
+      <div id="glossaryList">${GLOSSARY.map(g=>`<div class="glossary-row">
         <div class="lat">${g.latin}</div>
+        ${g.phonetic ? `<div class="phonetic">${g.phonetic}</div>` : ''}
         <div class="eng">${g.english}</div>
         <div class="when">${g.when}</div>
-      </div>`).join('')}
+      </div>`).join('')}</div>
       <button class="begin-btn" id="glossaryBackBtn" style="margin-top:16px;">← Home</button>
     </div></div>`;
+  document.getElementById('glossarySearch').oninput = (e)=>{
+    const q = stripAccents(e.target.value.toLowerCase().trim());
+    document.querySelectorAll('#glossaryList .glossary-row').forEach(row=>{
+      row.style.display = !q || stripAccents(row.textContent.toLowerCase()).includes(q) ? '' : 'none';
+    });
+  };
   document.getElementById('glossaryBackBtn').onclick = goHome;
 }
 
@@ -1029,7 +1156,8 @@ function renderBellChart(){
   app.innerHTML = `
     <div class="learn-view"><div class="missal">
       <h2>Bells & Canon</h2>
-      <p style="font-size:14px;">Acolyte 1 bell duties — FSSP El Paso custom.</p>
+      <p class="source-note">${O_BRIEN_SOURCE}</p>
+      <p style="font-size:14px;">Bell and elevation duties — two-server chart notes AC1 where applicable.</p>
       ${BELL_CHART.map(r=>`<div class="bell-row">
         <div class="moment">${r.moment}</div>
         <div class="action">${r.action}</div>
@@ -1039,13 +1167,101 @@ function renderBellChart(){
   document.getElementById('bellBackBtn').onclick = goHome;
 }
 
+function renderObrienLessons(){
+  app.innerHTML = `
+    <div class="learn-view"><div class="missal">
+      <h2>Five Lessons</h2>
+      <p class="source-note">${O_BRIEN_SOURCE}</p>
+      <div class="guide-scroll">${O_BRIEN_LESSONS.map(l=>`
+        <div class="guide-item">
+          <div class="sec">${l.title}</div>
+          <div class="lesson-body">${l.body}</div>
+        </div>`).join('')}</div>
+      ${obrienBackBtn()}
+    </div></div>`;
+  wireObrienBack();
+}
+
+function renderObrienSacristy(){
+  const s = O_BRIEN_SACRISTY;
+  app.innerHTML = `
+    <div class="learn-view"><div class="missal">
+      <h2>The Sacristy</h2>
+      <p class="source-note">${O_BRIEN_SOURCE}</p>
+      <p style="font-size:15px;">${s.intro}</p>
+      <label class="field-label">List of Things in the Sacristy</label>
+      ${s.items.map(i=>`<div class="ref-block"><strong>${i.n}. ${i.name}</strong><br><span style="color:var(--ink-soft);">${i.desc}</span></div>`).join('')}
+      <label class="field-label">Lighting Candles</label>
+      <p style="font-size:15px;">${s.candles}</p>
+      ${obrienBackBtn()}
+    </div></div>`;
+  wireObrienBack();
+}
+
+function renderObrienSanctuary(){
+  app.innerHTML = `
+    <div class="learn-view"><div class="missal">
+      <h2>The Sanctuary</h2>
+      <p class="source-note">${O_BRIEN_SOURCE}</p>
+      <p style="font-size:15px;">Observe well the sanctuary — the Holy Sacrifice of the Mass is offered here. Everything necessary for Mass, with proper names:</p>
+      <div class="guide-scroll">${O_BRIEN_SANCTUARY.map(i=>`<div class="ref-block"><strong>${i.n}. ${i.name}</strong>${i.desc ? `<br><span style="color:var(--ink-soft);">${i.desc}</span>` : ''}</div>`).join('')}</div>
+      ${obrienBackBtn()}
+    </div></div>`;
+  wireObrienBack();
+}
+
+function renderObrienVestments(){
+  app.innerHTML = `
+    <div class="learn-view"><div class="missal">
+      <h2>Vestments & Chalice</h2>
+      <p class="source-note">${O_BRIEN_SOURCE}</p>
+      <label class="field-label">How the Priest Vests</label>
+      ${O_BRIEN_VESTMENTS.map(v=>`<div class="ref-block"><strong>${v.name}</strong><br><span style="color:var(--ink-soft);">${v.desc}</span></div>`).join('')}
+      <label class="field-label">The Chalice and How It Is Covered</label>
+      <ol style="font-size:15px; padding-left:20px;">${O_BRIEN_CHALICE.map(x=>`<li style="margin-bottom:6px;">${x}</li>`).join('')}</ol>
+      ${obrienBackBtn()}
+    </div></div>`;
+  wireObrienBack();
+}
+
+function renderObrienPostures(){
+  app.innerHTML = `
+    <div class="learn-view"><div class="missal">
+      <h2>Proper Postures During Mass</h2>
+      <p class="source-note">${O_BRIEN_SOURCE}</p>
+      <p style="font-size:15px;">When kneeling, be sure your shoes are concealed by the cassock. When not occupied, hold hands palms joined before the breast.</p>
+      ${O_BRIEN_POSTURES.map(p=>`<div class="ref-block"><strong>${p.name}</strong><br><span style="color:var(--ink-soft);">${p.desc}</span></div>`).join('')}
+      ${obrienBackBtn()}
+    </div></div>`;
+  wireObrienBack();
+}
+
+function renderObrienTwoServers(){
+  const t = O_BRIEN_TWO_SERVERS;
+  app.innerHTML = `
+    <div class="learn-view"><div class="missal">
+      <h2>Ceremonies for Low Mass with Two Altar Boys</h2>
+      <p class="source-note">${O_BRIEN_SOURCE}</p>
+      <p style="font-size:15px;">${t.note}</p>
+      <table class="ref-table">
+        <tr><th>When</th><th>Altar Boy No. 1 (Epistle)</th><th>Altar Boy No. 2 (Gospel)</th></tr>
+        ${t.duties.map(d=>`<tr><td>${d.when}</td><td>${d.ac1}</td><td>${d.ac2}</td></tr>`).join('')}
+      </table>
+      <label class="field-label">General Rules</label>
+      <ul style="font-size:15px; padding-left:20px;">${t.rules.map(r=>`<li style="margin-bottom:8px;">${r}</li>`).join('')}</ul>
+      ${obrienBackBtn()}
+    </div></div>`;
+  wireObrienBack();
+}
+
 /* ============ RUBRIC SHEET ============ */
 function renderRubricSheet(){
   const items = MOVEMENTS.filter(m=> m.role==='both' || m.role===state.role);
   app.innerHTML = `
     <div class="rubric-view"><div class="missal">
       <h2>Rubric Reference</h2>
-      <p style="font-size:15px;">Movement notes for ${state.role==='ac1'?'Acolyte 1 (Senior)':'Acolyte 2 (Junior)'} — FSSP El Paso custom.</p>
+      <p class="source-note">${O_BRIEN_SOURCE}</p>
+      <p style="font-size:15px;">Movement notes for ${state.role==='ac1'?'Altar Boy No. 1 (Epistle side)':'Altar Boy No. 2 (Gospel side)'}.</p>
       ${items.map(m=>{
         const ans = m.options[m.correct];
         return `<div class="rubric-item">
@@ -1399,6 +1615,7 @@ function setupServerArea(i, s){
       <div class="reveal-wrap">
         <div class="reveal-bar"><div class="reveal-bar-fill" id="revealFill"></div></div>
         <div class="latin" id="revealText">${s.server}</div>
+        ${getPhonetic(s.server) ? `<div class="phonetic">${getPhonetic(s.server)}</div>` : ''}
       </div>`;
     const fill = document.getElementById('revealFill');
     fill.style.animation = 'shrink 5s linear forwards';
@@ -1561,11 +1778,24 @@ function render(){
   else if(state.view === 'massGuide') renderMassGuide();
   else if(state.view === 'glossary') renderGlossary();
   else if(state.view === 'bellChart') renderBellChart();
+  else if(state.view === 'obrienLessons') renderObrienLessons();
+  else if(state.view === 'obrienTwoServers') renderObrienTwoServers();
+  else if(state.view === 'obrienSacristy') renderObrienSacristy();
+  else if(state.view === 'obrienSanctuary') renderObrienSanctuary();
+  else if(state.view === 'obrienVestments') renderObrienVestments();
+  else if(state.view === 'obrienPostures') renderObrienPostures();
   else if(state.view === 'flashcards') renderFlashcards();
   else if(state.view === 'sectionPick') renderSectionPick();
   else renderPracticeItem();
 }
-render();
+
+async function boot(){
+  app.innerHTML = '<div class="cover"><div class="missal"><h2>Acolyte Training</h2><p style="color:var(--ink-soft);">Connecting schedule…</p></div></div>';
+  await initScheduleBackend();
+  window.onScheduleUpdated = ()=> render();
+  render();
+}
+boot();
 </script>
 </body>
 </html>
