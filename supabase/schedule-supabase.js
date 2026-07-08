@@ -1,11 +1,13 @@
 /* Schedule + profile backend: Supabase when available, localStorage fallback. */
 
 const SCHEDULE_POINTS = { serve: 10, pickup: 5, trade: 3 };
+const ADMIN_EMAILS = ['erdunn706@gmail.com', 'froneill@fssp.com'];
 
 let sbClient = null;
 let scheduleCache = [];
-let profileCache = { id: null, name: '', points: 0, massesServed: 0 };
+let profileCache = { id: null, name: '', email: '', avatarUrl: '', points: 0, massesServed: 0 };
 let myUserId = null;
+let authSession = null;
 let scheduleBackend = 'local'; // 'supabase' | 'local'
 let scheduleStatus = 'Connecting…';
 let scheduleChannel = null;
@@ -21,6 +23,15 @@ function lsGetJSON(key, fallback){
 }
 function lsSetJSON(key, val){
   try{ localStorage.setItem(key, JSON.stringify(val)); }catch(e){}
+}
+
+function readFileAsDataURL(file){
+  return new Promise((resolve, reject)=>{
+    const r = new FileReader();
+    r.onload = ()=> resolve(r.result);
+    r.onerror = ()=> reject(new Error('Could not read image'));
+    r.readAsDataURL(file);
+  });
 }
 
 function rowToSlot(row){
@@ -80,7 +91,7 @@ function buildSeedSlots(){
 
 function loadProfileLocal(){
   return lsGetJSON('altar_profile', {
-    id: 'local', name: lsGet('altar_serverName', ''), points: 0, massesServed: 0
+    id: 'local', name: lsGet('altar_serverName', ''), email: '', avatarUrl: '', points: 0, massesServed: 0
   });
 }
 function saveProfileLocal(p){
@@ -105,6 +116,12 @@ function getScheduleBackend(){ return scheduleBackend; }
 function getScheduleStatus(){ return scheduleStatus; }
 function loadProfile(){ return profileCache; }
 function loadSchedule(){ return scheduleCache; }
+function getAuthEmail(){ return (profileCache.email || authSession?.user?.email || '').toLowerCase(); }
+
+function isScheduleAdmin(){
+  const email = getAuthEmail();
+  return ADMIN_EMAILS.includes(email);
+}
 
 function formatSchedDate(iso){
   const d = new Date(iso + 'T12:00:00');
@@ -133,30 +150,39 @@ function myDisplayName(){
   return profileCache.name || 'You';
 }
 
+function applyProfileFromRow(prof, session){
+  if(!prof) return;
+  profileCache = {
+    id: prof.id,
+    name: prof.display_name || lsGet('altar_serverName', ''),
+    email: (session?.user?.email || profileCache.email || '').toLowerCase(),
+    avatarUrl: prof.avatar_url || profileCache.avatarUrl || '',
+    points: prof.points || 0,
+    massesServed: prof.masses_served || 0
+  };
+}
+
 async function refreshFromSupabase(){
   const { data: slots, error: sErr } = await sbClient.from('mass_slots').select('*').order('mass_date').order('mass_time');
   if(sErr) throw sErr;
   scheduleCache = (slots || []).map(rowToSlot);
 
+  const { data: { session } } = await sbClient.auth.getSession();
+  authSession = session;
+  myUserId = session?.user?.id || myUserId;
+
   const { data: prof, error: pErr } = await sbClient.from('profiles').select('*').eq('id', myUserId).maybeSingle();
   if(pErr) throw pErr;
-  if(prof){
-    profileCache = {
-      id: prof.id,
-      name: prof.display_name || lsGet('altar_serverName', ''),
-      points: prof.points || 0,
-      massesServed: prof.masses_served || 0
-    };
-  }
+  if(prof) applyProfileFromRow(prof, session);
+  else if(session?.user?.email) profileCache.email = session.user.email.toLowerCase();
 }
 
 async function seedSupabaseIfEmpty(){
-  const { count, error } = await sbClient.from('mass_slots').select('*', { count: 'exact', head: true });
+  const payload = buildSeedSlots().map(s=>({
+    id: s.id, date: s.date, time: s.time, label: s.label, priest: s.priest
+  }));
+  const { error } = await sbClient.rpc('seed_mass_slots_if_empty', { slots: payload });
   if(error) throw error;
-  if(count > 0) return;
-  const rows = buildSeedSlots().map(slotToRow);
-  const { error: insErr } = await sbClient.from('mass_slots').insert(rows);
-  if(insErr) throw insErr;
 }
 
 async function updateSlotRow(slotId, patch){
@@ -191,15 +217,25 @@ async function initScheduleBackend(){
 
   try{
     sbClient = supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
+    sbClient.auth.onAuthStateChange((_event, session)=>{
+      authSession = session;
+      if(session?.user?.email) profileCache.email = session.user.email.toLowerCase();
+      if(typeof window.onScheduleUpdated === 'function') window.onScheduleUpdated();
+    });
+
     let { data: { session } } = await sbClient.auth.getSession();
     if(!session){
       const { data, error } = await sbClient.auth.signInAnonymously();
       if(error) throw error;
       session = data.session;
     }
+    authSession = session;
     myUserId = session.user.id;
+    profileCache.email = (session.user.email || '').toLowerCase();
     scheduleBackend = 'supabase';
-    scheduleStatus = 'Live — synced with parish schedule';
+    scheduleStatus = isScheduleAdmin()
+      ? 'Live — admin schedule control'
+      : 'Live — synced with parish schedule';
 
     await seedSupabaseIfEmpty();
     await refreshFromSupabase();
@@ -219,6 +255,29 @@ async function initScheduleBackend(){
     scheduleCache = loadScheduleLocal() || [];
     profileCache = loadProfileLocal();
   }
+}
+
+async function signInWithEmail(email){
+  if(scheduleBackend !== 'supabase') throw new Error('Sign-in requires Supabase');
+  const normalized = email.trim().toLowerCase();
+  if(!normalized.includes('@')) throw new Error('Enter a valid email');
+  const { error } = await sbClient.auth.signInWithOtp({
+    email: normalized,
+    options: { emailRedirectTo: window.location.origin + window.location.pathname }
+  });
+  if(error) throw error;
+  return normalized;
+}
+
+async function signOutUser(){
+  if(scheduleBackend !== 'supabase') return;
+  await sbClient.auth.signOut();
+  const { data, error } = await sbClient.auth.signInAnonymously();
+  if(error) throw error;
+  authSession = data.session;
+  myUserId = data.session.user.id;
+  profileCache.email = '';
+  await refreshFromSupabase();
 }
 
 async function saveProfileName(name){
@@ -243,6 +302,26 @@ async function saveProfileName(name){
   }
 }
 
+async function saveProfileAvatar(file){
+  if(!file || !file.type.startsWith('image/')) throw new Error('Choose an image file');
+  if(file.size > 512000) throw new Error('Image must be under 512 KB');
+
+  if(scheduleBackend === 'supabase'){
+    const ext = (file.name.split('.').pop() || 'jpg').toLowerCase().replace(/[^a-z0-9]/g, '') || 'jpg';
+    const path = `${myUserId}/avatar.${ext}`;
+    const { error: upErr } = await sbClient.storage.from('avatars').upload(path, file, { upsert: true, contentType: file.type });
+    if(upErr) throw upErr;
+    const { data: { publicUrl } } = sbClient.storage.from('avatars').getPublicUrl(path);
+    const bustUrl = `${publicUrl}?t=${Date.now()}`;
+    await updateProfilePatch({ avatar_url: bustUrl });
+    profileCache.avatarUrl = bustUrl;
+  } else {
+    profileCache.avatarUrl = await readFileAsDataURL(file);
+    saveProfileLocal(profileCache);
+  }
+  return true;
+}
+
 async function claimSlot(slotId, role){
   const slot = scheduleCache.find(s=> s.id === slotId);
   if(!slot || slotAssignee(slot, role)) return false;
@@ -263,7 +342,8 @@ async function claimSlot(slotId, role){
 
 async function cancelSlot(slotId, role){
   const slot = scheduleCache.find(s=> s.id === slotId);
-  if(!slot || !isMySlot(slot, role)) return false;
+  if(!slot) return false;
+  if(!isMySlot(slot, role) && !isScheduleAdmin()) return false;
   if(scheduleBackend === 'supabase'){
     await updateSlotRow(slotId, { [`${role}_id`]: null, [`${role}_name`]: null, [`${role}_trade_offer`]: false });
     await refreshFromSupabase();
@@ -325,11 +405,13 @@ async function takeTrade(slotId, role){
 async function markMassServed(slotId){
   const slot = scheduleCache.find(s=> s.id === slotId);
   if(!slot || slot.served) return false;
-  if(!isMySlot(slot,'ac1') && !isMySlot(slot,'ac2')) return false;
+  if(!isMySlot(slot,'ac1') && !isMySlot(slot,'ac2') && !isScheduleAdmin()) return false;
   if(scheduleBackend === 'supabase'){
-    profileCache.points = (profileCache.points || 0) + SCHEDULE_POINTS.serve;
-    profileCache.massesServed = (profileCache.massesServed || 0) + 1;
-    await updateProfilePatch({ points: profileCache.points, masses_served: profileCache.massesServed });
+    if(isMySlot(slot,'ac1') || isMySlot(slot,'ac2')){
+      profileCache.points = (profileCache.points || 0) + SCHEDULE_POINTS.serve;
+      profileCache.massesServed = (profileCache.massesServed || 0) + 1;
+      await updateProfilePatch({ points: profileCache.points, masses_served: profileCache.massesServed });
+    }
     await updateSlotRow(slotId, { served: true });
     await refreshFromSupabase();
   } else {
@@ -340,6 +422,60 @@ async function markMassServed(slotId){
     saveScheduleLocal(scheduleCache);
   }
   return true;
+}
+
+async function adminAddSlot({ date, time, label, priest }){
+  if(!isScheduleAdmin()) throw new Error('Admin sign-in required');
+  const id = `mass-${date}-${time.replace(/[: ]/g,'')}-${Date.now()}`;
+  const slot = { id, date, time, label: label || 'Low Mass', priest: priest || 'Fr. FSSP', ac1: null, ac2: null, served: false };
+  if(scheduleBackend === 'supabase'){
+    const { error } = await sbClient.from('mass_slots').insert(slotToRow(slot));
+    if(error) throw error;
+    await refreshFromSupabase();
+  } else {
+    scheduleCache.push(slot);
+    saveScheduleLocal(scheduleCache);
+  }
+  return slot;
+}
+
+async function adminDeleteSlot(slotId){
+  if(!isScheduleAdmin()) throw new Error('Admin sign-in required');
+  if(scheduleBackend === 'supabase'){
+    const { error } = await sbClient.from('mass_slots').delete().eq('id', slotId);
+    if(error) throw error;
+    await refreshFromSupabase();
+  } else {
+    scheduleCache = scheduleCache.filter(s=> s.id !== slotId);
+    saveScheduleLocal(scheduleCache);
+  }
+}
+
+async function adminUpdateSlot(slotId, { date, time, label, priest }){
+  if(!isScheduleAdmin()) throw new Error('Admin sign-in required');
+  const patch = {};
+  if(date) patch.mass_date = date;
+  if(time) patch.mass_time = time;
+  if(label) patch.label = label;
+  if(priest) patch.priest = priest;
+  if(scheduleBackend === 'supabase'){
+    const { error } = await sbClient.from('mass_slots').update(patch).eq('id', slotId);
+    if(error) throw error;
+    await refreshFromSupabase();
+  } else {
+    const slot = scheduleCache.find(s=> s.id === slotId);
+    if(!slot) return;
+    if(date) slot.date = date;
+    if(time) slot.time = time;
+    if(label) slot.label = label;
+    if(priest) slot.priest = priest;
+    saveScheduleLocal(scheduleCache);
+  }
+}
+
+async function adminClearRole(slotId, role){
+  if(!isScheduleAdmin()) throw new Error('Admin sign-in required');
+  return cancelSlot(slotId, role);
 }
 
 function getMyUpcomingSlots(){
