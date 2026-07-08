@@ -253,6 +253,29 @@
   .lesson-body{white-space:pre-wrap; font-size:15px; line-height:1.55; margin:12px 0;}
   .source-note{font-size:12px; color:var(--ink-soft); font-style:italic; margin-bottom:14px;}
 
+  .home-tabs{flex-wrap:wrap;}
+  .home-tabs button{min-width:calc(33.33% - 2px); font-size:9px; padding:9px 4px;}
+
+  .sched-card{border:1px solid var(--border-soft); border-radius:10px; padding:14px; margin-bottom:12px; background:#fffdf8;}
+  .sched-card.mine{border-color:var(--ic-blue-light); background:var(--tint);}
+  .sched-card.trade-offer{border-color:var(--gold-bright);}
+  .sched-head{display:flex; justify-content:space-between; align-items:flex-start; gap:10px; margin-bottom:10px;}
+  .sched-date{font-family:'Cinzel',serif; font-size:13px; color:var(--rubric); letter-spacing:1px;}
+  .sched-meta{font-size:13px; color:var(--ink-soft);}
+  .slot-row{display:flex; align-items:center; justify-content:space-between; gap:8px; padding:8px 0; border-top:1px dashed var(--border-soft);}
+  .slot-row:first-of-type{border-top:none;}
+  .slot-label{font-family:'Cinzel',serif; font-size:10px; letter-spacing:1px; text-transform:uppercase; color:var(--ink-soft); min-width:36px;}
+  .slot-name{flex:1; font-size:15px;}
+  .slot-open{color:var(--ink-soft); font-style:italic;}
+  .slot-trade{font-size:11px; color:var(--gold); font-family:'Cinzel',serif; letter-spacing:1px; text-transform:uppercase;}
+  .slot-actions{display:flex; flex-wrap:wrap; gap:6px; justify-content:flex-end;}
+  .profile-header{text-align:center; margin-bottom:18px;}
+  .profile-avatar{width:64px; height:64px; border-radius:50%; background:linear-gradient(135deg,var(--ic-blue),var(--ic-blue-light)); color:#fff; font-family:'Cinzel',serif; font-size:24px; line-height:64px; margin:0 auto 10px;}
+  .points-badge{display:inline-block; background:var(--gold-bright); color:#1a1820; font-family:'Cinzel',serif; font-size:12px; letter-spacing:1px; padding:4px 12px; border-radius:16px; margin-top:6px;}
+  .sched-subtabs{display:flex; gap:6px; margin-bottom:12px; flex-wrap:wrap;}
+  .sched-subtabs button{font-family:'Cinzel',serif; font-size:10px; letter-spacing:1px; text-transform:uppercase; padding:7px 12px; border:1px solid var(--border-soft); border-radius:20px; background:none; cursor:pointer; color:var(--ink-soft);}
+  .sched-subtabs button.active{background:var(--rubric); color:#fff; border-color:var(--rubric);}
+
   @media (max-width:480px){
     .mode-grid{grid-template-columns:1fr;}
     .missal, .cover .missal, .summary .missal, .settings-view .missal, .recordpriest-view .missal, .rubric-view .missal, .flash-view .missal, .section-view .missal, .learn-view .missal{padding:28px 20px 22px 28px;}
@@ -273,6 +296,9 @@
 <div id="app"></div>
 <footer>Immaculate Conception Church · El Paso, TX · FSSP</footer>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase-config.js"></script>
+<script src="schedule-supabase.js"></script>
 <script src="obrien-data.js"></script>
 <script>
 /* ============ FULL MASS SEQUENCE (server's parts) ============ */
@@ -496,7 +522,8 @@ let state = {
   voiceURI: lsGet('altar_voiceURI', ''),
   elevenKey: lsGet('altar_elevenKey', ''),
   elevenVoiceId: lsGet('altar_elevenVoiceId', ''),
-  elevenCache: {}
+  elevenCache: {},
+  scheduleSubTab: lsGet('altar_scheduleSubTab', 'upcoming')
 };
 
 function loadProgress(){
@@ -806,10 +833,184 @@ function renderProgressPanel(){
       </div>`).join('')}` : '<p style="font-size:14px;color:var(--ink-soft);">Complete a practice session to see your weakest lines here.</p>'}`;
 }
 
+function renderSlotRow(slot, role){
+  const label = role === 'ac1' ? 'AC1' : 'AC2';
+  const assign = slotAssignee(slot, role);
+  const mine = isMySlot(slot, role);
+  const past = isPastSlot(slot);
+  let nameHtml = assign
+    ? `<span class="slot-name">${assign.name}${mine ? ' (you)' : ''}${assign.tradeOffer ? ' <span class="slot-trade">· trade offered</span>' : ''}</span>`
+    : `<span class="slot-name slot-open">Open — tap Take</span>`;
+  let actions = '';
+  if(!past && !slot.served){
+    if(!assign){
+      actions = `<button class="mini-btn" data-sched-action="take" data-id="${slot.id}" data-role="${role}">Take</button>`;
+    } else if(mine){
+      actions = assign.tradeOffer
+        ? `<button class="mini-btn" data-sched-action="withdraw" data-id="${slot.id}" data-role="${role}">Withdraw</button>`
+        : `<button class="mini-btn" data-sched-action="trade" data-id="${slot.id}" data-role="${role}">Trade</button>
+           <button class="mini-btn" data-sched-action="cancel" data-id="${slot.id}" data-role="${role}">Cancel</button>`;
+    } else if(assign.tradeOffer){
+      actions = `<button class="mini-btn" data-sched-action="accept-trade" data-id="${slot.id}" data-role="${role}">Take Trade</button>`;
+    }
+  }
+  return `<div class="slot-row">
+    <span class="slot-label">${label}</span>
+    ${nameHtml}
+    <div class="slot-actions">${actions}</div>
+  </div>`;
+}
+
+function renderSchedCard(slot){
+  const mine = isMySlot(slot,'ac1') || isMySlot(slot,'ac2');
+  const trade = (slot.ac1 && slot.ac1.tradeOffer) || (slot.ac2 && slot.ac2.tradeOffer);
+  const past = isPastSlot(slot);
+  let extra = '';
+  if(mine && !slot.served && past){
+    extra = `<button class="begin-btn" style="margin-top:10px; width:100%;" data-sched-action="served" data-id="${slot.id}">Mark Served (+${SCHEDULE_POINTS.serve} pts)</button>`;
+  } else if(slot.served){
+    extra = `<div class="score-chip score-good" style="margin-top:8px;">Served ✓</div>`;
+  }
+  return `<div class="sched-card ${mine?'mine':''} ${trade?'trade-offer':''}">
+    <div class="sched-head">
+      <div>
+        <div class="sched-date">${formatSchedDate(slot.date)} · ${slot.time}</div>
+        <div class="sched-meta">${slot.label} · ${slot.priest}</div>
+      </div>
+    </div>
+    ${renderSlotRow(slot,'ac1')}
+    ${renderSlotRow(slot,'ac2')}
+    ${extra}
+  </div>`;
+}
+
+function renderSchedulePanel(){
+  const sub = state.scheduleSubTab;
+  const slots = (loadSchedule() || []).filter(s=> !s.served || sub === 'my-shifts');
+  const upcoming = slots.filter(s=> !isPastSlot(s)).sort((a,b)=> a.date.localeCompare(b.date) || a.time.localeCompare(b.time));
+  const past = slots.filter(s=> isPastSlot(s) && (isMySlot(s,'ac1') || isMySlot(s,'ac2'))).slice(0,5);
+
+  let list = '';
+  if(sub === 'upcoming'){
+    list = upcoming.length ? upcoming.map(renderSchedCard).join('') : '<p style="color:var(--ink-soft);">No upcoming Masses on the schedule.</p>';
+  } else if(sub === 'my-shifts'){
+    const mine = upcoming.filter(s=> isMySlot(s,'ac1') || isMySlot(s,'ac2'));
+    list = mine.length ? mine.map(renderSchedCard).join('') : '<p style="color:var(--ink-soft);">You have no upcoming assignments. Take an open spot from the Schedule tab.</p>';
+    if(past.length){
+      list += `<label class="field-label" style="margin-top:16px;">Recent — mark served for points</label>${past.map(renderSchedCard).join('')}`;
+    }
+  } else {
+    const board = getTradeBoard();
+    list = board.length ? board.map(renderSchedCard).join('') : '<p style="color:var(--ink-soft);">No open spots or trade offers right now.</p>';
+  }
+
+  const subtabs = [
+    {id:'upcoming', label:'All Masses'},
+    {id:'my-shifts', label:'My Shifts'},
+    {id:'trades', label:'Open & Trades'}
+  ];
+  return `
+    <p style="font-size:13px; color:var(--ink-soft); margin-top:0;">${getScheduleStatus()}</p>
+    <p style="font-size:14px;">Sign up, cancel, or offer a trade — shared with all servers when Supabase is connected.</p>
+    <div class="sched-subtabs">${subtabs.map(t=>
+      `<button data-sched-sub="${t.id}" class="${sub===t.id?'active':''}">${t.label}</button>`
+    ).join('')}</div>
+    <div class="guide-scroll" style="max-height:55vh;">${list}</div>
+    <button class="begin-btn ghost" id="refreshScheduleBtn" style="margin-top:14px;">Refresh Schedule</button>`;
+}
+
+function renderProfilePanel(){
+  const p = loadProfile();
+  const initial = (p.name || 'S').charAt(0).toUpperCase();
+  const upcoming = getMyUpcomingSlots().length;
+  return `
+    <div class="profile-header">
+      <div class="profile-avatar">${initial}</div>
+      <input type="text" id="profileName" placeholder="Your name" value="${p.name || ''}"
+        style="width:100%; max-width:240px; padding:10px 12px; border:1px solid var(--border-soft); border-radius:8px; font-family:'EB Garamond',serif; font-size:18px; text-align:center; background:var(--tint);">
+      <div class="points-badge">${p.points || 0} points</div>
+    </div>
+    <div class="stat-block">
+      <div class="label">Masses Served</div>
+      <div class="value">${p.massesServed || 0}</div>
+    </div>
+    <div class="stat-block">
+      <div class="label">Upcoming Shifts</div>
+      <div class="value">${upcoming}</div>
+    </div>
+    <div class="stat-block">
+      <div class="label">How Points Work</div>
+      <div style="font-size:14px; color:var(--ink-soft); margin-top:6px; line-height:1.5;">
+        +${SCHEDULE_POINTS.serve} pts when you mark a Mass served<br>
+        +${SCHEDULE_POINTS.pickup} pts when you pick up a trade offer<br>
+        Practice progress is separate under Progress tab
+      </div>
+    </div>
+    <button class="begin-btn ghost" id="refreshScheduleBtn" style="margin-top:14px;">Refresh Schedule</button>`;
+}
+
+function wireSchedulePanel(){
+  app.querySelectorAll('[data-sched-sub]').forEach(b=>{
+    b.onclick = ()=>{ state.scheduleSubTab = b.dataset.schedSub; lsSet('altar_scheduleSubTab', state.scheduleSubTab); render(); };
+  });
+  app.querySelectorAll('[data-sched-action]').forEach(b=>{
+    b.onclick = async ()=>{
+      const {schedAction: action, id, role} = b.dataset;
+      b.disabled = true;
+      try{
+        if(action === 'take') await claimSlot(id, role);
+        else if(action === 'cancel') await cancelSlot(id, role);
+        else if(action === 'trade') await offerTrade(id, role);
+        else if(action === 'withdraw') await withdrawTrade(id, role);
+        else if(action === 'accept-trade') await takeTrade(id, role);
+        else if(action === 'served') await markMassServed(id);
+      }catch(e){
+        alert(e.message || 'Could not update schedule');
+      }
+      render();
+    };
+  });
+  const refreshBtn = document.getElementById('refreshScheduleBtn');
+  if(refreshBtn){
+    refreshBtn.onclick = async ()=>{
+      refreshBtn.disabled = true;
+      try{
+        if(getScheduleBackend() === 'supabase') await refreshFromSupabase();
+      }catch(e){ alert(e.message); }
+      render();
+    };
+  }
+}
+
+function wireProfilePanel(){
+  const inp = document.getElementById('profileName');
+  if(inp){
+    inp.onchange = inp.onblur = async ()=>{
+      try{ await saveProfileName(inp.value.trim()); }catch(e){ alert(e.message); }
+      render();
+    };
+  }
+  const resetBtn = document.getElementById('resetScheduleBtn');
+  if(resetBtn){
+    resetBtn.onclick = async ()=>{
+      if(getScheduleBackend() === 'supabase'){
+        alert('Schedule is shared in Supabase. Ask the MC to manage slots in the dashboard.');
+        return;
+      }
+      if(confirm('Reset the local demo schedule? Your points and name are kept.')){
+        await resetDemoScheduleLocal();
+        render();
+      }
+    };
+  }
+}
+
 function renderHome(){
   const tabs = [
     {id:'practice', label:'Practice'},
     {id:'learn', label:'Learn'},
+    {id:'schedule', label:'Schedule'},
+    {id:'profile', label:'Profile'},
     {id:'prepare', label:'Prepare'},
     {id:'progress', label:'Progress'}
   ];
@@ -817,6 +1018,8 @@ function renderHome(){
   let panel = '';
   if(state.homeTab === 'practice') panel = renderPracticePanel();
   else if(state.homeTab === 'learn') panel = renderLearnPanel();
+  else if(state.homeTab === 'schedule') panel = renderSchedulePanel();
+  else if(state.homeTab === 'profile') panel = renderProfilePanel();
   else if(state.homeTab === 'prepare') panel = renderPreparePanel();
   else panel = renderProgressPanel();
 
@@ -849,6 +1052,10 @@ function renderHome(){
     app.querySelectorAll('.mode-btn[data-learn]').forEach(b=>{
       b.onclick = ()=> openLearn(b.dataset.learn);
     });
+  } else if(state.homeTab === 'schedule'){
+    wireSchedulePanel();
+  } else if(state.homeTab === 'profile'){
+    wireProfilePanel();
   } else if(state.homeTab === 'prepare'){
     app.querySelectorAll('.check-row').forEach(row=>{
       row.onclick = (e)=>{
@@ -1581,7 +1788,14 @@ function render(){
   else if(state.view === 'sectionPick') renderSectionPick();
   else renderPracticeItem();
 }
-render();
+
+async function boot(){
+  app.innerHTML = '<div class="cover"><div class="missal"><h2>Acolyte Training</h2><p style="color:var(--ink-soft);">Connecting schedule…</p></div></div>';
+  await initScheduleBackend();
+  window.onScheduleUpdated = ()=> render();
+  render();
+}
+boot();
 </script>
 </body>
 </html>
