@@ -296,6 +296,9 @@
 <div id="app"></div>
 <footer>Immaculate Conception Church · El Paso, TX · FSSP</footer>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase-config.js"></script>
+<script src="schedule-supabase.js"></script>
 <script src="obrien-data.js"></script>
 <script>
 /* ============ FULL MASS SEQUENCE (server's parts) ============ */
@@ -483,157 +486,6 @@ const GLOSSARY = O_BRIEN_GLOSSARY;
 const BELL_CHART = O_BRIEN_BELL_CHART;
 
 const PREMASS_ITEMS = O_BRIEN_PREMASS;
-
-/* ============ SCHEDULE & ON-CALL (localStorage demo — sync with real backend later) ============ */
-const SCHEDULE_POINTS = { serve: 10, pickup: 5, trade: 3 };
-const DEMO_SERVERS = [
-  {id:'demo1', name:'Michael R.'},
-  {id:'demo2', name:'Andrew K.'},
-  {id:'demo3', name:'Peter S.'}
-];
-
-function loadProfile(){
-  return lsGetJSON('altar_profile', {
-    id: 'me', name: lsGet('altar_serverName', ''), points: 0, massesServed: 0, streak: 0
-  });
-}
-function saveProfile(p){ lsSetJSON('altar_profile', p); }
-function loadSchedule(){
-  return lsGetJSON('altar_schedule', null);
-}
-function saveSchedule(slots){ lsSetJSON('altar_schedule', slots); }
-
-function seedScheduleIfEmpty(){
-  if(loadSchedule()) return;
-  const slots = [];
-  const times = [
-    {t:'7:30 AM', label:'Low Mass'},
-    {t:'12:10 PM', label:'Low Mass'},
-    {t:'6:30 PM', label:'Low Mass'}
-  ];
-  const base = new Date();
-  base.setHours(0,0,0,0);
-  for(let d=0; d<14; d++){
-    const day = new Date(base);
-    day.setDate(day.getDate() + d);
-    const dow = day.getDay();
-    const dayTimes = dow === 0 ? [times[0], times[1], times[2]] : (dow === 6 ? [times[0], times[2]] : [times[0], times[1]]);
-    dayTimes.forEach(({t, label})=>{
-      const id = `mass-${day.toISOString().slice(0,10)}-${t.replace(/[: ]/g,'')}`;
-      const pick = ()=> DEMO_SERVERS[Math.floor(Math.random()*DEMO_SERVERS.length)];
-      const r = Math.random();
-      slots.push({
-        id, date: day.toISOString().slice(0,10), time: t, label,
-        priest: 'Fr. FSSP',
-        ac1: r > 0.35 ? {...pick(), tradeOffer: false} : null,
-        ac2: r > 0.55 ? {...pick(), tradeOffer: false} : null,
-        served: false
-      });
-    });
-  }
-  saveSchedule(slots);
-}
-
-function formatSchedDate(iso){
-  const d = new Date(iso + 'T12:00:00');
-  return d.toLocaleDateString(undefined, {weekday:'short', month:'short', day:'numeric'});
-}
-function isPastSlot(slot){
-  const [h,m] = slot.time.replace(' AM','').replace(' PM','').split(':').map(Number);
-  let hr = h;
-  if(slot.time.includes('PM') && h !== 12) hr += 12;
-  if(slot.time.includes('AM') && h === 12) hr = 0;
-  const dt = new Date(slot.date + 'T' + String(hr).padStart(2,'0') + ':' + String(m).padStart(2,'0') + ':00');
-  return dt < new Date();
-}
-function slotAssignee(slot, role){
-  const s = slot[role];
-  return s ? s : null;
-}
-function isMySlot(slot, role){
-  const s = slotAssignee(slot, role);
-  return s && s.id === 'me';
-}
-function myDisplayName(){
-  const p = loadProfile();
-  return p.name || 'You';
-}
-
-function claimSlot(slotId, role){
-  const slots = loadSchedule();
-  const slot = slots.find(s=> s.id === slotId);
-  if(!slot || slotAssignee(slot, role)) return false;
-  slot[role] = { id:'me', name: myDisplayName(), tradeOffer: false };
-  saveSchedule(slots);
-  return true;
-}
-function cancelSlot(slotId, role){
-  const slots = loadSchedule();
-  const slot = slots.find(s=> s.id === slotId);
-  if(!slot || !isMySlot(slot, role)) return false;
-  slot[role] = null;
-  saveSchedule(slots);
-  return true;
-}
-function offerTrade(slotId, role){
-  const slots = loadSchedule();
-  const slot = slots.find(s=> s.id === slotId);
-  if(!slot || !isMySlot(slot, role)) return false;
-  slot[role].tradeOffer = true;
-  saveSchedule(slots);
-  return true;
-}
-function withdrawTrade(slotId, role){
-  const slots = loadSchedule();
-  const slot = slots.find(s=> s.id === slotId);
-  if(!slot || !isMySlot(slot, role)) return false;
-  slot[role].tradeOffer = false;
-  saveSchedule(slots);
-  return true;
-}
-function takeTrade(slotId, role){
-  const slots = loadSchedule();
-  const slot = slots.find(s=> s.id === slotId);
-  const cur = slotAssignee(slot, role);
-  if(!slot || !cur || !cur.tradeOffer || cur.id === 'me') return false;
-  const p = loadProfile();
-  p.points = (p.points || 0) + SCHEDULE_POINTS.pickup;
-  saveProfile(p);
-  slot[role] = { id:'me', name: myDisplayName(), tradeOffer: false };
-  saveSchedule(slots);
-  return true;
-}
-function markMassServed(slotId){
-  const slots = loadSchedule();
-  const slot = slots.find(s=> s.id === slotId);
-  if(!slot || slot.served) return false;
-  const mine = isMySlot(slot,'ac1') || isMySlot(slot,'ac2');
-  if(!mine) return false;
-  slot.served = true;
-  const p = loadProfile();
-  p.points = (p.points || 0) + SCHEDULE_POINTS.serve;
-  p.massesServed = (p.massesServed || 0) + 1;
-  saveProfile(p);
-  saveSchedule(slots);
-  return true;
-}
-
-function getMyUpcomingSlots(){
-  return (loadSchedule() || []).filter(s=>
-    !s.served && (isMySlot(s,'ac1') || isMySlot(s,'ac2')) && !isPastSlot(s)
-  );
-}
-function getTradeBoard(){
-  return (loadSchedule() || []).filter(s=>{
-    if(s.served || isPastSlot(s)) return false;
-    const a1 = slotAssignee(s,'ac1');
-    const a2 = slotAssignee(s,'ac2');
-    return (a1 && a1.tradeOffer && a1.id !== 'me') || (a2 && a2.tradeOffer && a2.id !== 'me') ||
-      !a1 || !a2;
-  });
-}
-
-seedScheduleIfEmpty();
 
 /* ============ STATE ============ */
 const app = document.getElementById('app');
@@ -1058,11 +910,13 @@ function renderSchedulePanel(){
     {id:'trades', label:'Open & Trades'}
   ];
   return `
-    <p style="font-size:14px; margin-top:0;">Sign up, cancel, or offer a trade — like the on-call board.</p>
+    <p style="font-size:13px; color:var(--ink-soft); margin-top:0;">${getScheduleStatus()}</p>
+    <p style="font-size:14px;">Sign up, cancel, or offer a trade — shared with all servers when Supabase is connected.</p>
     <div class="sched-subtabs">${subtabs.map(t=>
       `<button data-sched-sub="${t.id}" class="${sub===t.id?'active':''}">${t.label}</button>`
     ).join('')}</div>
-    <div class="guide-scroll" style="max-height:55vh;">${list}</div>`;
+    <div class="guide-scroll" style="max-height:55vh;">${list}</div>
+    <button class="begin-btn ghost" id="refreshScheduleBtn" style="margin-top:14px;">Refresh Schedule</button>`;
 }
 
 function renderProfilePanel(){
@@ -1092,7 +946,7 @@ function renderProfilePanel(){
         Practice progress is separate under Progress tab
       </div>
     </div>
-    <button class="begin-btn ghost" id="resetScheduleBtn" style="margin-top:14px;">Reset Demo Schedule</button>`;
+    <button class="begin-btn ghost" id="refreshScheduleBtn" style="margin-top:14px;">Refresh Schedule</button>`;
 }
 
 function wireSchedulePanel(){
@@ -1100,41 +954,55 @@ function wireSchedulePanel(){
     b.onclick = ()=>{ state.scheduleSubTab = b.dataset.schedSub; lsSet('altar_scheduleSubTab', state.scheduleSubTab); render(); };
   });
   app.querySelectorAll('[data-sched-action]').forEach(b=>{
-    b.onclick = ()=>{
+    b.onclick = async ()=>{
       const {schedAction: action, id, role} = b.dataset;
-      if(action === 'take') claimSlot(id, role);
-      else if(action === 'cancel') cancelSlot(id, role);
-      else if(action === 'trade') offerTrade(id, role);
-      else if(action === 'withdraw') withdrawTrade(id, role);
-      else if(action === 'accept-trade') takeTrade(id, role);
-      else if(action === 'served') markMassServed(id);
+      b.disabled = true;
+      try{
+        if(action === 'take') await claimSlot(id, role);
+        else if(action === 'cancel') await cancelSlot(id, role);
+        else if(action === 'trade') await offerTrade(id, role);
+        else if(action === 'withdraw') await withdrawTrade(id, role);
+        else if(action === 'accept-trade') await takeTrade(id, role);
+        else if(action === 'served') await markMassServed(id);
+      }catch(e){
+        alert(e.message || 'Could not update schedule');
+      }
       render();
     };
   });
+  const refreshBtn = document.getElementById('refreshScheduleBtn');
+  if(refreshBtn){
+    refreshBtn.onclick = async ()=>{
+      refreshBtn.disabled = true;
+      try{
+        if(getScheduleBackend() === 'supabase') await refreshFromSupabase();
+      }catch(e){ alert(e.message); }
+      render();
+    };
+  }
 }
 
 function wireProfilePanel(){
   const inp = document.getElementById('profileName');
   if(inp){
-    inp.onchange = inp.onblur = ()=>{
-      const p = loadProfile();
-      p.name = inp.value.trim();
-      saveProfile(p);
-      lsSet('altar_serverName', p.name);
-      const slots = loadSchedule() || [];
-      slots.forEach(s=>{
-        ['ac1','ac2'].forEach(r=>{ if(isMySlot(s,r)) s[r].name = p.name || 'You'; });
-      });
-      saveSchedule(slots);
+    inp.onchange = inp.onblur = async ()=>{
+      try{ await saveProfileName(inp.value.trim()); }catch(e){ alert(e.message); }
+      render();
     };
   }
-  document.getElementById('resetScheduleBtn').onclick = ()=>{
-    if(confirm('Reset the demo schedule? Your points and name are kept.')){
-      lsSetJSON('altar_schedule', null);
-      seedScheduleIfEmpty();
-      render();
-    }
-  };
+  const resetBtn = document.getElementById('resetScheduleBtn');
+  if(resetBtn){
+    resetBtn.onclick = async ()=>{
+      if(getScheduleBackend() === 'supabase'){
+        alert('Schedule is shared in Supabase. Ask the MC to manage slots in the dashboard.');
+        return;
+      }
+      if(confirm('Reset the local demo schedule? Your points and name are kept.')){
+        await resetDemoScheduleLocal();
+        render();
+      }
+    };
+  }
 }
 
 function renderHome(){
@@ -1920,7 +1788,14 @@ function render(){
   else if(state.view === 'sectionPick') renderSectionPick();
   else renderPracticeItem();
 }
-render();
+
+async function boot(){
+  app.innerHTML = '<div class="cover"><div class="missal"><h2>Acolyte Training</h2><p style="color:var(--ink-soft);">Connecting schedule…</p></div></div>';
+  await initScheduleBackend();
+  window.onScheduleUpdated = ()=> render();
+  render();
+}
+boot();
 </script>
 </body>
 </html>
