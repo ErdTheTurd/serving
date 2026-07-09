@@ -258,15 +258,54 @@ async function initScheduleBackend(){
 }
 
 async function signInWithEmail(email){
-  if(scheduleBackend !== 'supabase') throw new Error('Sign-in requires Supabase');
+  if(scheduleBackend !== 'supabase') throw new Error('Sign-in requires Supabase — check that the schedule shows Live, not Offline.');
   const normalized = email.trim().toLowerCase();
   if(!normalized.includes('@')) throw new Error('Enter a valid email');
+  // OTP code flow (no redirect URL) — email must include {{ .Token }} in Supabase template
   const { error } = await sbClient.auth.signInWithOtp({
     email: normalized,
-    options: { emailRedirectTo: window.location.origin + window.location.pathname }
+    options: { shouldCreateUser: true }
   });
-  if(error) throw error;
+  if(error) throw formatAuthError(error);
+  lsSet('altar_pendingEmail', normalized);
   return normalized;
+}
+
+async function verifyEmailOtp(email, token){
+  if(scheduleBackend !== 'supabase') throw new Error('Sign-in requires Supabase');
+  const normalized = email.trim().toLowerCase();
+  const code = token.trim().replace(/\D/g, '');
+  if(code.length < 6) throw new Error('Enter the 6-digit code from your email');
+  const { data, error } = await sbClient.auth.verifyOtp({
+    email: normalized,
+    token: code,
+    type: 'email'
+  });
+  if(error) throw formatAuthError(error);
+  authSession = data.session;
+  myUserId = data.session.user.id;
+  profileCache.email = (data.session.user.email || normalized).toLowerCase();
+  lsSet('altar_pendingEmail', '');
+  scheduleStatus = isScheduleAdmin() ? 'Live — admin schedule control' : 'Live — synced with parish schedule';
+  await refreshFromSupabase();
+  return true;
+}
+
+function getPendingSignInEmail(){
+  return lsGet('altar_pendingEmail', '');
+}
+
+function clearPendingSignInEmail(){
+  lsSet('altar_pendingEmail', '');
+}
+
+function formatAuthError(error){
+  const msg = (error && (error.message || error.msg || error.error_description)) || 'Sign-in failed';
+  if(/rate limit|too many/i.test(msg)) return new Error('Too many sign-in attempts — wait a few minutes and try again.');
+  if(/smtp|mail|email.*send|delivery/i.test(msg)) return new Error('Email could not be sent. In Supabase: Authentication → SMTP Settings — configure a mail provider (Resend, SendGrid, etc.).');
+  if(/signup.*disabled|not allowed/i.test(msg)) return new Error('Email sign-up is disabled in Supabase. Enable Authentication → Providers → Email.');
+  if(/invalid.*redirect|redirect.*url/i.test(msg)) return new Error('Redirect URL not allowed. Add https://fsspserve.com in Supabase → Authentication → URL Configuration.');
+  return new Error(msg);
 }
 
 async function signOutUser(){

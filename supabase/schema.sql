@@ -4,7 +4,21 @@
 
 -- 1) Enable auth providers:
 --    Authentication → Providers → Anonymous → Enable
---    Authentication → Providers → Email → Enable (magic link)
+--    Authentication → Providers → Email → Enable
+--
+-- 2) Email delivery (required for sign-in codes to arrive):
+--    Authentication → SMTP Settings → Enable custom SMTP
+--    Use Resend, SendGrid, Gmail SMTP, etc. Supabase's built-in mailer
+--    often does NOT deliver to real inboxes without custom SMTP.
+--
+-- 3) Sign-in code template (not magic link):
+--    Authentication → Email Templates → Magic Link
+--    Replace body link with the 6-digit code, e.g.:
+--      Your sign-in code: {{ .Token }}
+--    (Remove or de-emphasize {{ .ConfirmationURL }} if you want codes only.)
+--
+-- 4) Redirect URLs (if using magic links later):
+--    Authentication → URL Configuration → add https://fsspserve.com
 
 -- Profiles (one row per signed-in server)
 create table if not exists public.profiles (
