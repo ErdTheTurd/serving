@@ -216,12 +216,20 @@ async function initScheduleBackend(){
   }
 
   try{
-    sbClient = supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
+    sbClient = supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
+      auth: { persistSession: true, detectSessionInUrl: true, flowType: 'implicit' }
+    });
     sbClient.auth.onAuthStateChange((_event, session)=>{
       authSession = session;
       if(session?.user?.email) profileCache.email = session.user.email.toLowerCase();
       if(typeof window.onScheduleUpdated === 'function') window.onScheduleUpdated();
     });
+
+    // Pick up session after magic-link redirect
+    if(window.location.hash.includes('access_token') || window.location.search.includes('code=')){
+      await sbClient.auth.getSession();
+      try{ window.history.replaceState({}, '', window.location.pathname); }catch(e){}
+    }
 
     let { data: { session } } = await sbClient.auth.getSession();
     if(!session){
@@ -261,12 +269,96 @@ async function signInWithEmail(email){
   if(scheduleBackend !== 'supabase') throw new Error('Sign-in requires Supabase');
   const normalized = email.trim().toLowerCase();
   if(!normalized.includes('@')) throw new Error('Enter a valid email');
+  const redirectTo = window.location.origin + window.location.pathname;
   const { error } = await sbClient.auth.signInWithOtp({
     email: normalized,
-    options: { emailRedirectTo: window.location.origin + window.location.pathname }
+    options: { shouldCreateUser: true, emailRedirectTo: redirectTo }
   });
-  if(error) throw error;
+  if(error) throw formatAuthError(error);
+  lsSet('altar_pendingEmail', normalized);
   return normalized;
+}
+
+async function verifyEmailOtp(email, token){
+  if(scheduleBackend !== 'supabase') throw new Error('Sign-in requires Supabase');
+  const normalized = email.trim().toLowerCase();
+  const code = token.trim().replace(/\D/g, '');
+  if(code.length < 6) throw new Error('Enter the 6-digit code from your email');
+  const { data, error } = await sbClient.auth.verifyOtp({ email: normalized, token: code, type: 'email' });
+  if(error) throw formatAuthError(error);
+  authSession = data.session;
+  myUserId = data.session.user.id;
+  profileCache.email = (data.session.user.email || normalized).toLowerCase();
+  lsSet('altar_pendingEmail', '');
+  scheduleStatus = isScheduleAdmin() ? 'Live — admin schedule control' : 'Live — synced with parish schedule';
+  await refreshFromSupabase();
+  return true;
+}
+
+function getPendingSignInEmail(){ return lsGet('altar_pendingEmail', ''); }
+function clearPendingSignInEmail(){ lsSet('altar_pendingEmail', ''); }
+
+function formatAuthError(error){
+  const msg = (error && (error.message || error.msg || error.error_description)) || 'Sign-in failed';
+  const status = error && (error.status || error.code);
+  const id = error && error.error_id;
+  const suffix = id ? ` Log id: ${id}` : '';
+  if(status === 504 || /timed out|timeout|504/i.test(msg)){
+    return new Error('Email server timed out — use password sign-in below.' + suffix);
+  }
+  if(/Error sending confirmation|unexpected_failure|500/i.test(msg)){
+    return new Error(
+      'Email failed (Resend not configured correctly). Fix: verify fsspserve.com in Resend, ' +
+      'set Supabase sender to no-reply@fsspserve.com, SMTP host smtp.resend.com:587, user resend, ' +
+      'password = full re_ API key. Check Resend → Logs. Or use password sign-in below.' + suffix
+    );
+  }
+  if(/rate limit|too many/i.test(msg)) return new Error('Too many attempts — wait a few minutes.' + suffix);
+  if(/invalid login|invalid credentials/i.test(msg)) return new Error('Wrong email or password — create account below or in Supabase → Users.' + suffix);
+  if(/already registered|already exists/i.test(msg)) return new Error('Account exists — use Sign In instead.' + suffix);
+  return new Error(msg + suffix);
+}
+
+async function signInWithPassword(email, password){
+  if(scheduleBackend !== 'supabase') throw new Error('Sign-in requires Supabase');
+  const normalized = email.trim().toLowerCase();
+  if(!normalized.includes('@')) throw new Error('Enter a valid email');
+  if(!password) throw new Error('Enter your password');
+  await sbClient.auth.signOut();
+  const { data, error } = await sbClient.auth.signInWithPassword({ email: normalized, password });
+  if(error){
+    await sbClient.auth.signInAnonymously().catch(()=>{});
+    throw formatAuthError(error);
+  }
+  authSession = data.session;
+  myUserId = data.session.user.id;
+  profileCache.email = (data.session.user.email || normalized).toLowerCase();
+  lsSet('altar_pendingEmail', '');
+  scheduleStatus = isScheduleAdmin() ? 'Live — admin schedule control' : 'Live — synced with parish schedule';
+  await refreshFromSupabase();
+  return true;
+}
+
+async function registerAdminAccount(email, password){
+  if(scheduleBackend !== 'supabase') throw new Error('Sign-in requires Supabase');
+  const normalized = email.trim().toLowerCase();
+  if(!ADMIN_EMAILS.includes(normalized)) throw new Error('Only admin emails can register: ' + ADMIN_EMAILS.join(', '));
+  if(!password || password.length < 8) throw new Error('Password must be at least 8 characters');
+  await sbClient.auth.signOut();
+  const { data, error } = await sbClient.auth.signUp({ email: normalized, password });
+  if(error){
+    await sbClient.auth.signInAnonymously().catch(()=>{});
+    throw formatAuthError(error);
+  }
+  if(data.session){
+    authSession = data.session;
+    myUserId = data.session.user.id;
+    profileCache.email = normalized;
+    scheduleStatus = 'Live — admin schedule control';
+    await refreshFromSupabase();
+    return 'signed_in';
+  }
+  return 'check_email';
 }
 
 async function signOutUser(){

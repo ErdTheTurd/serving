@@ -279,6 +279,8 @@
   .auth-block{margin:16px 0; padding:14px; background:var(--tint); border-radius:8px; border:1px solid var(--border-soft); text-align:left;}
   .auth-block input{width:100%; padding:10px 12px; border:1px solid var(--border-soft); border-radius:8px; font-family:'EB Garamond',serif; font-size:16px; margin-bottom:8px; box-sizing:border-box;}
   .auth-note{font-size:13px; color:var(--ink-soft); margin:8px 0 0; line-height:1.45;}
+  .otp-input{letter-spacing:6px; font-size:22px; text-align:center; font-family:'Cinzel',serif;}
+  .auth-checklist{font-size:12.5px; color:var(--ink-soft); margin-top:10px; padding-left:18px; line-height:1.5;}
   .admin-form{display:grid; gap:8px; margin-bottom:14px; padding:12px; background:var(--tint); border-radius:8px; border:1px solid var(--border-soft);}
   .admin-form input, .admin-form select{padding:8px 10px; border:1px solid var(--border-soft); border-radius:6px; font-family:'EB Garamond',serif; font-size:15px;}
   .admin-form label{font-family:'Cinzel',serif; font-size:10px; letter-spacing:1px; text-transform:uppercase; color:var(--ink-soft);}
@@ -983,6 +985,7 @@ function renderProfilePanel(){
   const admin = isScheduleAdmin();
   const upcoming = getMyUpcomingSlots().length;
   const signedIn = !!email;
+  const pendingEmail = getPendingSignInEmail();
   return `
     <div class="profile-header">
       <label class="avatar-picker">
@@ -1000,11 +1003,31 @@ function renderProfilePanel(){
         <div style="font-size:15px;">Signed in as <strong>${email}</strong></div>
         ${admin ? '<p class="auth-note">You can manage the parish schedule under Schedule → Manage.</p>' : ''}
         <button class="begin-btn ghost" id="signOutBtn" style="margin-top:10px;">Sign Out</button>
+      ` : pendingEmail ? `
+        <label class="field-label">Check your email</label>
+        <p class="auth-note">Sent to <strong>${pendingEmail}</strong>. Click the sign-in link, or enter the 6-digit code below.</p>
+        <input type="text" id="otpCode" class="otp-input" placeholder="000000" maxlength="8" inputmode="numeric" autocomplete="one-time-code">
+        <button class="begin-btn" id="verifyOtpBtn" style="margin-top:8px;">Verify Code</button>
+        <button class="begin-btn ghost" id="cancelOtpBtn" style="margin-top:8px;">Cancel</button>
       ` : `
-        <label class="field-label">Sign in with email</label>
+        <label class="field-label">Sign in with password (works without email)</label>
+        <input type="email" id="signInEmailPw" placeholder="erdunn706@gmail.com">
+        <input type="password" id="signInPassword" placeholder="Password" autocomplete="current-password">
+        <button class="begin-btn" id="signInPwBtn">Sign In</button>
+        <button class="begin-btn ghost" id="registerAdminBtn" style="margin-top:8px;">Create Admin Account</button>
+        <p class="auth-note">First time? Tap <strong>Create Admin Account</strong> with your admin email + password (8+ chars). No email needed if Supabase has Confirm Email off.</p>
+        <hr style="border:none; border-top:1px dashed var(--border-soft); margin:14px 0;">
+        <label class="field-label">Or email sign-in link</label>
         <input type="email" id="signInEmail" placeholder="your@email.com">
-        <button class="begin-btn" id="signInBtn">Send Sign-In Link</button>
-        <p class="auth-note">Parish coordinators: sign in with your admin email to manage the schedule. Everyone else can use the app without signing in.</p>
+        <button class="begin-btn ghost" id="signInBtn">Send Sign-In Link</button>
+        <ul class="auth-checklist">
+          <li>Resend → verify <strong>fsspserve.com</strong> domain</li>
+          <li>Supabase SMTP sender: <strong>no-reply@fsspserve.com</strong></li>
+          <li>Host <strong>smtp.resend.com</strong> port <strong>587</strong>, user <strong>resend</strong></li>
+          <li>Password = full <strong>re_...</strong> API key (Full Access)</li>
+          <li>Add <strong>https://fsspserve.com</strong> to Supabase redirect URLs</li>
+          <li>Check <strong>Resend → Logs</strong> if still failing</li>
+        </ul>
       `}
     </div>
     <div class="stat-block">
@@ -1102,10 +1125,49 @@ function wireProfilePanel(){
       signInBtn.disabled = true;
       try{
         await signInWithEmail(emailInp.value);
-        alert('Check your email for a sign-in link. After clicking it, return here and refresh.');
-      }catch(e){ alert(e.message || 'Could not send sign-in link'); signInBtn.disabled = false; }
+        render();
+      }catch(e){ alert(e.message || 'Could not send email'); signInBtn.disabled = false; }
     };
   }
+  const signInPwBtn = document.getElementById('signInPwBtn');
+  if(signInPwBtn){
+    signInPwBtn.onclick = async ()=>{
+      signInPwBtn.disabled = true;
+      try{
+        await signInWithPassword(
+          document.getElementById('signInEmailPw').value,
+          document.getElementById('signInPassword').value
+        );
+        render();
+      }catch(e){ alert(e.message); signInPwBtn.disabled = false; }
+    };
+  }
+  const registerAdminBtn = document.getElementById('registerAdminBtn');
+  if(registerAdminBtn){
+    registerAdminBtn.onclick = async ()=>{
+      registerAdminBtn.disabled = true;
+      try{
+        const result = await registerAdminAccount(
+          document.getElementById('signInEmailPw').value,
+          document.getElementById('signInPassword').value
+        );
+        if(result === 'signed_in') render();
+        else alert('Account created — check email to confirm, or disable Confirm Email in Supabase.');
+      }catch(e){ alert(e.message); registerAdminBtn.disabled = false; }
+    };
+  }
+  const verifyOtpBtn = document.getElementById('verifyOtpBtn');
+  if(verifyOtpBtn){
+    verifyOtpBtn.onclick = async ()=>{
+      verifyOtpBtn.disabled = true;
+      try{
+        await verifyEmailOtp(getPendingSignInEmail(), document.getElementById('otpCode').value);
+        render();
+      }catch(e){ alert(e.message); verifyOtpBtn.disabled = false; }
+    };
+  }
+  const cancelOtpBtn = document.getElementById('cancelOtpBtn');
+  if(cancelOtpBtn) cancelOtpBtn.onclick = ()=>{ clearPendingSignInEmail(); render(); };
   const signOutBtn = document.getElementById('signOutBtn');
   if(signOutBtn){
     signOutBtn.onclick = async ()=>{
