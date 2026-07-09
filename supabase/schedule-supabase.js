@@ -263,10 +263,57 @@ async function signInWithEmail(email){
   if(!normalized.includes('@')) throw new Error('Enter a valid email');
   const { error } = await sbClient.auth.signInWithOtp({
     email: normalized,
-    options: { emailRedirectTo: window.location.origin + window.location.pathname }
+    options: { shouldCreateUser: true }
   });
-  if(error) throw error;
+  if(error) throw formatAuthError(error);
+  lsSet('altar_pendingEmail', normalized);
   return normalized;
+}
+
+async function verifyEmailOtp(email, token){
+  if(scheduleBackend !== 'supabase') throw new Error('Sign-in requires Supabase');
+  const normalized = email.trim().toLowerCase();
+  const code = token.trim().replace(/\D/g, '');
+  if(code.length < 6) throw new Error('Enter the 6-digit code from your email');
+  const { data, error } = await sbClient.auth.verifyOtp({ email: normalized, token: code, type: 'email' });
+  if(error) throw formatAuthError(error);
+  authSession = data.session;
+  myUserId = data.session.user.id;
+  profileCache.email = (data.session.user.email || normalized).toLowerCase();
+  lsSet('altar_pendingEmail', '');
+  scheduleStatus = isScheduleAdmin() ? 'Live — admin schedule control' : 'Live — synced with parish schedule';
+  await refreshFromSupabase();
+  return true;
+}
+
+function getPendingSignInEmail(){ return lsGet('altar_pendingEmail', ''); }
+function clearPendingSignInEmail(){ lsSet('altar_pendingEmail', ''); }
+
+function formatAuthError(error){
+  const msg = (error && (error.message || error.msg || error.error_description)) || 'Sign-in failed';
+  const status = error && (error.status || error.code);
+  if(status === 504 || /timed out|timeout|504/i.test(msg)) return new Error('Email server timed out (504). Hostinger SMTP is too slow — switch to Resend, or use password sign-in below.');
+  if(/rate limit|too many/i.test(msg)) return new Error('Too many attempts — wait a few minutes.');
+  if(/smtp|mail|email.*send|delivery/i.test(msg)) return new Error('Email could not be sent. Use Resend SMTP or password sign-in below.');
+  if(/invalid login|invalid credentials|invalid/i.test(msg)) return new Error('Wrong email or password.');
+  return new Error(msg);
+}
+
+async function signInWithPassword(email, password){
+  if(scheduleBackend !== 'supabase') throw new Error('Sign-in requires Supabase');
+  const normalized = email.trim().toLowerCase();
+  if(!normalized.includes('@')) throw new Error('Enter a valid email');
+  if(!password) throw new Error('Enter your password');
+  await sbClient.auth.signOut();
+  const { data, error } = await sbClient.auth.signInWithPassword({ email: normalized, password });
+  if(error) throw formatAuthError(error);
+  authSession = data.session;
+  myUserId = data.session.user.id;
+  profileCache.email = (data.session.user.email || normalized).toLowerCase();
+  lsSet('altar_pendingEmail', '');
+  scheduleStatus = isScheduleAdmin() ? 'Live — admin schedule control' : 'Live — synced with parish schedule';
+  await refreshFromSupabase();
+  return true;
 }
 
 async function signOutUser(){
