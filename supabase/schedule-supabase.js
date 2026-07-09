@@ -204,6 +204,56 @@ function subscribeSchedule(){
     .subscribe();
 }
 
+function getAuthRedirectUrl(){
+  return window.location.origin + window.location.pathname;
+}
+
+async function handleAuthCallback(){
+  if(!sbClient) return null;
+  const url = new URL(window.location.href);
+  const code = url.searchParams.get('code');
+  if(code){
+    const { data, error } = await sbClient.auth.exchangeCodeForSession(code);
+    if(error) throw formatAuthError(error);
+    authSession = data.session;
+    myUserId = data.session?.user?.id || myUserId;
+    if(data.session?.user?.email) profileCache.email = data.session.user.email.toLowerCase();
+    lsSet('altar_pendingEmail', '');
+    lsSet('altar_authPending', '');
+    window.history.replaceState({}, '', url.pathname);
+    return data.session;
+  }
+  if(window.location.hash.includes('access_token')){
+    await sbClient.auth.getSession();
+    window.history.replaceState({}, '', url.pathname);
+  }
+  return null;
+}
+
+function getPendingSignInEmail(){ return lsGet('altar_pendingEmail', ''); }
+function getAuthPending(){ return lsGet('altar_authPending', ''); }
+function clearPendingSignInEmail(){
+  lsSet('altar_pendingEmail', '');
+  lsSet('altar_authPending', '');
+}
+
+function formatAuthError(error){
+  const msg = (error && (error.message || error.msg || error.error_description)) || 'Authentication failed';
+  const id = error && error.error_id;
+  const suffix = id ? ` (log: ${id})` : '';
+  if(/Error sending confirmation|unexpected_failure|500/i.test(msg)){
+    return new Error(
+      'Could not send email. Verify fsspserve.com in Resend, set Supabase sender to no-reply@fsspserve.com, ' +
+      'SMTP smtp.resend.com:587 user resend password re_ API key. Check Resend → Logs.' + suffix
+    );
+  }
+  if(/email not confirmed/i.test(msg)) return new Error('Confirm your email first — click the link we sent you.' + suffix);
+  if(/rate limit|too many/i.test(msg)) return new Error('Too many attempts — wait a few minutes.' + suffix);
+  if(/invalid login|invalid credentials/i.test(msg)) return new Error('Wrong email or password, or email not yet confirmed.' + suffix);
+  if(/already registered|already exists/i.test(msg)) return new Error('Account exists — sign in instead.' + suffix);
+  return new Error(msg + suffix);
+}
+
 async function initScheduleBackend(){
   seedScheduleLocalIfEmpty();
   scheduleCache = loadScheduleLocal() || [];
@@ -216,22 +266,33 @@ async function initScheduleBackend(){
   }
 
   try{
-    sbClient = supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
-    sbClient.auth.onAuthStateChange((_event, session)=>{
+    sbClient = supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
+      auth: { persistSession: true, detectSessionInUrl: true, flowType: 'pkce' }
+    });
+    sbClient.auth.onAuthStateChange((event, session)=>{
       authSession = session;
       if(session?.user?.email) profileCache.email = session.user.email.toLowerCase();
-      if(typeof window.onScheduleUpdated === 'function') window.onScheduleUpdated();
+      if((event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') && typeof window.onScheduleUpdated === 'function'){
+        window.onScheduleUpdated();
+      }
     });
 
+    try{ await handleAuthCallback(); }catch(e){ console.warn('Auth callback:', e.message); }
+
     let { data: { session } } = await sbClient.auth.getSession();
-    if(!session){
-      const { data, error } = await sbClient.auth.signInAnonymously();
-      if(error) throw error;
-      session = data.session;
+    if(session?.user?.email){
+      authSession = session;
+      myUserId = session.user.id;
+      profileCache.email = session.user.email.toLowerCase();
+    } else {
+      if(!session){
+        const { data, error } = await sbClient.auth.signInAnonymously();
+        if(error) throw error;
+        session = data.session;
+      }
+      authSession = session;
+      myUserId = session.user.id;
     }
-    authSession = session;
-    myUserId = session.user.id;
-    profileCache.email = (session.user.email || '').toLowerCase();
     scheduleBackend = 'supabase';
     scheduleStatus = isScheduleAdmin()
       ? 'Live — admin schedule control'
@@ -257,16 +318,81 @@ async function initScheduleBackend(){
   }
 }
 
+async function signUpWithEmail(email, password){
+  if(scheduleBackend !== 'supabase') throw new Error('Sign-in requires Supabase');
+  const normalized = email.trim().toLowerCase();
+  if(!normalized.includes('@')) throw new Error('Enter a valid email');
+  if(!password || password.length < 8) throw new Error('Password must be at least 8 characters');
+  await sbClient.auth.signOut();
+  const { data, error } = await sbClient.auth.signUp({
+    email: normalized,
+    password,
+    options: { emailRedirectTo: getAuthRedirectUrl() }
+  });
+  if(error) throw formatAuthError(error);
+  lsSet('altar_pendingEmail', normalized);
+  lsSet('altar_authPending', 'signup');
+  if(data.session){
+    authSession = data.session;
+    myUserId = data.session.user.id;
+    profileCache.email = normalized;
+    lsSet('altar_pendingEmail', '');
+    lsSet('altar_authPending', '');
+    await refreshFromSupabase();
+  }
+  return normalized;
+}
+
 async function signInWithEmail(email){
   if(scheduleBackend !== 'supabase') throw new Error('Sign-in requires Supabase');
   const normalized = email.trim().toLowerCase();
   if(!normalized.includes('@')) throw new Error('Enter a valid email');
   const { error } = await sbClient.auth.signInWithOtp({
     email: normalized,
-    options: { emailRedirectTo: window.location.origin + window.location.pathname }
+    options: { shouldCreateUser: false, emailRedirectTo: getAuthRedirectUrl() }
   });
-  if(error) throw error;
+  if(error) throw formatAuthError(error);
+  lsSet('altar_pendingEmail', normalized);
+  lsSet('altar_authPending', 'signin');
   return normalized;
+}
+
+async function verifyEmailOtp(email, token){
+  if(scheduleBackend !== 'supabase') throw new Error('Sign-in requires Supabase');
+  const normalized = email.trim().toLowerCase();
+  const code = token.trim().replace(/\D/g, '');
+  if(code.length < 6) throw new Error('Enter the 6-digit code from your email');
+  const { data, error } = await sbClient.auth.verifyOtp({ email: normalized, token: code, type: 'email' });
+  if(error) throw formatAuthError(error);
+  authSession = data.session;
+  myUserId = data.session.user.id;
+  profileCache.email = (data.session.user.email || normalized).toLowerCase();
+  lsSet('altar_pendingEmail', '');
+  lsSet('altar_authPending', '');
+  scheduleStatus = isScheduleAdmin() ? 'Live — admin schedule control' : 'Live — synced with parish schedule';
+  await refreshFromSupabase();
+  return true;
+}
+
+async function signInWithPassword(email, password){
+  if(scheduleBackend !== 'supabase') throw new Error('Sign-in requires Supabase');
+  const normalized = email.trim().toLowerCase();
+  if(!normalized.includes('@')) throw new Error('Enter a valid email');
+  if(!password) throw new Error('Enter your password');
+  await sbClient.auth.signOut();
+  const { data, error } = await sbClient.auth.signInWithPassword({ email: normalized, password });
+  if(error){
+    await sbClient.auth.signInAnonymously().catch(()=>{});
+    throw formatAuthError(error);
+  }
+  authSession = data.session;
+  myUserId = data.session.user.id;
+  profileCache.email = normalized;
+  lsSet('altar_pendingEmail', '');
+  lsSet('altar_authPending', '');
+  scheduleStatus = isScheduleAdmin() ? 'Live — admin schedule control' : 'Live — synced with parish schedule';
+  await refreshFromSupabase();
+  return true;
 }
 
 async function signOutUser(){

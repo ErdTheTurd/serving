@@ -279,6 +279,7 @@
   .auth-block{margin:16px 0; padding:14px; background:var(--tint); border-radius:8px; border:1px solid var(--border-soft); text-align:left;}
   .auth-block input{width:100%; padding:10px 12px; border:1px solid var(--border-soft); border-radius:8px; font-family:'EB Garamond',serif; font-size:16px; margin-bottom:8px; box-sizing:border-box;}
   .auth-note{font-size:13px; color:var(--ink-soft); margin:8px 0 0; line-height:1.45;}
+  .otp-input{letter-spacing:6px; font-size:22px; text-align:center; font-family:'Cinzel',serif;}
   .admin-form{display:grid; gap:8px; margin-bottom:14px; padding:12px; background:var(--tint); border-radius:8px; border:1px solid var(--border-soft);}
   .admin-form input, .admin-form select{padding:8px 10px; border:1px solid var(--border-soft); border-radius:6px; font-family:'EB Garamond',serif; font-size:15px;}
   .admin-form label{font-family:'Cinzel',serif; font-size:10px; letter-spacing:1px; text-transform:uppercase; color:var(--ink-soft);}
@@ -549,7 +550,8 @@ let state = {
   elevenKey: lsGet('altar_elevenKey', ''),
   elevenVoiceId: lsGet('altar_elevenVoiceId', ''),
   elevenCache: {},
-  scheduleSubTab: lsGet('altar_scheduleSubTab', 'upcoming')
+  scheduleSubTab: lsGet('altar_scheduleSubTab', 'upcoming'),
+  authTab: lsGet('altar_authTab', 'signup')
 };
 
 function loadProgress(){
@@ -983,6 +985,9 @@ function renderProfilePanel(){
   const admin = isScheduleAdmin();
   const upcoming = getMyUpcomingSlots().length;
   const signedIn = !!email;
+  const pendingEmail = getPendingSignInEmail();
+  const authPending = getAuthPending();
+  const authTab = state.authTab;
   return `
     <div class="profile-header">
       <label class="avatar-picker">
@@ -1000,11 +1005,33 @@ function renderProfilePanel(){
         <div style="font-size:15px;">Signed in as <strong>${email}</strong></div>
         ${admin ? '<p class="auth-note">You can manage the parish schedule under Schedule → Manage.</p>' : ''}
         <button class="begin-btn ghost" id="signOutBtn" style="margin-top:10px;">Sign Out</button>
+      ` : pendingEmail ? `
+        <label class="field-label">${authPending === 'signup' ? 'Confirm your email' : 'Check your email'}</label>
+        <p class="auth-note">We sent an email to <strong>${pendingEmail}</strong>. Click the confirmation link to activate your account, then you'll return here signed in.</p>
+        <p class="auth-note">Or enter the 6-digit code from the email:</p>
+        <input type="text" id="otpCode" class="otp-input" placeholder="000000" maxlength="8" inputmode="numeric" autocomplete="one-time-code">
+        <button class="begin-btn" id="verifyOtpBtn" style="margin-top:8px;">Verify Code</button>
+        <button class="begin-btn ghost" id="cancelOtpBtn" style="margin-top:8px;">Cancel</button>
       ` : `
-        <label class="field-label">Sign in with email</label>
-        <input type="email" id="signInEmail" placeholder="your@email.com">
-        <button class="begin-btn" id="signInBtn">Send Sign-In Link</button>
-        <p class="auth-note">Parish coordinators: sign in with your admin email to manage the schedule. Everyone else can use the app without signing in.</p>
+        <div class="sched-subtabs" style="margin-bottom:12px;">
+          <button data-auth-tab="signup" class="${authTab==='signup'?'active':''}">Sign Up</button>
+          <button data-auth-tab="signin" class="${authTab==='signin'?'active':''}">Sign In</button>
+        </div>
+        ${authTab === 'signup' ? `
+          <label class="field-label">Create account</label>
+          <input type="email" id="signUpEmail" placeholder="erdunn706@gmail.com">
+          <input type="password" id="signUpPassword" placeholder="Password (8+ characters)" autocomplete="new-password">
+          <button class="begin-btn" id="signUpBtn">Create Account</button>
+          <p class="auth-note">You <strong>must confirm your email</strong> before signing in. We'll send a confirmation link to your inbox.</p>
+        ` : `
+          <label class="field-label">Sign in</label>
+          <input type="email" id="signInEmail" placeholder="your@email.com">
+          <button class="begin-btn" id="signInLinkBtn">Send Sign-In Link</button>
+          <hr style="border:none; border-top:1px dashed var(--border-soft); margin:14px 0;">
+          <input type="password" id="signInPassword" placeholder="Password" autocomplete="current-password">
+          <button class="begin-btn ghost" id="signInPwBtn">Sign In with Password</button>
+          <p class="auth-note">Password and sign-in link only work after you've confirmed your email.</p>
+        `}
       `}
     </div>
     <div class="stat-block">
@@ -1095,17 +1122,57 @@ function wireProfilePanel(){
       render();
     };
   }
-  const signInBtn = document.getElementById('signInBtn');
-  if(signInBtn){
-    signInBtn.onclick = async ()=>{
-      const emailInp = document.getElementById('signInEmail');
-      signInBtn.disabled = true;
+  app.querySelectorAll('[data-auth-tab]').forEach(b=>{
+    b.onclick = ()=>{ state.authTab = b.dataset.authTab; lsSet('altar_authTab', state.authTab); render(); };
+  });
+  const signUpBtn = document.getElementById('signUpBtn');
+  if(signUpBtn){
+    signUpBtn.onclick = async ()=>{
+      signUpBtn.disabled = true;
       try{
-        await signInWithEmail(emailInp.value);
-        alert('Check your email for a sign-in link. After clicking it, return here and refresh.');
-      }catch(e){ alert(e.message || 'Could not send sign-in link'); signInBtn.disabled = false; }
+        await signUpWithEmail(
+          document.getElementById('signUpEmail').value,
+          document.getElementById('signUpPassword').value
+        );
+        render();
+      }catch(e){ alert(e.message); signUpBtn.disabled = false; }
     };
   }
+  const signInLinkBtn = document.getElementById('signInLinkBtn');
+  if(signInLinkBtn){
+    signInLinkBtn.onclick = async ()=>{
+      signInLinkBtn.disabled = true;
+      try{
+        await signInWithEmail(document.getElementById('signInEmail').value);
+        render();
+      }catch(e){ alert(e.message); signInLinkBtn.disabled = false; }
+    };
+  }
+  const signInPwBtn = document.getElementById('signInPwBtn');
+  if(signInPwBtn){
+    signInPwBtn.onclick = async ()=>{
+      signInPwBtn.disabled = true;
+      try{
+        await signInWithPassword(
+          document.getElementById('signInEmail').value,
+          document.getElementById('signInPassword').value
+        );
+        render();
+      }catch(e){ alert(e.message); signInPwBtn.disabled = false; }
+    };
+  }
+  const verifyOtpBtn = document.getElementById('verifyOtpBtn');
+  if(verifyOtpBtn){
+    verifyOtpBtn.onclick = async ()=>{
+      verifyOtpBtn.disabled = true;
+      try{
+        await verifyEmailOtp(getPendingSignInEmail(), document.getElementById('otpCode').value);
+        render();
+      }catch(e){ alert(e.message); verifyOtpBtn.disabled = false; }
+    };
+  }
+  const cancelOtpBtn = document.getElementById('cancelOtpBtn');
+  if(cancelOtpBtn) cancelOtpBtn.onclick = ()=>{ clearPendingSignInEmail(); render(); };
   const signOutBtn = document.getElementById('signOutBtn');
   if(signOutBtn){
     signOutBtn.onclick = async ()=>{

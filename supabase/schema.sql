@@ -2,9 +2,19 @@
 -- Project: https://rhcambnracldfibsqjdg.supabase.co
 -- Safe to re-run: uses IF NOT EXISTS / DROP POLICY IF EXISTS
 
--- 1) Enable auth providers:
---    Authentication → Providers → Anonymous → Enable
---    Authentication → Providers → Email → Enable (magic link)
+-- 1) Auth providers (Authentication → Providers):
+--    Anonymous → Enable
+--    Email → Enable
+--    Email → Confirm email → ON (required)
+--
+-- 2) Resend SMTP (Authentication → SMTP Settings):
+--    Host: smtp.resend.com  |  Port: 587  |  User: resend
+--    Password: full re_ API key  |  Sender: no-reply@fsspserve.com
+--    Domain fsspserve.com must be verified in Resend
+--
+-- 3) Redirect URLs: https://fsspserve.com (Authentication → URL Configuration)
+--
+-- 4) Email templates must include {{ .ConfirmationURL }} or {{ .Token }}
 
 -- Profiles (one row per signed-in server)
 create table if not exists public.profiles (
