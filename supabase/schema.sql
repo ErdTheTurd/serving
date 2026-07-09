@@ -2,9 +2,17 @@
 -- Project: https://rhcambnracldfibsqjdg.supabase.co
 -- Safe to re-run: uses IF NOT EXISTS / DROP POLICY IF EXISTS
 
--- 1) Enable auth providers:
---    Authentication → Providers → Anonymous → Enable
---    Authentication → Providers → Email → Enable (magic link)
+-- 2) Resend SMTP (Supabase → Authentication → SMTP Settings):
+--    Host: smtp.resend.com  |  Port: 587  |  User: resend
+--    Password: full re_ API key (Full Access recommended)
+--    Sender email: no-reply@fsspserve.com  (MUST be verified domain in Resend)
+--    Check Resend → Logs if emails fail — domain must show green verified
+--
+-- 3) For password sign-in without email:
+--    Authentication → Providers → Email → disable "Confirm email"
+--    Then use Profile → Create Admin Account
+--
+-- 4) Redirect URLs: add https://fsspserve.com
 
 -- Profiles (one row per signed-in server)
 create table if not exists public.profiles (
