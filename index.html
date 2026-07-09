@@ -270,7 +270,19 @@
   .slot-trade{font-size:11px; color:var(--gold); font-family:'Cinzel',serif; letter-spacing:1px; text-transform:uppercase;}
   .slot-actions{display:flex; flex-wrap:wrap; gap:6px; justify-content:flex-end;}
   .profile-header{text-align:center; margin-bottom:18px;}
-  .profile-avatar{width:64px; height:64px; border-radius:50%; background:linear-gradient(135deg,var(--ic-blue),var(--ic-blue-light)); color:#fff; font-family:'Cinzel',serif; font-size:24px; line-height:64px; margin:0 auto 10px;}
+  .profile-avatar{width:64px; height:64px; border-radius:50%; background:linear-gradient(135deg,var(--ic-blue),var(--ic-blue-light)); color:#fff; font-family:'Cinzel',serif; font-size:24px; line-height:64px; margin:0 auto 10px; overflow:hidden; display:flex; align-items:center; justify-content:center;}
+  .profile-avatar img{width:100%; height:100%; object-fit:cover;}
+  .avatar-picker{display:block; cursor:pointer; margin:0 auto 8px; width:fit-content;}
+  .avatar-picker input{display:none;}
+  .avatar-hint{font-size:12px; color:var(--ic-blue); letter-spacing:.5px; display:block; margin-top:4px;}
+  .admin-badge{display:inline-block; background:var(--rubric); color:#fff; font-family:'Cinzel',serif; font-size:10px; letter-spacing:1px; text-transform:uppercase; padding:3px 10px; border-radius:12px; margin-top:6px;}
+  .auth-block{margin:16px 0; padding:14px; background:var(--tint); border-radius:8px; border:1px solid var(--border-soft); text-align:left;}
+  .auth-block input{width:100%; padding:10px 12px; border:1px solid var(--border-soft); border-radius:8px; font-family:'EB Garamond',serif; font-size:16px; margin-bottom:8px; box-sizing:border-box;}
+  .auth-note{font-size:13px; color:var(--ink-soft); margin:8px 0 0; line-height:1.45;}
+  .admin-form{display:grid; gap:8px; margin-bottom:14px; padding:12px; background:var(--tint); border-radius:8px; border:1px solid var(--border-soft);}
+  .admin-form input, .admin-form select{padding:8px 10px; border:1px solid var(--border-soft); border-radius:6px; font-family:'EB Garamond',serif; font-size:15px;}
+  .admin-form label{font-family:'Cinzel',serif; font-size:10px; letter-spacing:1px; text-transform:uppercase; color:var(--ink-soft);}
+  .mini-btn.admin{background:var(--rubric); color:#fff; border-color:var(--rubric);}
   .points-badge{display:inline-block; background:var(--gold-bright); color:#1a1820; font-family:'Cinzel',serif; font-size:12px; letter-spacing:1px; padding:4px 12px; border-radius:16px; margin-top:6px;}
   .sched-subtabs{display:flex; gap:6px; margin-bottom:12px; flex-wrap:wrap;}
   .sched-subtabs button{font-family:'Cinzel',serif; font-size:10px; letter-spacing:1px; text-transform:uppercase; padding:7px 12px; border:1px solid var(--border-soft); border-radius:20px; background:none; cursor:pointer; color:var(--ink-soft);}
@@ -847,6 +859,15 @@ function renderProgressPanel(){
       </div>`).join('')}` : '<p style="font-size:14px;color:var(--ink-soft);">Complete a practice session to see your weakest lines here.</p>'}`;
 }
 
+function renderAvatarHtml(p, sizeClass){
+  const initial = (p.name || 'S').charAt(0).toUpperCase();
+  const cls = sizeClass || 'profile-avatar';
+  if(p.avatarUrl){
+    return `<div class="${cls}"><img src="${p.avatarUrl}" alt="Profile"></div>`;
+  }
+  return `<div class="${cls}">${initial}</div>`;
+}
+
 function renderSlotRow(slot, role){
   const label = role === 'ac1' ? 'AC1' : 'AC2';
   const assign = slotAssignee(slot, role);
@@ -866,6 +887,8 @@ function renderSlotRow(slot, role){
            <button class="mini-btn" data-sched-action="cancel" data-id="${slot.id}" data-role="${role}">Cancel</button>`;
     } else if(assign.tradeOffer){
       actions = `<button class="mini-btn" data-sched-action="accept-trade" data-id="${slot.id}" data-role="${role}">Take Trade</button>`;
+    } else if(isScheduleAdmin() && assign){
+      actions = `<button class="mini-btn admin" data-sched-action="admin-clear" data-id="${slot.id}" data-role="${role}">Clear</button>`;
     }
   }
   return `<div class="slot-row">
@@ -884,6 +907,12 @@ function renderSchedCard(slot){
     extra = `<button class="begin-btn" style="margin-top:10px; width:100%;" data-sched-action="served" data-id="${slot.id}">Mark Served (+${SCHEDULE_POINTS.serve} pts)</button>`;
   } else if(slot.served){
     extra = `<div class="score-chip score-good" style="margin-top:8px;">Served ✓</div>`;
+  }
+  if(isScheduleAdmin()){
+    extra += `<div class="slot-actions" style="margin-top:10px; justify-content:flex-start;">
+      <button class="mini-btn admin" data-sched-action="admin-delete" data-id="${slot.id}">Delete Mass</button>
+      ${!slot.served ? `<button class="mini-btn admin" data-sched-action="served" data-id="${slot.id}">Mark Served</button>` : ''}
+    </div>`;
   }
   return `<div class="sched-card ${mine?'mine':''} ${trade?'trade-offer':''}">
     <div class="sched-head">
@@ -913,15 +942,30 @@ function renderSchedulePanel(){
     if(past.length){
       list += `<label class="field-label" style="margin-top:16px;">Recent — mark served for points</label>${past.map(renderSchedCard).join('')}`;
     }
-  } else {
+  } else if(sub === 'trades'){
     const board = getTradeBoard();
     list = board.length ? board.map(renderSchedCard).join('') : '<p style="color:var(--ink-soft);">No open spots or trade offers right now.</p>';
+  } else if(sub === 'manage' && isScheduleAdmin()){
+    list = `
+      <div class="admin-form">
+        <label>Add Mass to schedule</label>
+        <input type="date" id="adminDate" value="${new Date().toISOString().slice(0,10)}">
+        <select id="adminTime">
+          <option>7:30 AM</option><option>12:10 PM</option><option>6:30 PM</option>
+        </select>
+        <input type="text" id="adminLabel" placeholder="Low Mass" value="Low Mass">
+        <input type="text" id="adminPriest" placeholder="Celebrant" value="Fr. FSSP">
+        <button class="begin-btn" id="adminAddBtn" style="margin-top:4px;">Add Mass</button>
+      </div>
+      <p style="font-size:13px; color:var(--ink-soft);">As admin you can add or delete Masses, clear any server spot, and mark served.</p>`
+      + (upcoming.length ? upcoming.map(renderSchedCard).join('') : '<p style="color:var(--ink-soft);">No Masses scheduled.</p>');
   }
 
   const subtabs = [
     {id:'upcoming', label:'All Masses'},
     {id:'my-shifts', label:'My Shifts'},
-    {id:'trades', label:'Open & Trades'}
+    {id:'trades', label:'Open & Trades'},
+    ...(isScheduleAdmin() ? [{id:'manage', label:'Manage'}] : [])
   ];
   return `
     <p style="font-size:13px; color:var(--ink-soft); margin-top:0;">${getScheduleStatus()}</p>
@@ -935,14 +979,33 @@ function renderSchedulePanel(){
 
 function renderProfilePanel(){
   const p = loadProfile();
-  const initial = (p.name || 'S').charAt(0).toUpperCase();
+  const email = getAuthEmail();
+  const admin = isScheduleAdmin();
   const upcoming = getMyUpcomingSlots().length;
+  const signedIn = !!email;
   return `
     <div class="profile-header">
-      <div class="profile-avatar">${initial}</div>
+      <label class="avatar-picker">
+        ${renderAvatarHtml(p)}
+        <input type="file" id="avatarInput" accept="image/jpeg,image/png,image/webp,image/gif">
+        <span class="avatar-hint">Change photo</span>
+      </label>
       <input type="text" id="profileName" placeholder="Your name" value="${p.name || ''}"
         style="width:100%; max-width:240px; padding:10px 12px; border:1px solid var(--border-soft); border-radius:8px; font-family:'EB Garamond',serif; font-size:18px; text-align:center; background:var(--tint);">
       <div class="points-badge">${p.points || 0} points</div>
+      ${admin ? '<div class="admin-badge">Schedule Admin</div>' : ''}
+    </div>
+    <div class="auth-block">
+      ${signedIn ? `
+        <div style="font-size:15px;">Signed in as <strong>${email}</strong></div>
+        ${admin ? '<p class="auth-note">You can manage the parish schedule under Schedule → Manage.</p>' : ''}
+        <button class="begin-btn ghost" id="signOutBtn" style="margin-top:10px;">Sign Out</button>
+      ` : `
+        <label class="field-label">Sign in with email</label>
+        <input type="email" id="signInEmail" placeholder="your@email.com">
+        <button class="begin-btn" id="signInBtn">Send Sign-In Link</button>
+        <p class="auth-note">Parish coordinators: sign in with your admin email to manage the schedule. Everyone else can use the app without signing in.</p>
+      `}
     </div>
     <div class="stat-block">
       <div class="label">Masses Served</div>
@@ -978,6 +1041,8 @@ function wireSchedulePanel(){
         else if(action === 'withdraw') await withdrawTrade(id, role);
         else if(action === 'accept-trade') await takeTrade(id, role);
         else if(action === 'served') await markMassServed(id);
+        else if(action === 'admin-clear') await adminClearRole(id, role);
+        else if(action === 'admin-delete'){ if(confirm('Delete this Mass from the schedule?')) await adminDeleteSlot(id); }
       }catch(e){
         alert(e.message || 'Could not update schedule');
       }
@@ -994,6 +1059,21 @@ function wireSchedulePanel(){
       render();
     };
   }
+  const addBtn = document.getElementById('adminAddBtn');
+  if(addBtn){
+    addBtn.onclick = async ()=>{
+      addBtn.disabled = true;
+      try{
+        await adminAddSlot({
+          date: document.getElementById('adminDate').value,
+          time: document.getElementById('adminTime').value,
+          label: document.getElementById('adminLabel').value.trim(),
+          priest: document.getElementById('adminPriest').value.trim()
+        });
+      }catch(e){ alert(e.message); }
+      render();
+    };
+  }
 }
 
 function wireProfilePanel(){
@@ -1001,6 +1081,46 @@ function wireProfilePanel(){
   if(inp){
     inp.onchange = inp.onblur = async ()=>{
       try{ await saveProfileName(inp.value.trim()); }catch(e){ alert(e.message); }
+      render();
+    };
+  }
+  const avatarInput = document.getElementById('avatarInput');
+  if(avatarInput){
+    avatarInput.onchange = async ()=>{
+      const file = avatarInput.files && avatarInput.files[0];
+      if(!file) return;
+      try{
+        await saveProfileAvatar(file);
+      }catch(e){ alert(e.message || 'Could not save photo'); }
+      render();
+    };
+  }
+  const signInBtn = document.getElementById('signInBtn');
+  if(signInBtn){
+    signInBtn.onclick = async ()=>{
+      const emailInp = document.getElementById('signInEmail');
+      signInBtn.disabled = true;
+      try{
+        await signInWithEmail(emailInp.value);
+        alert('Check your email for a sign-in link. After clicking it, return here and refresh.');
+      }catch(e){ alert(e.message || 'Could not send sign-in link'); signInBtn.disabled = false; }
+    };
+  }
+  const signOutBtn = document.getElementById('signOutBtn');
+  if(signOutBtn){
+    signOutBtn.onclick = async ()=>{
+      signOutBtn.disabled = true;
+      try{ await signOutUser(); }catch(e){ alert(e.message); }
+      render();
+    };
+  }
+  const refreshBtn = document.getElementById('refreshScheduleBtn');
+  if(refreshBtn){
+    refreshBtn.onclick = async ()=>{
+      refreshBtn.disabled = true;
+      try{
+        if(getScheduleBackend() === 'supabase') await refreshFromSupabase();
+      }catch(e){ alert(e.message); }
       render();
     };
   }
