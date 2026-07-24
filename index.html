@@ -76,6 +76,7 @@
   .rubric-note{font-size:14.5px; color:var(--ink-soft); font-style:italic;}
   .translation{margin-top:8px; font-size:14.5px; color:var(--ink-soft); font-style:normal;}
   .varies-tag{font-family:'Cinzel', serif; font-size:10px; letter-spacing:1px; text-transform:uppercase; color:var(--gold); border:1px solid var(--gold); border-radius:10px; padding:1px 8px; margin-left:8px;}
+  .info-tag{font-family:'Cinzel', serif; font-size:10px; letter-spacing:1px; text-transform:uppercase; color:var(--ink-soft); border:1px solid var(--border-soft); border-radius:10px; padding:1px 8px; margin-left:8px;}
 
   .hear-row{display:flex; align-items:center; gap:10px; margin-top:10px; flex-wrap:wrap;}
   .hear-btn, .mini-btn{
@@ -383,10 +384,16 @@ const STEPS = [
  server:"Et cum spíritu tuo.", serverT:"And with thy spirit."},
 
 {section:"Collect (at the foot of the altar)", priest:"Orémus. Aufer a nobis, quǽsumus, Dómine, iniquitátes nostras: ut ad Sancta sanctórum puris mereámur méntibus introíre. Per Christum Dóminum nostrum.", priestT:"Let us pray. Take away from us our iniquities, that we may enter with pure minds into the Holy of Holies.",
- server:"Amen.", serverT:"Amen."},
+ server:"Amen.", serverT:"Amen.", priestOnly:true},
 
 {section:"Collect (at the foot of the altar)", priest:"Orámus te, Dómine, per mérita Sanctórum tuórum, quorum relíquiæ hic sunt, et ómnium Sanctórum: ut indulgére dignéris ómnia peccáta mea.", priestT:"We beseech Thee, O Lord, by the merits of Thy Saints, to forgive me all my sins.",
- server:"Amen.", serverT:"Amen."},
+ server:"Amen.", serverT:"Amen.", priestOnly:true},
+
+{section:"Kyrie", priest:"Kýrie, eléison. Kýrie, eléison. Kýrie, eléison. Christe, eléison. Christe, eléison. Christe, eléison. Kýrie, eléison. Kýrie, eléison. Kýrie, eléison.", priestT:"Lord, have mercy (×3). Christ, have mercy (×3). Lord, have mercy (×3).",
+ server:"Kýrie, eléison. Kýrie, eléison. Kýrie, eléison. Christe, eléison. Christe, eléison. Christe, eléison. Kýrie, eléison. Kýrie, eléison. Kýrie, eléison.", serverT:"Lord, have mercy (×3). Christ, have mercy (×3). Lord, have mercy (×3)."},
+
+{section:"Gloria", priest:"(The Gloria is sung or recited by the Priest when prescribed.)", priestT:"Glory to God in the highest… (when said)", varies:true,
+ server:"Et cum spíritu tuo.", serverT:"And with thy spirit.", note:"Respond after Dominus vobiscum following the Gloria."},
 
 {section:"Before the Collect of the Day", priest:"Dóminus vobíscum.", priestT:"The Lord be with you.",
  server:"Et cum spíritu tuo.", serverT:"And with thy spirit."},
@@ -403,9 +410,12 @@ const STEPS = [
 {section:"Gospel", priest:"Sequéntia sancti Evangélii secúndum [N].", priestT:"The continuation of the holy Gospel according to [N].", varies:true,
  server:"Glória tibi, Dómine.", serverT:"Glory be to Thee, O Lord."},
 
+{section:"After the Gospel", priest:"(End of the Gospel)", priestT:"(End of the Gospel)",
+ server:"Laus tibi, Christe.", serverT:"Praise to Thee, O Christ."},
+
 {section:"Credo", priest:"(The Creed is intoned by the Priest at the middle of the altar.)", priestT:"(intoned)",
  server:"Credo in unum Deum, Patrem omnipoténtem, factórem cæli et terræ, visibílium ómnium, et invisibílium. Et in unum Dóminum Jesum Christum, Fílium Dei unigénitum. Et ex Patre natum ante ómnia sǽcula. Deum de Deo, lumen de lúmine, Deum verum de Deo vero. Génitum, non factum, consubstantiálem Patri: per quem ómnia facta sunt. Qui propter nos hómines, et propter nostram salútem descéndit de cælis. Et incarnátus est de Spíritu Sancto ex María Vírgine: et homo factus est. Crucifíxus étiam pro nobis: sub Póntio Piláto passus, et sepúltus est. Et resurréxit tértia die, secúndum Scriptúras. Et ascéndit in cælum: sedet ad déxteram Patris. Et íterum ventúrus est cum glória judicáre vivos, et mórtuos: cujus regni non erit finis. Et in Spíritum Sanctum, Dóminum, et vivificántem: qui ex Patre, Filióque procédit. Qui cum Patre, et Fílio simul adorátur, et conglorificátur: qui locútus est per Prophétas. Et unam sanctam cathólicam et apostólicam Ecclésiam. Confíteor unum baptísma in remissiónem peccatórum. Et expécto resurrectiónem mórtuorum. Et vitam ventúri sǽculi. Amen.",
- serverT:"I believe in one God, the Father almighty... and the life of the world to come. Amen."},
+ serverT:"I believe in one God, the Father almighty... and the life of the world to come. Amen.", referenceOnly:true},
 
 {section:"Before the Offertory", priest:"Dóminus vobíscum.", priestT:"The Lord be with you.",
  server:"Et cum spíritu tuo.", serverT:"And with thy spirit."},
@@ -414,7 +424,7 @@ const STEPS = [
  server:"Suscípiat Dóminus sacrifícium de mánibus tuis ad laudem et glóriam nóminis sui, ad utilitátem quoque nostram, totiúsque Ecclésiæ suæ sanctæ.", serverT:"May the Lord receive the sacrifice from thy hands, to the praise and glory of His name, to our benefit and that of all His holy Church."},
 
 {section:"Secret", priest:"[The Secret prayer is said silently, ending aloud:] ...Per ómnia sǽcula sæculórum.", priestT:"[Secret of the day, ending] ...world without end.", varies:true,
- server:"Amen.", serverT:"Amen."},
+ server:"Amen.", serverT:"Amen.", priestOnly:true},
 
 {section:"Preface", priest:"Dóminus vobíscum.", priestT:"The Lord be with you.",
  server:"Et cum spíritu tuo.", serverT:"And with thy spirit."},
@@ -426,7 +436,7 @@ const STEPS = [
  server:"Dignum et justum est.", serverT:"It is meet and just."},
 
 {section:"Sanctus", priest:"(The Priest concludes the Preface aloud and continues the Canon in silence.)", priestT:"(silent Canon begins)",
- server:"Sánctus, Sánctus, Sánctus, Dóminus Deus Sábaoth. Pleni sunt cæli et terra glória tua. Hosánna in excélsis. Benedíctus qui venit in nómine Dómini. Hosánna in excélsis.", serverT:"Holy, Holy, Holy, Lord God of Hosts. Heaven and earth are full of Thy glory. Hosanna in the highest. Blessed is He who cometh in the name of the Lord. Hosanna in the highest."},
+ server:"Sánctus, Sánctus, Sánctus, Dóminus Deus Sábaoth. Pleni sunt cæli et terra glória tua. Hosánna in excélsis. Benedíctus qui venit in nómine Dómini. Hosánna in excélsis.", serverT:"Holy, Holy, Holy, Lord God of Hosts. Heaven and earth are full of Thy glory. Hosanna in the highest. Blessed is He who cometh in the name of the Lord. Hosanna in the highest.", referenceOnly:true},
 
 {section:"End of the Canon", priest:"(The Priest, having consecrated in silence, concludes aloud:) ...Per ómnia sǽcula sæculórum.", priestT:"(silent Canon, then aloud) ...world without end.",
  server:"Amen.", serverT:"Amen."},
@@ -435,13 +445,13 @@ const STEPS = [
  server:"Sed líbera nos a malo.", serverT:"But deliver us from evil."},
 
 {section:"Pater Noster", priest:"(The Priest continues silently, then concludes aloud:) ...Per ómnia sǽcula sæculórum.", priestT:"(silent embolism, then aloud) ...world without end.",
- server:"Amen.", serverT:"Amen."},
+ server:"Amen.", serverT:"Amen.", priestOnly:true},
 
 {section:"Pax Domini", priest:"Pax Dómini sit semper vobíscum.", priestT:"May the peace of the Lord be always with you.",
  server:"Et cum spíritu tuo.", serverT:"And with thy spirit."},
 
 {section:"Agnus Dei", priest:"(Said by the Priest bowing before the Blessed Sacrament.)", priestT:"(said quietly)",
- server:"Agnus Dei, qui tollis peccáta mundi: miserére nobis. Agnus Dei, qui tollis peccáta mundi: miserére nobis. Agnus Dei, qui tollis peccáta mundi: dona nobis pacem.", serverT:"Lamb of God, who takest away the sins of the world: have mercy on us (x2)... grant us peace."},
+ server:"Agnus Dei, qui tollis peccáta mundi: miserére nobis. Agnus Dei, qui tollis peccáta mundi: miserére nobis. Agnus Dei, qui tollis peccáta mundi: dona nobis pacem.", serverT:"Lamb of God, who takest away the sins of the world: have mercy on us (x2)... grant us peace.", referenceOnly:true},
 
 {section:"Domine, non sum dignus", priest:"Ecce Agnus Dei, ecce qui tollit peccáta mundi.", priestT:"Behold the Lamb of God, behold Him who taketh away the sins of the world.",
  server:"Dómine, non sum dignus, ut intres sub tectum meum: sed tantum dic verbo, et sanábitur ánima mea. (Said three times.)", serverT:"Lord, I am not worthy that Thou shouldst enter under my roof: but only say the word, and my soul shall be healed."},
@@ -480,12 +490,12 @@ const CANON_MV_IDS = ['ob11','ob12','ob13','ob14','ob15'];
 const MASS_SECTIONS = [
   {id:'foot', label:'Prayers at the Foot of the Altar', from:0, to:7},
   {id:'confiteor', label:'Confiteor at the Altar', from:8, to:11},
-  {id:'altar', label:'Versicles & Collect', from:12, to:20},
-  {id:'gospel', label:'Gospel & Creed', from:21, to:23},
-  {id:'offertory', label:'Offertory', from:24, to:26},
-  {id:'preface', label:'Preface & Sanctus', from:27, to:30},
-  {id:'canon', label:'Canon & Communion', from:31, to:36},
-  {id:'closing', label:'Dismissal & Last Gospel', from:37, to:44}
+  {id:'altar', label:'Versicles, Kyrie & Collect', from:12, to:22},
+  {id:'gospel', label:'Gospel & Creed', from:23, to:26},
+  {id:'offertory', label:'Offertory', from:27, to:29},
+  {id:'preface', label:'Preface & Sanctus', from:30, to:33},
+  {id:'canon', label:'Canon & Communion', from:34, to:39},
+  {id:'closing', label:'Dismissal & Last Gospel', from:40, to:47}
 ];
 
 const PRACTICE_MODES = [
@@ -621,6 +631,17 @@ function inSection(idx, range){
   return idx >= range.from && idx <= range.to;
 }
 
+function isServerResponseStep(idx){
+  const s = STEPS[idx];
+  return !s.priestOnly && !s.referenceOnly;
+}
+
+function stepInfoTag(s){
+  if(s.priestOnly) return '<span class="info-tag">priest only</span>';
+  if(s.referenceOnly) return '<span class="info-tag">reference only</span>';
+  return '';
+}
+
 function buildSequence(role, mode='full', range=null){
   if(mode === 'movements'){
     return MOVEMENTS.filter(m=> m.role==='both' || m.role===role)
@@ -633,7 +654,7 @@ function buildSequence(role, mode='full', range=null){
   }
   if(mode === 'responses'){
     return STEPS.map((_, idx)=> idx)
-      .filter(idx=> !range || inSection(idx, range))
+      .filter(idx=> (!range || inSection(idx, range)) && isServerResponseStep(idx))
       .map(idx=>({type:'prayer', idx}));
   }
   const seq = [];
@@ -821,8 +842,9 @@ function renderPreparePanel(){
 
 function renderProgressPanel(){
   const p = loadProgress();
-  const recorded = Object.keys(p.recordedOnce || {}).length;
-  const total = STEPS.length;
+  const practiceSteps = STEPS.map((_,i)=>i).filter(isServerResponseStep);
+  const recorded = Object.keys(p.recordedOnce || {}).filter(k=> isServerResponseStep(parseInt(k))).length;
+  const total = practiceSteps.length;
   const pct = total ? Math.round((recorded / total) * 100) : 0;
   const last = p.lastSession ? new Date(p.lastSession).toLocaleDateString() : 'Never';
   let mvTotal = 0, mvCorrect = 0;
@@ -1307,10 +1329,11 @@ function renderMassGuide(){
         <div class="sec">${idx+1}. ${s.section}</div>
         <div class="role" style="margin-top:8px;"><span class="dot"></span>Priest</div>
         <div class="latin" style="font-size:16px;">${s.priest}${s.varies?'<span class="varies-tag">varies</span>':''}</div>
-        <div class="role" style="margin-top:10px;"><span class="dot" style="background:var(--gold);"></span>Your Response</div>
-        <div class="latin" style="font-size:16px;">${s.server}</div>
+        <div class="role" style="margin-top:10px;"><span class="dot" style="background:var(--gold);"></span>${s.priestOnly ? 'Priest Only' : s.referenceOnly ? 'Reference (good to know)' : 'Your Response'}</div>
+        <div class="latin" style="font-size:16px;">${s.server}${stepInfoTag(s)}</div>
         ${getPhonetic(s.server) ? `<div class="phonetic">${getPhonetic(s.server)}</div>` : ''}
         <div class="translation">${s.serverT}</div>
+        ${s.note ? `<div class="translation" style="font-style:italic;">${s.note}</div>` : ''}
       </div>`;
     }
   }
@@ -1474,8 +1497,9 @@ function renderRubricSheet(){
 
 /* ============ FLASHCARDS ============ */
 function getFlashSteps(){
-  if(state.sectionRange) return STEPS.map((_,i)=>i).filter(i=> inSection(i, state.sectionRange));
-  return STEPS.map((_,i)=>i);
+  const pool = STEPS.map((_,i)=>i).filter(isServerResponseStep);
+  if(state.sectionRange) return pool.filter(i=> inSection(i, state.sectionRange));
+  return pool;
 }
 
 function renderFlashcards(){
@@ -1642,6 +1666,7 @@ function renderRecordPriest(){
 function renderPracticeItem(){
   const item = state.sequence[state.step];
   if(item.type === 'movement') renderMovementStep();
+  else if(!isServerResponseStep(item.idx)) renderInfoPrayerStep();
   else renderPrayerStep();
 }
 
@@ -1661,6 +1686,59 @@ function wireNav(seqPos){
     if(seqPos===state.sequence.length-1){ state.view='summary'; render(); }
     else { state.step = seqPos+1; render(); }
   };
+}
+
+function renderInfoPrayerStep(){
+  const seqPos = state.step;
+  const i = state.sequence[seqPos].idx;
+  const total = state.sequence.length;
+  const s = STEPS[i];
+  const ribbonTop = 8 + (seqPos/(total-1))*86;
+  const label = s.priestOnly ? 'Priest Only' : 'Reference — Good to Know';
+  const note = s.priestOnly
+    ? 'This prayer — including the Amen — is said only by the priest. Listen and continue.'
+    : 'Good to know, but not required to memorize. Read along if helpful, then continue.';
+
+  app.innerHTML = `
+    <div class="controls">
+      <button class="toggle-link ${state.showTranslation?'active':''}" id="transToggle">English</button>
+      <button class="toggle-link" id="settingsLink">⚙ Voice</button>
+    </div>
+    <div class="missal-wrap">
+      <div class="ribbon" style="top:${ribbonTop}%"></div>
+      <div class="missal">
+        <div class="meta-row">
+          <span class="step-count">Step ${seqPos+1} of ${total}</span>
+          <span class="section-label">${s.section} ${stepInfoTag(s)}</span>
+        </div>
+        <div class="block">
+          <div class="role"><span class="dot"></span>Priest</div>
+          <div class="latin">${s.priest}${s.varies ? '<span class="varies-tag">varies by day</span>' : ''}</div>
+          ${state.showTranslation ? `<div class="translation">${s.priestT}</div>` : ''}
+          <div class="hear-row">
+            <button class="hear-btn" id="hearBtn">🔊 Hear the Priest</button>
+            <span class="voice-note" id="hearStatus"></span>
+          </div>
+        </div>
+        <div class="block server-block">
+          <div class="role"><span class="dot" style="background:var(--gold);"></span>${label}</div>
+          <div class="latin">${s.server}</div>
+          ${getPhonetic(s.server) ? `<div class="phonetic">${getPhonetic(s.server)}</div>` : ''}
+          ${state.showTranslation ? `<div class="translation">${s.serverT}</div>` : ''}
+          ${s.note ? `<div class="translation" style="font-style:italic;">${s.note}</div>` : ''}
+          <div class="compare-box" style="margin-top:12px;">
+            <div class="translation">${note}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    ${navRow(seqPos)}
+  `;
+
+  document.getElementById('transToggle').onclick = ()=>{ state.showTranslation = !state.showTranslation; renderInfoPrayerStep(); };
+  document.getElementById('settingsLink').onclick = ()=>{ state.view='settings'; render(); };
+  document.getElementById('hearBtn').onclick = ()=> playPriestLine(i, document.getElementById('hearStatus'));
+  wireNav(seqPos);
 }
 
 function renderPrayerStep(){
@@ -1939,11 +2017,12 @@ function renderSummary(){
         <button class="begin-btn restart-btn" id="restartBtn">Practice Again</button>
       </div></div>`;
   } else {
+    const prayerItems = state.sequence.filter(x=> x.type==='prayer' && isServerResponseStep(x.idx));
     app.innerHTML = `
       <div class="summary"><div class="missal">
         <h2>Practice Complete</h2>
-        <p>You recorded ${recordedCount} of ${state.sequence.filter(x=>x.type==='prayer').length} responses.</p>
-        ${state.sequence.filter(x=>x.type==='prayer').map(item=>{
+        <p>You recorded ${recordedCount} of ${prayerItems.length} responses.</p>
+        ${prayerItems.map(item=>{
           const idx = item.idx;
           const s = STEPS[idx];
           return `<div class="summary-item">

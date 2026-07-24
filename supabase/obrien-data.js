@@ -3,7 +3,7 @@
 const O_BRIEN_SOURCE = "How to Serve Low Mass & Benediction — Rev. William A. O'Brien, M.A.";
 
 const O_BRIEN_SACRISTY = {
-  intro: "The sacristy is the place where the priests prepare and vest for Mass. Become familiar with your sacristy so that you will know just where everything belongs, as each thing has its proper place. You should arrive here a few minutes before Mass. Immediately put on your cassock and surplice, place the cruets of wine and water, the finger bowl and towel on the credence table and light the two lowest candles, one on each side of the tabernacle beginning with the one on the Epistle side. While in the sacristy always observe silence and be ever ready to give any assistance requested.",
+  intro: "The sacristy is the place where the priests prepare and vest for Mass. Become familiar with your sacristy so that you will know just where everything belongs, as each thing has its proper place. You should arrive here 15–30 minutes before Mass. Immediately put on your cassock and surplice, place the cruets of wine and water, the finger bowl and towel on the credence table and light the two lowest candles, one on each side of the tabernacle beginning with the one on the Epistle side. While in the sacristy always observe silence and be ever ready to give any assistance requested.",
   items: [
     {n:1, name:"The Lavabo, or Lavatory", desc:"Towel rack where the priest washes his hands before beginning to vest for Mass."},
     {n:2, name:"The Vesting Table", desc:"Vestments laid out in order as the priest puts them on. Frequently has drawers and closets for vestments, linens, missals. A crucifix is generally at the head. A card with prayers for vesting or for the Bishop's intention."},
@@ -84,52 +84,64 @@ const O_BRIEN_TWO_SERVERS = {
   rules: [
     "All responses are made by both boys.",
     "All genuflections are made by both boys.",
-    "Whenever a duty is to be performed by one or both boys, both boys proceed to the center of the altar and genuflect on the floor before and after the action."
+    "Whenever a duty is to be performed by one or both boys, both boys proceed to the center of the altar and genuflect on the floor before and after the action — except when acolyte 1 transfers the missal toward the Gospel side, or after the Last Gospel when he goes for the priest's biretta.",
+    "After the prayers at the foot with two acolytes, acolyte 1 kneels on the lowest step on the Gospel side and acolyte 2 on the lowest step on the Epistle side.",
+    "At the Last Gospel with two servers, acolyte 1 goes directly to bring the priest's biretta (no center genuflection)."
   ]
 };
 
 const O_BRIEN_LESSONS = [
-  {id:"I", title:"Lesson I — From the Beginning of Mass to the Introit", body:`When the priest gives the signal, bow with him to the crucifix and walk before him to the altar with your hands joined palm to palm on your breast. If there is a holy water font at the door, dip the fingers of your right hand in it and touch the tips of the priest's outstretched fingers and then bless yourself. If there is a bell at the sacristy door, ring it to warn the people of the entrance of the priest.
+  {id:"I", title:"Lesson I — From the Beginning of Mass to the Introit", body:`When the priest gives the signal, bow with him to the crucifix (pray the proper prayer — "Adjutorium nostrum in nomine Domini" / "Qui fecit caelum et terram", or "Procedamus in pace" / "In nomine Christi, amen") and walk before him to the altar with your hands joined palm to palm on your breast. If there is a holy water font at the door, dip the fingers of your right hand in it and touch the tips of the priest's outstretched fingers, then of acolyte 2, and then bless yourself. If there is a bell at the sacristy door, ring it to warn the people of the entrance of the priest.
 
-On arriving at the altar, stand a little to the right of the priest, take his biretta by the nearest peak, genuflect with him, place the biretta on the sedilia, come back to the center of the altar steps, genuflect and move about two feet to the Gospel side. Remain standing (or kneel at once on the floor where customary) until the priest descends to begin Mass. Then kneel on the floor, with head erect and hands joined, palm to palm, and make the sign of the cross with the priest.
+On arriving at the altar, stand a little to the right of the priest, kiss (oscula) the hand of the priest, then take his biretta by the nearest peak, kiss (oscula) it, genuflect with him, place the biretta on the sedilia, come back to the center of the altar steps, genuflect and move about two feet to the Gospel side. Remain standing (or kneel at once on the floor where customary) until the priest descends to begin Mass. Then kneel on the floor, with head erect and hands joined, palm to palm, and make the sign of the cross with the priest.
 
-THE PRAYERS AT THE FOOT OF THE ALTAR — Remain kneeling erect while the priest bows low and says the Confiteor. As the priest says the last words of the Confiteor — "ad Dominum Deum nostrum" — bow your head slightly, turn toward the priest and say Misereatur tui. Then bow head and shoulders low toward the altar for your Confiteor, turning toward the priest at "et tibi, Pater" and "et te, Pater." Strike your breast three times at mea culpa, mea culpa, mea maxima culpa.
+THE PRAYERS AT THE FOOT OF THE ALTAR — Remain kneeling erect while the priest bows low and says the Confiteor. As the priest says the last words of the Confiteor — "ad Dominum Deum nostrum" — bow your head slightly, turn toward the priest and say "Misereatur tui…", then bow head and shoulders low toward the altar for your Confiteor, turning toward the priest at "et tibi, Pater" and "et te, Pater." Strike your breast three times at mea culpa, mea culpa, mea maxima culpa.
 
-Arise at once (where it is customary, lift the priest's alb a little as he goes up the steps), genuflect in the center, go to the Gospel side and kneel on the lowest step. Keep hands folded throughout the Mass except when otherwise occupied.`},
-  {id:"II", title:"Lesson II — From the Introit to the Offertory", body:`The priest ascends the steps, goes to the missal at the Epistle side (right) and reads the Introit. Make the sign of the cross with him. You are opposite the missal — this is the rule all through the rest of the Mass.
+Arise at once (where it is customary, lift the priest's alb a little as he goes up the steps). With one server: genuflect in the center, go to the Gospel side and kneel on the lowest step. With two servers: acolyte 1 and acolyte 2 each go to the lowest step on the Gospel side and Epistle side respectively (do not genuflect at center). Keep hands folded throughout the Mass except when otherwise occupied.`},
+  {id:"II", title:"Lesson II — From the Introit to the Offertory", body:`The priest ascends the steps, goes to the missal at the Epistle side (right) and reads the Introit. At the Introit make the sign of the cross with him. You are opposite the missal — this is the rule all through the rest of the Mass.
 
-At Kyrie and Christe, answer each invocation. After the Gloria (when said), respond Et cum spiritu tuo to Dominus vobiscum. At Per omnia saecula saeculorum answer Amen.
+At Kyrie and Christe, answer each invocation as follows: Kyrie, eleison (×3), Christe, eleison (×3), Kyrie, eleison (×3). After the Gloria (when said), respond Et cum spiritu tuo to Dominus vobiscum. At Per omnia saecula saeculorum answer Amen.
 
-THE EPISTLE — When the priest finishes the Epistle (signal: turns head or drops left hand on altar), say Deo gratias. Rise, walk to the Epistle side, genuflect at center, go up side steps, wait on step below platform. Take firm hold of missal stand, turn left, descend front steps diagonally to floor, genuflect, ascend diagonally to Gospel side, place missal turned partly toward tabernacle, stand on first step below platform facing priest.
+THE EPISTLE — When the priest finishes the Epistle (signal: turns head or drops left hand on altar), say Deo gratias.
+
+With one server: rise, go to the center, genuflect, walk to the Epistle side, take missal stand, turn left, descend front steps diagonally, genuflect, ascend to Gospel side, place missal turned partly toward tabernacle.
+
+With two servers (acolyte 1 already at the Epistle side): rise, walk to the Epistle side without genuflecting at center, take missal stand, turn left, descend front steps diagonally, genuflect at center, ascend to Gospel side, place missal turned partly toward tabernacle. Then say the proper responses, bow at the name of Our Lord J. C., and go to your spot at the Epistle side.
 
 NOTE: In some places the missal is transferred by descending side steps, passing center, genuflecting, and ascending Gospel side steps. This custom is approved.
 
-THE GOSPEL — Respond Et cum spiritu tuo. Sign forehead, lips, and breast with thumb as priest signs missal. Respond Gloria tibi, Domine. Bow to priest, turn right, descend to floor, walk to Epistle side genuflecting at center. Remain standing during Gospel. At end say Laus tibi, Christe and kneel on lowest step. Bow head when priest genuflects at et incarnatus est during Credo.`},
-  {id:"III", title:"Lesson III — From the Offertory to the Canon", body:`When the priest uncovers the chalice, arise without genuflecting, go to credence. Take wine cruet in right hand, water cruet in left, go up side steps facing Gospel side.
+THE GOSPEL — After Dominus vobiscum respond Et cum spiritu tuo. Sign forehead, lips, and breast with thumb as priest signs missal. After sequentia sancti Evangelii… respond Gloria tibi, Domine. At the name of Our Lord J. C. or after a few minutes bow to the priest, turn right, descend to the floor, walk to the Epistle side genuflecting at center. Remain standing during Gospel. At the end of the Gospel say Laus tibi, Christe and kneel on lowest step. Bow head when priest genuflects at et incarnatus est during Credo.`},
+  {id:"III", title:"Lesson III — From the Offertory to the Canon", body:`When the priest uncovers the chalice, you should go up, receive the chalice veil, fold it in three parts, and then go to credence. Take the wine cruet in right hand, water cruet in left, go up side steps facing Gospel side.
 
-Present cruets with slight bow, kissing each cruet before presenting and after receiving back. Each cruet is presented with the right hand; transfer water cruet from left to right as priest takes wine.
+Present cruets with a slight bow, kissing each cruet before presenting and after receiving back — except in a Requiem Mass (no kisses). Each cruet is presented with the right hand; transfer water cruet from left to right as the priest takes wine.
 
-For Lavabo: finger towel over left arm, basin in left hand, water cruet in right. Pour water over priest's fingers; turn slightly right for towel. Replace items on credence, return to Epistle side without genuflecting, kneel erect.
+For Lavabo: finger towel over left arm, basin in left hand, water cruet in right. Pour water over the priest's fingers; turn slightly right for the towel. Replace items on credence, return to Epistle side without genuflecting, kneel erect.
 
-At Orate, fratres wait until priest faces altar, bow head and shoulders slightly, respond Suscipiat Dominus.
+At Orate, fratres wait until the priest faces the altar, bow head and shoulders slightly, respond Suscipiat Dominus…
 
-At Preface respond Amen, Et cum spiritu tuo, Habemus ad Dominum, Dignum et justum est. At Sanctus ring bell three times, fold hands, kneel erect.`},
-  {id:"IV", title:"Lesson IV — From the Canon to the Communion", body:`At Hanc igitur when priest extends hands over chalice, ring bell once. Rise, go to middle, genuflect, ascend, kneel on edge of platform a little to the right of the priest.
+At the end of the secreta (per omnia saecula saeculorum) respond Amen, then after Dominus vobiscum respond Et cum spiritu tuo, after sursum corda respond Habemus ad Dominum, after gratias agamus Domino Deum nostrum respond Dignum et justum est. At Sanctus ring bell three times, fold hands, kneel erect.`},
+  {id:"IV", title:"Lesson IV — From the Canon to the Communion", body:`At Hanc igitur when the priest extends hands over chalice, ring the bell once. Rise, go to the middle, genuflect, ascend, and kneel on the edge of the platform a little to the right of the priest.
 
-CONSECRATION OF THE HOST — Bow profoundly and ring bell as priest genuflects; kneeling erect, slightly raise lower end of chasuble with left hand, ring bell again and look at Host as priest elevates; when Host is placed on altar let go of chasuble and ring bell as priest genuflects again.
+CONSECRATION OF THE HOST — Bow profoundly and ring bell as priest genuflects; kneeling erect, slightly raise lower end of chasuble with left hand, ring bell thrice and look at Host as priest elevates; when Host is placed on altar let go of chasuble and ring bell as priest genuflects again.
 
 CONSECRATION OF THE CHALICE — Same five steps: (1) bow profoundly; (2) ring as priest genuflects; (3) raise chasuble with left hand, ring with right at elevation; (4) let go as chalice is placed; (5) ring as priest genuflects.
 
 Rise, go down to center, genuflect, return to Epistle side kneeling as before. At Per omnia saecula saeculorum answer Amen. At end of Pater Noster respond Sed libera nos a malo. At Pax Domini respond Et cum spiritu tuo. Strike breast at Agnus Dei with priest.
 
-At Domine, non sum dignus ring bell each time priest strikes his breast (three times).`},
-  {id:"V", title:"Lesson V — From the Communion to the End of Mass", body:`After Communion prayers at center, respond Et cum spiritu tuo and Amen at Per omnia saecula saeculorum. At Ite, missa est or Benedicamus Domino always answer Deo gratias.
+At Domine, non sum dignus ring the bell each time the priest strikes his breast (three times).`},
+  {id:"V", title:"Lesson V — From the Communion to the End of Mass", body:`After Dominus vobiscum respond Et cum spiritu tuo and then after Communion prayers respond Amen at Per omnia saecula saeculorum. At Ite, missa est or Benedicamus Domino always answer Deo gratias.
 
 If missal was left open, rise, genuflect at middle, transfer missal to Gospel side as after Epistle.
 
-At final blessing kneel, bow head, bless yourself with priest's triple blessing and respond Amen.
+At the final blessing kneel, bow head, bless yourself with the priest's triple blessing and respond Amen.
 
-At Last Gospel respond Et cum spiritu tuo, Gloria tibi, Domine, and at end Deo gratias. Go to center, genuflect, bring priest's biretta from sedilia, stand Epistle side during Gospel. Precede priest to sacristy; profound bow with priest to crucifix. Help unvest if wished. Extinguish candles Gospel side first.`}
+At Last Gospel after Dominus vobiscum respond Et cum spiritu tuo, after sequentia sancti Evangelii… respond Gloria tibi, Domine, and at end of the last Gospel respond Deo gratias.
+
+With one server: after Gloria tibi, Domine, sign yourself with the sign of the cross, go to center, genuflect, bring priest's biretta from sedilia, stand Epistle side during Gospel.
+
+With two servers: after Gloria tibi, Domine, sign yourself with the sign of the cross, go directly to bring the priest's biretta from the sedilia and stand at the Epistle side during the Last Gospel.
+
+Precede priest to sacristy; profound bow with priest to crucifix. Help unvest if wished. Extinguish candles Gospel side first.`}
 ];
 
 const O_BRIEN_PHONETICS = {
@@ -161,11 +173,11 @@ const O_BRIEN_BELL_CHART = [
   {moment:"Hanc igitur — Priest extends hands over chalice", action:"Ring once; then rise, go to middle, genuflect, ascend, kneel on edge of platform a little to the right of the priest."},
   {moment:"Consecration of the Host — each genuflection", action:"Bow profoundly and ring; raise chasuble with left hand at elevation and ring with right; ring again at genuflection. (Two servers: AC1 holds chasuble and rings; AC2 holds chasuble.)"},
   {moment:"Consecration of the Chalice", action:"Same five steps as for the Host."},
-  {moment:"Domine, non sum dignus (×3)", action:"Ring the bell each time the priest strikes his breast."}
+  {moment:"Domine, non sum dignus (×3)", action:"Each time the priest strikes his breast, ring the bell twice as a signal of the Communion of the Mass."}
 ];
 
 const O_BRIEN_PREMASS = [
-  {id:"arrive", label:"Arrive in the sacristy a few minutes before Mass"},
+  {id:"arrive", label:"Arrive in the sacristy 15–30 minutes before Mass"},
   {id:"cassock", label:"Put on cassock and surplice"},
   {id:"cruets", label:"Place cruets of wine and water on the credence table"},
   {id:"lavabo", label:"Place finger bowl and towel on the credence table"},
@@ -176,7 +188,7 @@ const O_BRIEN_PREMASS = [
 
 const O_BRIEN_MOVEMENTS = [
   {id:"ob0", insertBefore:0, role:"ac1", section:"Lesson I — Arrival at the Altar",
-   q:"On arriving at the altar with the Priest, what does Altar Boy No. 1 (Epistle side) do with the biretta?",
+   q:"On arriving at the altar with the Priest, what does Altar Boy No. 1 (Epistle side) do with the priest's biretta?",
    options:["Takes it by the nearest peak, genuflects, places it on the sedilia","Places it on the altar","Hands it to Altar Boy No. 2","Keeps it until the Last Gospel"],
    correct:0, explain:"On arriving at the altar, stand a little to the right of the priest, take his biretta by the nearest peak, genuflect with him, place the biretta on the sedilia, come back to the center of the altar steps, genuflect and move about two feet to the Gospel side."},
 
@@ -191,79 +203,79 @@ const O_BRIEN_MOVEMENTS = [
    correct:0, explain:"Kneel on the floor, with head erect and hands joined, palm to palm, and make the sign of the cross with the priest."},
 
   {id:"ob3", insertBefore:16, role:"both", section:"Lesson I — Ascending the Altar",
-   q:"After the prayers at the foot, where does the server kneel?",
+   q:"After the prayers at the foot, where does the server (acolyte 1) kneel?",
    options:["On the lowest step on the Gospel side (opposite the missal)","On the Epistle side top step","On the floor at the center","Standing at the credence"],
-   correct:0, explain:"Arise at once, genuflect in the center, go to the Gospel side and kneel on the lowest step. Keep hands folded throughout the Mass except when otherwise occupied."},
+   correct:0, explain:"With one server: arise at once, genuflect in the center, go to the Gospel side and kneel on the lowest step. With two acolytes: acolyte 1 kneels on the Gospel side and acolyte 2 on the Epistle side respectively (no center genuflection). Keep hands folded throughout the Mass except when otherwise occupied."},
 
-  {id:"ob4", insertBefore:21, role:"ac1", section:"Lesson II — Epistle",
+  {id:"ob4", insertBefore:23, role:"ac1", section:"Lesson II — Epistle",
    q:"After Deo gratias at the Epistle, what does Altar Boy No. 1 do?",
    options:["Transfers the missal from Epistle side to Gospel side","Rings the Sanctus bell","Brings the cruets","Kneels and does nothing"],
-   correct:0, explain:"Rise, walk to the Epistle side, genuflect at center, take missal stand, turn left, descend front steps diagonally, genuflect, ascend to Gospel side, place missal turned partly toward tabernacle."},
+   correct:0, explain:"With one server: rise, go to the center, genuflect, walk to the Epistle side, take missal stand, turn left, descend front steps diagonally, genuflect, ascend to Gospel side, place missal turned partly toward tabernacle. With two servers (acolyte 1 at the Epistle side): rise, walk to the Epistle side without genuflecting at center, take missal stand, turn left, descend front steps diagonally, genuflect at center, ascend to Gospel side, place missal turned partly toward tabernacle. Then bow at the name of Our Lord J. C., and go to your spot at the Epistle side."},
 
-  {id:"ob5", insertBefore:22, role:"both", section:"Lesson II — Gospel",
+  {id:"ob5", insertBefore:25, role:"both", section:"Lesson II — Gospel",
    q:"When the Priest signs the missal at the Gospel, what do both servers do?",
    options:["Sign forehead, lips, and breast with thumb of open right hand","Bow only","Ring the bell","Turn away from the altar"],
    correct:0, explain:"At the same time as the priest, with thumb of open right hand make the sign of the cross upon forehead, lips, and center of breast. Respond Gloria tibi, Domine."},
 
-  {id:"ob6", insertBefore:24, role:"ac1", section:"Lesson III — Offertory (Two Servers)",
+  {id:"ob6", insertBefore:28, role:"ac1", section:"Lesson III — Offertory (Two Servers)",
    q:"At the Offertory with two altar boys, who presents the wine?",
    options:["Altar Boy No. 1 (Epistle side)","Altar Boy No. 2 (Gospel side)","Both together","The Priest fetches it himself"],
    correct:0, explain:"At the Offertory: Altar Boy No. 1 presents the wine; Altar Boy No. 2 presents the water."},
 
-  {id:"ob7", insertBefore:24, role:"ac2", section:"Lesson III — Offertory (Two Servers)",
+  {id:"ob7", insertBefore:28, role:"ac2", section:"Lesson III — Offertory (Two Servers)",
    q:"At the Offertory with two altar boys, who presents the water?",
    options:["Altar Boy No. 2 (Gospel side)","Altar Boy No. 1 (Epistle side)","Neither — one boy holds both","The MC"],
    correct:0, explain:"At the Offertory: Altar Boy No. 1 presents the wine; Altar Boy No. 2 presents the water."},
 
-  {id:"ob8", insertBefore:24, role:"both", section:"Lesson III — Offertory",
+  {id:"ob8", insertBefore:28, role:"both", section:"Lesson III — Offertory",
    q:"When presenting the cruets to the Priest, what does O'Brien direct?",
-   options:["Kiss each cruet before presenting and after receiving it back","Never touch the cruets with the hands","Present both in the left hand only","Genuflect before each presentation"],
-   correct:0, explain:"Make a slight bow and present the cruets, kissing each cruet before presenting it and also after you receive it back from him."},
+   options:["Kiss each cruet before presenting and after receiving it back (except Requiem Mass)","Never touch the cruets with the hands","Present both in the left hand only","Genuflect before each presentation"],
+   correct:0, explain:"Make a slight bow and present the cruets, kissing each cruet before presenting it and also after you receive it back from him. Kissing cruets is excepted in a Requiem Mass (where there are no kisses)."},
 
-  {id:"ob9", insertBefore:24, role:"ac1", section:"Lesson III — Lavabo (Two Servers)",
+  {id:"ob9", insertBefore:28, role:"ac1", section:"Lesson III — Lavabo (Two Servers)",
    q:"At the Lavabo with two servers, what does Altar Boy No. 1 do?",
    options:["Presents the towel","Pours the water","Rings the bell","Transfers the missal"],
    correct:0, explain:"At the Lavabo: Altar Boy No. 1 presents the towel; Altar Boy No. 2 pours the water."},
 
-  {id:"ob10", insertBefore:24, role:"ac2", section:"Lesson III — Lavabo (Two Servers)",
+  {id:"ob10", insertBefore:28, role:"ac2", section:"Lesson III — Lavabo (Two Servers)",
    q:"At the Lavabo with two servers, who pours the water over the Priest's fingers?",
    options:["Altar Boy No. 2","Altar Boy No. 1","The Priest","Neither"],
    correct:0, explain:"At the Lavabo: Altar Boy No. 1 presents the towel; Altar Boy No. 2 pours the water."},
 
-  {id:"ob11", insertBefore:30, role:"ac1", section:"Lesson III — Sanctus",
+  {id:"ob11", insertBefore:34, role:"ac1", section:"Lesson III — Sanctus",
    q:"At the Sanctus, who rings the bell (two-server Low Mass)?",
    options:["Altar Boy No. 1 — three times","Altar Boy No. 2 — three times","Both together","No bell at Low Mass"],
    correct:0, explain:"At Sanctus ring bell three times, then fold hands and kneel erect. With two servers, Altar Boy No. 1 rings the bell."},
 
-  {id:"ob12", insertBefore:31, role:"ac1", section:"Lesson IV — Hanc Igitur",
-   q:"At the Hanc igitur, what does the server do after ringing the bell once?",
+  {id:"ob12", insertBefore:35, role:"ac1", section:"Lesson IV — Hanc Igitur",
+   q:"At the Hanc igitur, what does the server (altar boy or acolyte 1) do after ringing the bell once?",
    options:["Rise, go to middle, genuflect, ascend, kneel on platform right of Priest","Remain on lowest step","Return to credence","Genuflect only"],
    correct:0, explain:"Ring bell at Hanc igitur, then rising, go to the middle, genuflect, go up the steps and kneel on the edge of the platform a little to the right of the priest."},
 
-  {id:"ob13", insertBefore:31, role:"ac1", section:"Lesson IV — Elevation (Two Servers)",
+  {id:"ob13", insertBefore:35, role:"ac1", section:"Lesson IV — Elevation (Two Servers)",
    q:"At the elevation of the Host with two servers, what does Altar Boy No. 1 do?",
    options:["Holds the chasuble and rings the bell","Only rings — does not touch chasuble","Only holds chasuble — does not ring","Kneels at the foot"],
    correct:0, explain:"At the Elevation: Altar Boy No. 1 holds chasuble and rings bell; Altar Boy No. 2 holds chasuble."},
 
-  {id:"ob14", insertBefore:31, role:"ac2", section:"Lesson IV — Elevation (Two Servers)",
+  {id:"ob14", insertBefore:35, role:"ac2", section:"Lesson IV — Elevation (Two Servers)",
    q:"At the elevation with two servers, what does Altar Boy No. 2 do?",
    options:["Holds the chasuble","Rings the bell","Transfers the missal","Pours the wine"],
    correct:0, explain:"At the Elevation: Altar Boy No. 1 holds chasuble and rings bell; Altar Boy No. 2 holds chasuble."},
 
-  {id:"ob15", insertBefore:36, role:"ac1", section:"Lesson IV — Domine non sum dignus",
+  {id:"ob15", insertBefore:40, role:"ac1", section:"Lesson IV — Domine non sum dignus",
    q:"At Domine, non sum dignus, when does the server ring the bell?",
    options:["Each time the Priest strikes his breast (three times)","Once only at the end","Not at all at Low Mass","Only at the first"],
-   correct:0, explain:"Each time he strikes his breast, ring the bell as a signal of the Communion of the Mass."},
+   correct:0, explain:"Each time he strikes his breast, ring the bell twice as a signal of the Communion of the Mass."},
 
-  {id:"ob16", insertBefore:41, role:"ac1", section:"Lesson V — Last Gospel",
+  {id:"ob16", insertBefore:47, role:"ac1", section:"Lesson V — Last Gospel",
    q:"At the Last Gospel, what does Altar Boy No. 1 do before standing at the Epistle side?",
    options:["Brings the Priest's biretta from the sedilia","Rings the bell three times","Transfers the missal to Epistle side","Extinguishes the candles"],
-   correct:0, explain:"Go to center, genuflect, bring the priest's biretta from the sedilia and stand at the Epistle side during the Last Gospel."},
+   correct:0, explain:"After Gloria tibi, Domine, sign yourself with the sign of the cross. With one server: go to center, genuflect, bring the priest's biretta from the sedilia and stand at the Epistle side during the Last Gospel. With two servers: go directly to bring the priest's biretta from the sedilia and stand at the Epistle side (no center genuflection)."},
 
   {id:"ob17", insertBefore:0, role:"both", section:"Two Altar Boys — General Rule",
    q:"When one or both boys perform a duty at the altar, what do both do first?",
    options:["Proceed to the center and genuflect on the floor before and after the action","Genuflect only on one knee at their places","Bow at the foot only","No special movement"],
-   correct:0, explain:"Whenever a duty is to be performed by one or both boys, both boys proceed to the center of the altar and genuflect on the floor before and after the action."}
+   correct:0, explain:"Whenever a duty is to be performed by one or both boys, both boys proceed to the center of the altar and genuflect on the floor before and after the action — except when acolyte 1 transfers the missal toward the Gospel side, or after the Last Gospel when he goes for the priest's biretta."}
 ];
 
 const O_BRIEN_GLOSSARY = [
