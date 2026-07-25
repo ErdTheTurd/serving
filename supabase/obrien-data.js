@@ -84,7 +84,7 @@ const O_BRIEN_TWO_SERVERS = {
   rules: [
     "All responses are made by both boys.",
     "All genuflections are made by both boys.",
-    "Whenever a duty is to be performed by one or both boys, both boys proceed to the center of the altar and genuflect on the floor before and after the action — except when acolyte 1 transfers the missal toward the Gospel side, or after the Last Gospel when he goes for the priest's biretta.",
+    "Whenever a duty is to be performed by one or both boys, both boys proceed to the center of the altar and genuflect on the floor before and after the action — except when acolyte 1 transfers the missal toward the Gospel side, or after the Last Gospel when he goes for the priest's biretta or the Leonine prayers.",
     "After the prayers at the foot with two acolytes, acolyte 1 kneels on the lowest step on the Gospel side and acolyte 2 on the lowest step on the Epistle side.",
     "At the Last Gospel with two servers, acolyte 1 goes directly to bring the priest's biretta (no center genuflection)."
   ]
@@ -189,13 +189,13 @@ const O_BRIEN_PREMASS = [
 const O_BRIEN_MOVEMENTS = [
   {id:"ob0", insertBefore:0, role:"ac1", section:"Lesson I — Arrival at the Altar",
    q:"On arriving at the altar with the Priest, what does Altar Boy No. 1 (Epistle side) do with the priest's biretta?",
-   options:["Takes it by the nearest peak, genuflects, places it on the sedilia","Places it on the altar","Hands it to Altar Boy No. 2","Keeps it until the Last Gospel"],
-   correct:0, explain:"On arriving at the altar, stand a little to the right of the priest, take his biretta by the nearest peak, genuflect with him, place the biretta on the sedilia, come back to the center of the altar steps, genuflect and move about two feet to the Gospel side."},
+   options:["Kisses the priest's hand and biretta (oscula), takes the biretta by the nearest peak, genuflects, places it on the sedilia","Places it on the altar","Hands it to Altar Boy No. 2","Keeps it until the Last Gospel"],
+   correct:0, explain:"On arriving at the altar, stand a little to the right of the priest, kiss (oscula) the hand of the priest, then take his biretta by the nearest peak, kiss (oscula) it, genuflect with him, place the biretta on the sedilia, come back to the center of the altar steps, genuflect and move about two feet to the Gospel side."},
 
   {id:"ob1", insertBefore:0, role:"both", section:"Lesson I — Procession",
    q:"When walking before the Priest to the altar, how should both servers hold their hands?",
    options:["Joined palm to palm on the breast","At their sides","Folded behind the back","One hand on the missal"],
-   correct:0, explain:"Bow with the priest to the crucifix and walk before him to the altar with hands joined palm to palm on your breast."},
+   correct:0, explain:"Bow with the priest to the crucifix (pray Adjutorium nostrum in nomine Domini / Qui fecit caelum et terram, or Procedamus in pace / In nomine Christi, amen) and walk before him to the altar with hands joined palm to palm on your breast."},
 
   {id:"ob2", insertBefore:0, role:"both", section:"Lesson I — Prayers at the Foot",
    q:"When the Priest descends to begin Mass, where do both servers kneel?",
@@ -275,7 +275,7 @@ const O_BRIEN_MOVEMENTS = [
   {id:"ob17", insertBefore:0, role:"both", section:"Two Altar Boys — General Rule",
    q:"When one or both boys perform a duty at the altar, what do both do first?",
    options:["Proceed to the center and genuflect on the floor before and after the action","Genuflect only on one knee at their places","Bow at the foot only","No special movement"],
-   correct:0, explain:"Whenever a duty is to be performed by one or both boys, both boys proceed to the center of the altar and genuflect on the floor before and after the action — except when acolyte 1 transfers the missal toward the Gospel side, or after the Last Gospel when he goes for the priest's biretta."}
+   correct:0, explain:"Whenever a duty is to be performed by one or both boys, both boys proceed to the center of the altar and genuflect on the floor before and after the action — except when acolyte 1 transfers the missal toward the Gospel side, or after the Last Gospel when he goes for the priest's biretta or the Leonine prayers."}
 ];
 
 const O_BRIEN_GLOSSARY = [
