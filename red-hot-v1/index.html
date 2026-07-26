@@ -13,11 +13,15 @@
   <div id="main-menu" class="screen">
     <div class="logo">Red Hot</div>
     <div class="logo-sub">V1</div>
-    <p style="color:#888;margin-bottom:2rem;font-size:0.95rem;max-width:400px;text-align:center;line-height:1.6;">
+    <p style="color:#888;margin-bottom:1.5rem;font-size:0.95rem;max-width:420px;text-align:center;line-height:1.6;">
       Counter-Strike 2 mechanics. Cars instead of operators.<br>
-      Plant the bomb. Defend the sites. Buy upgrades.
+      Buy keys, open cases, race to go faster.
     </p>
-    <button id="btn-play" class="menu-btn primary">Play</button>
+    <div class="wallet-display">Balance: <span class="wallet-balance">$50.00</span></div>
+    <button id="btn-play" class="menu-btn primary">Competitive</button>
+    <button id="btn-race" class="menu-btn">Race</button>
+    <button id="btn-garage" class="menu-btn">Garage</button>
+    <button id="btn-market" class="menu-btn">Marketplace</button>
   </div>
 
   <!-- Team Select -->
@@ -33,6 +37,65 @@
         <h2>Hot</h2>
         <p>Defenders — Hold the sites, defuse the bomb, eliminate Red team before they plant or detonate.</p>
       </div>
+    </div>
+  </div>
+
+  <!-- Garage -->
+  <div id="garage-screen" class="screen hidden panel-screen">
+    <div class="panel-header">
+      <h1>Garage</h1>
+      <div class="wallet-display">Balance: <span class="wallet-balance">$50.00</span></div>
+    </div>
+    <div class="panel-body">
+      <div id="garage-inventory" class="car-grid"></div>
+      <div class="garage-sidebar">
+        <div id="garage-detail" class="detail-panel"></div>
+        <div class="owned-section">
+          <h4>Keys</h4>
+          <div id="owned-keys"></div>
+          <h4>Cases</h4>
+          <div id="owned-cases"></div>
+        </div>
+        <div class="garage-actions">
+          <button id="btn-invest" class="menu-btn small">Invest $5.00</button>
+          <button id="btn-sell-car" class="menu-btn small">Sell Car</button>
+        </div>
+      </div>
+    </div>
+    <button id="btn-back-menu" class="menu-btn">Back</button>
+  </div>
+
+  <!-- Marketplace -->
+  <div id="market-screen" class="screen hidden panel-screen">
+    <div class="panel-header">
+      <h1>Marketplace</h1>
+      <div class="wallet-display">Balance: <span class="wallet-balance">$50.00</span></div>
+    </div>
+    <div class="panel-body market-layout">
+      <div>
+        <h3>Store</h3>
+        <div id="market-shop" class="shop-grid"></div>
+      </div>
+      <div id="market-listings" class="listings-panel"></div>
+    </div>
+    <button id="btn-back-garage" class="menu-btn">Back</button>
+  </div>
+
+  <!-- Race Results -->
+  <div id="race-results" class="screen hidden">
+    <h2 id="race-result-title">1st Place!</h2>
+    <p id="race-result-detail" style="color:#888;margin:1rem 0;font-size:1.1rem;"></p>
+    <button id="btn-race-back" class="menu-btn primary">Continue</button>
+  </div>
+
+  <!-- Case Reveal -->
+  <div id="case-reveal" class="overlay-modal">
+    <div class="case-reveal-inner">
+      <div class="reel-window">
+        <div id="case-reel" class="case-reel"></div>
+      </div>
+      <div id="case-reveal-result"></div>
+      <button id="case-reveal-close" class="menu-btn primary">Collect</button>
     </div>
   </div>
 
@@ -83,6 +146,23 @@
       WASD — Drive · Mouse — Aim · Click — Shoot<br>
       R — Reload · E — Plant/Defuse · Shift — Nitro · B — Skip Buy
     </div>
+
+    <div class="hud-car-speed" id="hud-car-speed"></div>
+  </div>
+
+  <!-- Race HUD -->
+  <div id="race-hud">
+    <div class="race-countdown" id="race-countdown"></div>
+    <div class="race-speed">
+      <span class="mph-value" id="race-mph">0</span>
+      <span class="mph-label">MPH</span>
+    </div>
+    <div class="race-info">
+      <div>Lap <span id="race-lap">0</span>/3</div>
+      <div>Top: <span id="race-top">0</span> mph</div>
+      <div class="race-pos">P<span id="race-pos">1</span></div>
+    </div>
+    <div class="race-tolerance" id="race-tolerance"></div>
   </div>
 
   <!-- Buy Menu -->

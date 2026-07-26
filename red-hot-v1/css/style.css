@@ -403,3 +403,275 @@ html, body {
 }
 
 .interact-hint.active { display: block; }
+
+/* Wallet */
+.wallet-display {
+  font-size: 1.1rem;
+  color: var(--cs-green);
+  margin-bottom: 1.5rem;
+  font-weight: 600;
+}
+
+/* Panel screens */
+.panel-screen {
+  justify-content: flex-start;
+  padding: 2rem;
+  overflow-y: auto;
+}
+
+.panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  max-width: 1100px;
+  margin-bottom: 1.5rem;
+}
+
+.panel-header h1 { font-size: 2rem; color: var(--cs-gold); }
+
+.panel-body {
+  display: flex;
+  gap: 2rem;
+  width: 100%;
+  max-width: 1100px;
+  margin-bottom: 2rem;
+}
+
+.car-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 12px;
+  flex: 1;
+}
+
+.car-card {
+  background: var(--cs-panel);
+  border: 2px solid #444;
+  padding: 14px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.car-card:hover { background: #222; transform: translateY(-2px); }
+.car-card.active { background: #1a2a1a; box-shadow: 0 0 12px rgba(90,158,62,0.3); }
+
+.car-rarity { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; margin-bottom: 4px; }
+.car-name { font-weight: 600; margin-bottom: 4px; }
+.car-wear { font-size: 0.75rem; color: var(--cs-dim); }
+.car-speed { font-size: 0.9rem; color: var(--cs-gold); margin: 6px 0; font-weight: 600; }
+.car-stats { font-size: 0.75rem; color: var(--cs-dim); }
+
+.garage-sidebar { width: 320px; flex-shrink: 0; }
+
+.detail-panel {
+  background: var(--cs-panel);
+  padding: 1.2rem;
+  margin-bottom: 1rem;
+  border: 1px solid #333;
+}
+
+.detail-panel h3 { margin-bottom: 0.5rem; }
+.detail-rarity { font-size: 0.85rem; margin-bottom: 1rem; }
+
+.speed-breakdown { font-size: 0.85rem; line-height: 1.8; color: var(--cs-dim); }
+.speed-breakdown strong { color: var(--cs-text); }
+.speed-total { font-size: 1.3rem; color: var(--cs-gold); font-weight: 700; margin-top: 8px; }
+.speed-range { font-size: 0.8rem; color: var(--cs-dim); margin-top: 4px; }
+
+.owned-section { margin-bottom: 1rem; }
+.owned-section h4 { font-size: 0.8rem; color: var(--cs-dim); margin: 8px 0 4px; }
+
+.key-badge {
+  display: inline-block;
+  background: #222;
+  padding: 4px 10px;
+  margin: 2px;
+  font-size: 0.75rem;
+  border: 1px solid #444;
+}
+
+.open-case-btn {
+  display: block;
+  width: 100%;
+  padding: 8px;
+  margin: 4px 0;
+  background: #2a1a1a;
+  border: 1px solid var(--red-team);
+  color: var(--cs-text);
+  cursor: pointer;
+  font-size: 0.85rem;
+}
+
+.open-case-btn:hover { background: #3a2020; }
+
+.garage-actions { display: flex; gap: 8px; }
+
+.menu-btn.small {
+  padding: 8px 20px;
+  font-size: 0.85rem;
+}
+
+.dim { color: var(--cs-dim); font-size: 0.85rem; }
+
+/* Marketplace */
+.market-layout { flex-direction: column; }
+
+.shop-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 10px;
+  margin-bottom: 2rem;
+}
+
+.shop-item {
+  background: var(--cs-panel);
+  padding: 14px;
+  border: 1px solid #333;
+  text-align: center;
+}
+
+.shop-name { font-weight: 600; margin-bottom: 4px; }
+.shop-price { color: var(--cs-green); margin-bottom: 8px; }
+
+.listings-panel { width: 100%; }
+.listings-panel h3 { color: var(--cs-gold); margin-bottom: 1rem; }
+
+.market-listing {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  background: var(--cs-panel);
+  padding: 12px 16px;
+  margin-bottom: 8px;
+  border-left: 3px solid #444;
+}
+
+.listing-info { flex: 1; }
+.listing-name { font-weight: 600; }
+.listing-meta { font-size: 0.8rem; color: var(--cs-dim); }
+.listing-price { color: var(--cs-green); font-weight: 700; font-size: 1.1rem; }
+
+/* Case reveal */
+.overlay-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  background: rgba(0,0,0,0.92);
+  display: none;
+  align-items: center;
+  justify-content: center;
+}
+
+.overlay-modal.active { display: flex; }
+
+.case-reveal-inner { text-align: center; max-width: 800px; }
+
+.reel-window {
+  overflow: hidden;
+  width: 480px;
+  margin: 0 auto 2rem;
+  border: 2px solid var(--cs-gold);
+  background: #111;
+}
+
+.case-reel {
+  display: flex;
+  gap: 0;
+  transition: transform 4s cubic-bezier(0.15, 0.85, 0.25, 1);
+}
+
+.reel-item {
+  min-width: 160px;
+  height: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.85rem;
+  border-right: 1px solid #333;
+  padding: 0 8px;
+}
+
+.reel-item.winner { background: rgba(200,169,81,0.15); font-size: 1rem; }
+
+.reveal-rarity { font-size: 0.9rem; font-weight: 700; text-transform: uppercase; margin-bottom: 4px; }
+.reveal-name { font-size: 1.5rem; font-weight: 700; margin-bottom: 4px; }
+.reveal-stats { color: var(--cs-dim); margin-bottom: 1.5rem; }
+
+/* Race HUD */
+#race-hud {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 15;
+  display: none;
+}
+
+#race-hud.active { display: block; }
+
+.race-countdown {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 6rem;
+  font-weight: 900;
+  color: var(--cs-gold);
+  text-shadow: 0 0 40px rgba(200,169,81,0.5);
+}
+
+.race-speed {
+  position: absolute;
+  bottom: 40px;
+  right: 40px;
+  text-align: right;
+}
+
+.mph-value {
+  font-size: 4rem;
+  font-weight: 900;
+  color: var(--cs-text);
+  font-variant-numeric: tabular-nums;
+}
+
+.mph-label {
+  display: block;
+  font-size: 1rem;
+  color: var(--cs-dim);
+  letter-spacing: 0.2em;
+}
+
+.race-info {
+  position: absolute;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  text-align: center;
+  font-size: 1.1rem;
+  background: rgba(0,0,0,0.6);
+  padding: 8px 24px;
+  border-radius: 4px;
+}
+
+.race-pos { font-size: 1.8rem; font-weight: 900; color: var(--cs-gold); }
+
+.race-tolerance {
+  position: absolute;
+  bottom: 40px;
+  left: 40px;
+  font-size: 0.9rem;
+  color: var(--cs-dim);
+  background: rgba(0,0,0,0.6);
+  padding: 8px 16px;
+  border-radius: 4px;
+}
+
+.hud-car-speed {
+  position: absolute;
+  bottom: 60px;
+  right: 24px;
+  font-size: 0.85rem;
+  color: var(--cs-gold);
+  text-align: right;
+}

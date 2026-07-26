@@ -48,7 +48,7 @@ export class Car {
 
   createMesh(scene) {
     const group = new THREE.Group();
-    const bodyColor = this.team === 'red' ? 0xc44a2a : 0x2a6fc4;
+    const bodyColor = this.garageColor || (this.team === 'red' ? 0xc44a2a : 0x2a6fc4);
 
     const body = new THREE.Mesh(
       new THREE.BoxGeometry(3.2, 1.2, 5),

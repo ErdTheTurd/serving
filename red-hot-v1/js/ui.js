@@ -1,4 +1,5 @@
 import { SHOP_ITEMS, WEAPONS, createWeaponState } from './weapons.js';
+import { formatSpeedDisplay } from './progression.js';
 
 export class UI {
   constructor(game) {
@@ -16,6 +17,7 @@ export class UI {
     this.interactHint = document.querySelector('.interact-hint');
     this.minimapCanvas = document.getElementById('minimap');
     this.minimapCtx = this.minimapCanvas.getContext('2d');
+    this.raceHud = document.getElementById('race-hud');
   }
 
   setupBuyMenu() {
@@ -114,6 +116,11 @@ export class UI {
       `${p.weapon.ammo} <span>/ ${p.weapon.reserve}</span>`;
 
     document.querySelector('.hud-money').textContent = `$${p.money}`;
+
+    const carSpeedEl = document.getElementById('hud-car-speed');
+    if (p.garageCar && this.game.garage) {
+      carSpeedEl.textContent = formatSpeedDisplay(this.game.garage.getSpeedProfile(p.garageCar));
+    }
 
     const bombEl = document.querySelector('.hud-bomb');
     if (g.bomb.planted) {
@@ -226,5 +233,45 @@ export class UI {
 
   hideRoundEnd() {
     this.roundOverlay.classList.remove('active');
+  }
+
+  showRaceHUD() {
+    this.raceHud.classList.add('active');
+    document.getElementById('race-countdown').textContent = '3';
+  }
+
+  hideRaceHUD() {
+    this.raceHud.classList.remove('active');
+  }
+
+  updateRaceCountdown(n) {
+    const el = document.getElementById('race-countdown');
+    el.textContent = n > 0 ? n : 'GO!';
+    el.style.opacity = n > 0 ? 1 : 0;
+  }
+
+  updateRaceHUD(race) {
+    const player = race.runners[race.playerIdx];
+    document.getElementById('race-mph').textContent = player.currentMph;
+    document.getElementById('race-lap').textContent = Math.min(player.lap + 1, 3);
+    document.getElementById('race-top').textContent = player.topMph;
+
+    const pos = race.finished.indexOf(player) + 1 ||
+      1 + race.runners.filter((r) => !r.finished && r.lap * 4 + r.nextCp > player.lap * 4 + player.nextCp).length;
+    document.getElementById('race-pos').textContent = pos;
+
+    const profile = race.garage.getSpeedProfile(race.garageCar);
+    document.getElementById('race-tolerance').textContent = formatSpeedDisplay(profile);
+  }
+
+  showRaceResults(placement, reward, topMph, car) {
+    this.showScreen('race-results');
+    const titles = ['1st Place!', '2nd Place', '3rd Place', '4th Place', '5th Place'];
+    document.getElementById('race-result-title').textContent = titles[placement - 1] || `${placement}th Place`;
+    document.getElementById('race-result-detail').innerHTML =
+      `${car.name}<br>Top speed: ${topMph} mph · Earned $${(reward / 100).toFixed(2)}<br>` +
+      `${car.races} races on this car — keep racing to tighten your ± mph band!`;
+    this.game.garageUI.updateWalletDisplay();
+    this.game.state = 'menu';
   }
 }

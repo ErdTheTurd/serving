@@ -3,6 +3,10 @@ import { Car, createBulletTrail } from './car.js';
 import { BotAI, autoBuyBot } from './bots.js';
 import { UI } from './ui.js';
 import { SHOP_ITEMS, WEAPONS, createWeaponState, startReload } from './weapons.js';
+import { Garage } from './garage.js';
+import { GarageUI } from './garage-ui.js';
+import { RaceMode } from './race.js';
+import { mphToGameSpeed } from './progression.js';
 
 const ROUND_TIME = 115;
 const BUY_TIME = 15;
@@ -34,12 +38,18 @@ class Game {
     this.lastTime = 0;
     this.ui = null;
     this.lossStreak = 0;
+    this.garage = new Garage();
+    this.garageUI = null;
+    this.raceMode = null;
   }
 
   init() {
     this.setupRenderer();
     this.ui = new UI(this);
+    this.garageUI = new GarageUI(this);
+    this.raceMode = new RaceMode(this);
     this.setupInput();
+    this.garageUI.updateWalletDisplay();
     this.animate();
   }
 
@@ -144,11 +154,22 @@ class Game {
     }
 
     this.player = new Car(this.playerTeam, true);
+    this.applyGarageCar(this.player);
     this.player.createMesh(this.scene);
     this.allCars.push(this.player);
 
     this.ui.showHUD();
     this.startRound();
+  }
+
+  applyGarageCar(car) {
+    const gc = this.garage.activeCar;
+    if (!gc) return;
+    const profile = this.garage.getSpeedProfile(gc);
+    car.garageCar = gc;
+    car.garageColor = gc.color;
+    car.maxSpeed = mphToGameSpeed(profile.centerMph);
+    car.name = gc.name.split(' | ')[0];
   }
 
   startRound() {
@@ -328,6 +349,11 @@ class Game {
   endMatch() {
     this.state = 'menu';
     this.ui.hideHUD();
+    if (this.player?.garageCar) {
+      const other = this.playerTeam === 'red' ? 'hot' : 'red';
+      const won = this.scores[this.playerTeam] > this.scores[other];
+      this.garage.recordRace(this.player.garageCar.id, won ? 1 : 2, 2);
+    }
     const winner = this.scores.red > this.scores.hot ? 'RED' : 'HOT';
     document.querySelector('#match-end h2').textContent = `${winner} WINS THE MATCH`;
     document.querySelector('#match-end .final-score').textContent =
@@ -377,6 +403,12 @@ class Game {
   }
 
   update(dt) {
+    if (this.state === 'racing' && this.raceMode.active) {
+      this.raceMode.update(dt);
+      if (this.scene) this.renderer.render(this.scene, this.camera);
+      return;
+    }
+
     if (this.buyPhase) {
       this.ui.buyTimer -= dt;
       this.ui.updateBuyMenu();
@@ -432,5 +464,6 @@ window.addEventListener('DOMContentLoaded', () => {
   });
   document.getElementById('btn-menu')?.addEventListener('click', () => {
     game.ui.showScreen('main-menu');
+    game.garageUI.updateWalletDisplay();
   });
 });
