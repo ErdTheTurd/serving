@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Red Hot V1 — Car Combat</title>
+  <meta name="description" content="Red Hot V1 — Counter-Strike 2 mechanics with cars. Bomb defusal, buy menu, Dust2-inspired map.">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- Main Menu -->
+  <div id="main-menu" class="screen">
+    <div class="logo">Red Hot</div>
+    <div class="logo-sub">V1</div>
+    <p style="color:#888;margin-bottom:2rem;font-size:0.95rem;max-width:400px;text-align:center;line-height:1.6;">
+      Counter-Strike 2 mechanics. Cars instead of operators.<br>
+      Plant the bomb. Defend the sites. Buy upgrades.
+    </p>
+    <button id="btn-play" class="menu-btn primary">Play</button>
+  </div>
+
+  <!-- Team Select -->
+  <div id="team-select" class="screen hidden">
+    <h1 style="font-size:2rem;margin-bottom:0.5rem;">Choose Your Team</h1>
+    <p style="color:#888;margin-bottom:1rem;">Red plants the bomb · Hot defends the sites</p>
+    <div class="team-grid">
+      <div class="team-card red" data-team="red">
+        <h2>Red</h2>
+        <p>Attackers — Drive to bombsite A or B and plant the explosive. Eliminate Hot team or detonate to win.</p>
+      </div>
+      <div class="team-card hot" data-team="hot">
+        <h2>Hot</h2>
+        <p>Defenders — Hold the sites, defuse the bomb, eliminate Red team before they plant or detonate.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Match End -->
+  <div id="match-end" class="screen hidden">
+    <h2 style="font-size:3rem;font-weight:900;margin-bottom:1rem;">RED WINS</h2>
+    <p class="final-score" style="font-size:2rem;color:var(--cs-gold);margin-bottom:2rem;">13 — 7</p>
+    <button id="btn-rematch" class="menu-btn primary">Rematch</button>
+    <button id="btn-menu" class="menu-btn">Main Menu</button>
+  </div>
+
+  <!-- Game Canvas -->
+  <canvas id="game-canvas"></canvas>
+
+  <!-- HUD -->
+  <div id="hud">
+    <canvas id="minimap" width="180" height="180"></canvas>
+
+    <div class="hud-top">
+      <div class="hud-score">
+        <span class="red">0</span>
+        <span style="color:#666;margin:0 8px;">:</span>
+        <span class="hot">0</span>
+      </div>
+      <div class="hud-timer">1:55</div>
+    </div>
+
+    <div class="hud-bomb">BOMB: 40s</div>
+    <div class="hud-crosshair"></div>
+    <div class="interact-hint">Hold E to plant bomb</div>
+
+    <div id="kill-feed"></div>
+
+    <div class="hud-bottom">
+      <div class="hud-health">
+        <div class="bar-bg"><div class="bar-fill" style="width:100%"></div></div>
+        <div class="label">HP</div>
+      </div>
+      <div class="hud-weapon">
+        <div class="name">Pistol</div>
+        <div class="ammo">12 <span>/ 24</span></div>
+      </div>
+    </div>
+
+    <div class="hud-money">$800</div>
+
+    <div class="controls-hint">
+      WASD — Drive · Mouse — Aim · Click — Shoot<br>
+      R — Reload · E — Plant/Defuse · Shift — Nitro · B — Skip Buy
+    </div>
+  </div>
+
+  <!-- Buy Menu -->
+  <div id="buy-menu">
+    <div class="buy-header">
+      <h2>Buy Phase</h2>
+      <div class="buy-money">$800</div>
+    </div>
+    <div class="buy-grid"></div>
+    <div class="buy-timer">Round starts in 15s</div>
+  </div>
+
+  <!-- Round End -->
+  <div id="round-overlay">
+    <h2>RED WINS</h2>
+    <p class="reason">Bomb exploded</p>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script type="module" src="js/game.js"></script>
+</body>
+</html>
