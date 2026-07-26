@@ -1,0 +1,677 @@
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --red-team: #c44a2a;
+  --hot-team: #2a6fc4;
+  --cs-bg: #1a1a1a;
+  --cs-panel: rgba(20, 20, 20, 0.92);
+  --cs-gold: #c8a951;
+  --cs-green: #5a9e3e;
+  --cs-text: #e8e8e8;
+  --cs-dim: #888;
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: #000;
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  color: var(--cs-text);
+  user-select: none;
+}
+
+#game-canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  cursor: none;
+}
+
+/* ── Screens ── */
+.screen {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  background: radial-gradient(ellipse at center, #1a1a2e 0%, #0a0a0f 70%);
+}
+
+.screen.hidden { display: none; }
+
+.logo {
+  font-size: 4.5rem;
+  font-weight: 900;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  background: linear-gradient(135deg, var(--red-team), #ff6b35, var(--hot-team));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 0.25rem;
+}
+
+.logo-sub {
+  font-size: 1rem;
+  letter-spacing: 0.4em;
+  color: var(--cs-dim);
+  margin-bottom: 3rem;
+}
+
+.menu-btn {
+  padding: 14px 48px;
+  margin: 8px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  border: 2px solid var(--cs-gold);
+  background: rgba(200, 169, 81, 0.1);
+  color: var(--cs-gold);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.menu-btn:hover {
+  background: var(--cs-gold);
+  color: #111;
+}
+
+.menu-btn.primary {
+  background: var(--cs-gold);
+  color: #111;
+}
+
+.menu-btn.primary:hover {
+  background: #e0c060;
+}
+
+/* Team select */
+.team-grid {
+  display: flex;
+  gap: 3rem;
+  margin: 2rem 0;
+}
+
+.team-card {
+  width: 280px;
+  padding: 2rem;
+  border: 3px solid transparent;
+  background: var(--cs-panel);
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.2s;
+}
+
+.team-card:hover { transform: scale(1.04); }
+
+.team-card.red { border-color: var(--red-team); }
+.team-card.hot { border-color: var(--hot-team); }
+
+.team-card h2 {
+  font-size: 1.8rem;
+  margin-bottom: 0.5rem;
+}
+
+.team-card.red h2 { color: var(--red-team); }
+.team-card.hot h2 { color: var(--hot-team); }
+
+.team-card p { color: var(--cs-dim); font-size: 0.9rem; line-height: 1.5; }
+
+/* Buy menu */
+#buy-menu {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  background: rgba(0, 0, 0, 0.85);
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+#buy-menu.active { display: flex; }
+
+.buy-header {
+  display: flex;
+  align-items: baseline;
+  gap: 2rem;
+  margin-bottom: 1.5rem;
+}
+
+.buy-header h2 {
+  font-size: 2rem;
+  color: var(--cs-gold);
+}
+
+.buy-money {
+  font-size: 1.5rem;
+  color: var(--cs-green);
+  font-weight: 700;
+}
+
+.buy-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  max-width: 900px;
+}
+
+.buy-item {
+  padding: 16px;
+  background: var(--cs-panel);
+  border: 1px solid #333;
+  cursor: pointer;
+  transition: all 0.15s;
+  text-align: center;
+}
+
+.buy-item:hover { border-color: var(--cs-gold); background: #222; }
+.buy-item.owned { border-color: var(--cs-green); opacity: 0.6; }
+.buy-item.cant-afford { opacity: 0.35; cursor: not-allowed; }
+
+.buy-item .name { font-weight: 600; margin-bottom: 4px; }
+.buy-item .price { color: var(--cs-green); font-size: 0.9rem; }
+.buy-item .desc { color: var(--cs-dim); font-size: 0.75rem; margin-top: 4px; }
+
+.buy-timer {
+  margin-top: 1.5rem;
+  font-size: 1.2rem;
+  color: var(--cs-dim);
+}
+
+/* ── HUD ── */
+#hud {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 10;
+  display: none;
+}
+
+#hud.active { display: block; }
+
+.hud-top {
+  position: absolute;
+  top: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  font-size: 1.4rem;
+  font-weight: 700;
+}
+
+.hud-score .red { color: var(--red-team); }
+.hud-score .hot { color: var(--hot-team); }
+
+.hud-timer {
+  background: rgba(0,0,0,0.6);
+  padding: 4px 16px;
+  border-radius: 4px;
+  font-variant-numeric: tabular-nums;
+}
+
+.hud-bottom {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: flex-end;
+  gap: 32px;
+}
+
+.hud-health {
+  text-align: center;
+}
+
+.hud-health .bar-bg {
+  width: 200px;
+  height: 8px;
+  background: #333;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.hud-health .bar-fill {
+  height: 100%;
+  background: var(--cs-green);
+  transition: width 0.2s;
+}
+
+.hud-health .bar-fill.low { background: var(--red-team); }
+
+.hud-health .label {
+  font-size: 0.75rem;
+  color: var(--cs-dim);
+  margin-top: 4px;
+}
+
+.hud-weapon {
+  text-align: center;
+}
+
+.hud-weapon .name { font-size: 1.1rem; font-weight: 600; }
+.hud-weapon .ammo { font-size: 2rem; font-weight: 700; color: var(--cs-gold); }
+.hud-weapon .ammo span { font-size: 1rem; color: var(--cs-dim); }
+
+.hud-money {
+  position: absolute;
+  bottom: 20px;
+  right: 24px;
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--cs-green);
+}
+
+.hud-bomb {
+  position: absolute;
+  top: 60px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(200, 50, 50, 0.85);
+  padding: 6px 20px;
+  border-radius: 4px;
+  font-weight: 700;
+  display: none;
+}
+
+.hud-bomb.active { display: block; }
+
+.hud-crosshair {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 20px;
+  height: 20px;
+}
+
+.hud-crosshair::before,
+.hud-crosshair::after {
+  content: '';
+  position: absolute;
+  background: rgba(255,255,255,0.8);
+}
+
+.hud-crosshair::before {
+  width: 2px;
+  height: 20px;
+  left: 9px;
+  top: 0;
+}
+
+.hud-crosshair::after {
+  width: 20px;
+  height: 2px;
+  left: 0;
+  top: 9px;
+}
+
+/* Minimap */
+#minimap {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  width: 180px;
+  height: 180px;
+  background: rgba(0,0,0,0.7);
+  border: 2px solid #444;
+  border-radius: 4px;
+}
+
+/* Kill feed */
+#kill-feed {
+  position: absolute;
+  top: 60px;
+  right: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-width: 280px;
+}
+
+.kill-entry {
+  background: rgba(0,0,0,0.7);
+  padding: 4px 10px;
+  font-size: 0.8rem;
+  animation: fadeOut 4s forwards;
+}
+
+.kill-entry .killer-red { color: var(--red-team); }
+.kill-entry .killer-hot { color: var(--hot-team); }
+
+@keyframes fadeOut {
+  0%, 70% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+/* Round end overlay */
+#round-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  background: rgba(0,0,0,0.7);
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+#round-overlay.active { display: flex; }
+
+#round-overlay h2 {
+  font-size: 3rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+#round-overlay .reason {
+  font-size: 1.2rem;
+  color: var(--cs-dim);
+  margin-top: 0.5rem;
+}
+
+/* Controls hint */
+.controls-hint {
+  position: absolute;
+  bottom: 12px;
+  left: 12px;
+  font-size: 0.7rem;
+  color: var(--cs-dim);
+  line-height: 1.6;
+}
+
+/* Bomb indicator on ground */
+.interact-hint {
+  position: absolute;
+  top: 55%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0,0,0,0.75);
+  padding: 8px 20px;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  display: none;
+  pointer-events: none;
+}
+
+.interact-hint.active { display: block; }
+
+/* Wallet */
+.wallet-display {
+  font-size: 1.1rem;
+  color: var(--cs-green);
+  margin-bottom: 1.5rem;
+  font-weight: 600;
+}
+
+/* Panel screens */
+.panel-screen {
+  justify-content: flex-start;
+  padding: 2rem;
+  overflow-y: auto;
+}
+
+.panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  max-width: 1100px;
+  margin-bottom: 1.5rem;
+}
+
+.panel-header h1 { font-size: 2rem; color: var(--cs-gold); }
+
+.panel-body {
+  display: flex;
+  gap: 2rem;
+  width: 100%;
+  max-width: 1100px;
+  margin-bottom: 2rem;
+}
+
+.car-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 12px;
+  flex: 1;
+}
+
+.car-card {
+  background: var(--cs-panel);
+  border: 2px solid #444;
+  padding: 14px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.car-card:hover { background: #222; transform: translateY(-2px); }
+.car-card.active { background: #1a2a1a; box-shadow: 0 0 12px rgba(90,158,62,0.3); }
+
+.car-rarity { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; margin-bottom: 4px; }
+.car-name { font-weight: 600; margin-bottom: 4px; }
+.car-wear { font-size: 0.75rem; color: var(--cs-dim); }
+.car-speed { font-size: 0.9rem; color: var(--cs-gold); margin: 6px 0; font-weight: 600; }
+.car-stats { font-size: 0.75rem; color: var(--cs-dim); }
+
+.garage-sidebar { width: 320px; flex-shrink: 0; }
+
+.detail-panel {
+  background: var(--cs-panel);
+  padding: 1.2rem;
+  margin-bottom: 1rem;
+  border: 1px solid #333;
+}
+
+.detail-panel h3 { margin-bottom: 0.5rem; }
+.detail-rarity { font-size: 0.85rem; margin-bottom: 1rem; }
+
+.speed-breakdown { font-size: 0.85rem; line-height: 1.8; color: var(--cs-dim); }
+.speed-breakdown strong { color: var(--cs-text); }
+.speed-total { font-size: 1.3rem; color: var(--cs-gold); font-weight: 700; margin-top: 8px; }
+.speed-range { font-size: 0.8rem; color: var(--cs-dim); margin-top: 4px; }
+
+.owned-section { margin-bottom: 1rem; }
+.owned-section h4 { font-size: 0.8rem; color: var(--cs-dim); margin: 8px 0 4px; }
+
+.key-badge {
+  display: inline-block;
+  background: #222;
+  padding: 4px 10px;
+  margin: 2px;
+  font-size: 0.75rem;
+  border: 1px solid #444;
+}
+
+.open-case-btn {
+  display: block;
+  width: 100%;
+  padding: 8px;
+  margin: 4px 0;
+  background: #2a1a1a;
+  border: 1px solid var(--red-team);
+  color: var(--cs-text);
+  cursor: pointer;
+  font-size: 0.85rem;
+}
+
+.open-case-btn:hover { background: #3a2020; }
+
+.garage-actions { display: flex; gap: 8px; }
+
+.menu-btn.small {
+  padding: 8px 20px;
+  font-size: 0.85rem;
+}
+
+.dim { color: var(--cs-dim); font-size: 0.85rem; }
+
+/* Marketplace */
+.market-layout { flex-direction: column; }
+
+.shop-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 10px;
+  margin-bottom: 2rem;
+}
+
+.shop-item {
+  background: var(--cs-panel);
+  padding: 14px;
+  border: 1px solid #333;
+  text-align: center;
+}
+
+.shop-name { font-weight: 600; margin-bottom: 4px; }
+.shop-price { color: var(--cs-green); margin-bottom: 8px; }
+
+.listings-panel { width: 100%; }
+.listings-panel h3 { color: var(--cs-gold); margin-bottom: 1rem; }
+
+.market-listing {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  background: var(--cs-panel);
+  padding: 12px 16px;
+  margin-bottom: 8px;
+  border-left: 3px solid #444;
+}
+
+.listing-info { flex: 1; }
+.listing-name { font-weight: 600; }
+.listing-meta { font-size: 0.8rem; color: var(--cs-dim); }
+.listing-price { color: var(--cs-green); font-weight: 700; font-size: 1.1rem; }
+
+/* Case reveal */
+.overlay-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  background: rgba(0,0,0,0.92);
+  display: none;
+  align-items: center;
+  justify-content: center;
+}
+
+.overlay-modal.active { display: flex; }
+
+.case-reveal-inner { text-align: center; max-width: 800px; }
+
+.reel-window {
+  overflow: hidden;
+  width: 480px;
+  margin: 0 auto 2rem;
+  border: 2px solid var(--cs-gold);
+  background: #111;
+}
+
+.case-reel {
+  display: flex;
+  gap: 0;
+  transition: transform 4s cubic-bezier(0.15, 0.85, 0.25, 1);
+}
+
+.reel-item {
+  min-width: 160px;
+  height: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.85rem;
+  border-right: 1px solid #333;
+  padding: 0 8px;
+}
+
+.reel-item.winner { background: rgba(200,169,81,0.15); font-size: 1rem; }
+
+.reveal-rarity { font-size: 0.9rem; font-weight: 700; text-transform: uppercase; margin-bottom: 4px; }
+.reveal-name { font-size: 1.5rem; font-weight: 700; margin-bottom: 4px; }
+.reveal-stats { color: var(--cs-dim); margin-bottom: 1.5rem; }
+
+/* Race HUD */
+#race-hud {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 15;
+  display: none;
+}
+
+#race-hud.active { display: block; }
+
+.race-countdown {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 6rem;
+  font-weight: 900;
+  color: var(--cs-gold);
+  text-shadow: 0 0 40px rgba(200,169,81,0.5);
+}
+
+.race-speed {
+  position: absolute;
+  bottom: 40px;
+  right: 40px;
+  text-align: right;
+}
+
+.mph-value {
+  font-size: 4rem;
+  font-weight: 900;
+  color: var(--cs-text);
+  font-variant-numeric: tabular-nums;
+}
+
+.mph-label {
+  display: block;
+  font-size: 1rem;
+  color: var(--cs-dim);
+  letter-spacing: 0.2em;
+}
+
+.race-info {
+  position: absolute;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  text-align: center;
+  font-size: 1.1rem;
+  background: rgba(0,0,0,0.6);
+  padding: 8px 24px;
+  border-radius: 4px;
+}
+
+.race-pos { font-size: 1.8rem; font-weight: 900; color: var(--cs-gold); }
+
+.race-tolerance {
+  position: absolute;
+  bottom: 40px;
+  left: 40px;
+  font-size: 0.9rem;
+  color: var(--cs-dim);
+  background: rgba(0,0,0,0.6);
+  padding: 8px 16px;
+  border-radius: 4px;
+}
+
+.hud-car-speed {
+  position: absolute;
+  bottom: 60px;
+  right: 24px;
+  font-size: 0.85rem;
+  color: var(--cs-gold);
+  text-align: right;
+}
