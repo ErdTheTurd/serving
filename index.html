@@ -371,13 +371,6 @@
   .avatar-picker{display:block; cursor:pointer; margin:0 auto 8px; width:fit-content;}
   .avatar-picker input{display:none;}
   .avatar-hint{font-size:12.5px; color:var(--ic-blue); letter-spacing:.3px; display:block; margin-top:6px;}
-  .admin-badge{display:inline-block; background:var(--rubric); color:#fff; font-family:var(--font-display); font-size:10px; letter-spacing:1px; text-transform:uppercase; padding:4px 12px; border-radius:var(--radius-pill); margin-top:8px; font-weight:600;}
-  .auth-block{margin:16px 0; padding:18px; background:var(--page-warm); border-radius:var(--radius-md); border:1px solid var(--border-soft); text-align:left;}
-  .auth-block input{width:100%; padding:11px 14px; border:1px solid var(--border-soft); border-radius:var(--radius-sm); font-family:var(--font-body); font-size:16px; margin-bottom:10px; box-sizing:border-box; background:#fff;}
-  .auth-block input:focus{outline:none; border-color:var(--ic-blue-light); box-shadow:0 0 0 3px rgba(74,123,200,.12);}
-  .auth-note{font-size:13.5px; color:var(--ink-soft); margin:10px 0 0; line-height:1.5;}
-  .otp-input{letter-spacing:8px; font-size:22px; text-align:center; font-family:var(--font-display);}
-  .auth-checklist{font-size:13px; color:var(--ink-soft); margin-top:12px; padding-left:20px; line-height:1.55;}
   .admin-form{display:grid; gap:10px; margin-bottom:16px; padding:16px; background:var(--tint); border-radius:var(--radius-md); border:1px solid var(--border-soft);}
   .admin-form input, .admin-form select{padding:10px 12px; border:1px solid var(--border-soft); border-radius:var(--radius-sm); font-family:var(--font-body); font-size:15px; background:#fff;}
   .admin-form label{font-family:var(--font-display); font-size:10px; letter-spacing:1px; text-transform:uppercase; color:var(--ink-soft); font-weight:600;}
@@ -419,24 +412,22 @@
 </footer>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="supabase/supabase-config.js"></script>
-<script src="supabase/schedule-supabase.js"></script>
-<script src="supabase/obrien-data.js"></script>
+<script src="schedule-local.js"></script>
+<script src="data/obrien-data.js"></script>
 <script>
 const app = document.getElementById('app');
 
 function showBootError(title, detail){
-  app.innerHTML = `<div class="cover"><div class="missal"><h2>${title}</h2><p style="color:var(--ink-soft);">${detail}</p><p style="color:var(--ink-soft); font-size:14px; margin-top:16px;">If you maintain this site, ensure <code>supabase/obrien-data.js</code>, <code>supabase/schedule-supabase.js</code>, and <code>supabase/supabase-config.js</code> are deployed alongside <code>index.html</code>.</p></div></div>`;
+  app.innerHTML = `<div class="cover"><div class="missal"><h2>${title}</h2><p style="color:var(--ink-soft);">${detail}</p><p style="color:var(--ink-soft); font-size:14px; margin-top:16px;">If you maintain this site, ensure <code>data/obrien-data.js</code> and <code>schedule-local.js</code> are deployed alongside <code>index.html</code>.</p></div></div>`;
 }
 
 if(typeof initScheduleBackend !== 'function'){
-  showBootError('App failed to load', 'Missing <strong>supabase/schedule-supabase.js</strong> (could not find <code>initScheduleBackend</code>).');
-  throw new Error('Missing supabase/schedule-supabase.js');
+  showBootError('App failed to load', 'Missing <strong>schedule-local.js</strong> (could not find <code>initScheduleBackend</code>).');
+  throw new Error('Missing schedule-local.js');
 }
 if(typeof O_BRIEN_MOVEMENTS === 'undefined'){
-  showBootError('App failed to load', 'Missing <strong>supabase/obrien-data.js</strong> (could not find <code>O_BRIEN_MOVEMENTS</code>).');
-  throw new Error('Missing supabase/obrien-data.js');
+  showBootError('App failed to load', 'Missing <strong>data/obrien-data.js</strong> (could not find <code>O_BRIEN_MOVEMENTS</code>).');
+  throw new Error('Missing data/obrien-data.js');
 }
 
 /* ============ FULL MASS SEQUENCE (server's parts) ============ */
@@ -1105,25 +1096,22 @@ function renderSchedulePanel(){
     {id:'upcoming', label:'All Masses'},
     {id:'my-shifts', label:'My Shifts'},
     {id:'trades', label:'Open & Trades'},
-    ...(isScheduleAdmin() ? [{id:'manage', label:'Manage'}] : [])
+    {id:'manage', label:'Manage'}
   ];
   return `
     <p style="font-size:13px; color:var(--ink-soft); margin-top:0;">${getScheduleStatus()}</p>
-    <p style="font-size:14px;">Sign up, cancel, or offer a trade — shared with all servers when Supabase is connected.</p>
+    <p style="font-size:14px;">Sign up, cancel, or offer a trade. Schedule is saved on this device only.</p>
     <div class="sched-subtabs">${subtabs.map(t=>
       `<button data-sched-sub="${t.id}" class="${sub===t.id?'active':''}">${t.label}</button>`
     ).join('')}</div>
     <div class="guide-scroll" style="max-height:55vh;">${list}</div>
-    <button class="begin-btn ghost" id="refreshScheduleBtn" style="margin-top:14px;">Refresh Schedule</button>`;
+    <button class="begin-btn ghost" id="refreshScheduleBtn" style="margin-top:14px;">Refresh Schedule</button>
+    <button class="begin-btn ghost" id="resetScheduleBtn" style="margin-top:10px;">Reset Demo Schedule</button>`;
 }
 
 function renderProfilePanel(){
   const p = loadProfile();
-  const email = getAuthEmail();
-  const admin = isScheduleAdmin();
   const upcoming = getMyUpcomingSlots().length;
-  const signedIn = !!email;
-  const pendingEmail = getPendingSignInEmail();
   return `
     <div class="profile-header">
       <label class="avatar-picker">
@@ -1134,39 +1122,6 @@ function renderProfilePanel(){
       <input type="text" id="profileName" placeholder="Your name" value="${p.name || ''}"
         style="width:100%; max-width:240px; padding:10px 12px; border:1px solid var(--border-soft); border-radius:8px; font-family:'EB Garamond',serif; font-size:18px; text-align:center; background:var(--tint);">
       <div class="points-badge">${p.points || 0} points</div>
-      ${admin ? '<div class="admin-badge">Schedule Admin</div>' : ''}
-    </div>
-    <div class="auth-block">
-      ${signedIn ? `
-        <div style="font-size:15px;">Signed in as <strong>${email}</strong></div>
-        ${admin ? '<p class="auth-note">You can manage the parish schedule under Schedule → Manage.</p>' : ''}
-        <button class="begin-btn ghost" id="signOutBtn" style="margin-top:10px;">Sign Out</button>
-      ` : pendingEmail ? `
-        <label class="field-label">Check your email</label>
-        <p class="auth-note">Sent to <strong>${pendingEmail}</strong>. Click the sign-in link, or enter the 6-digit code below.</p>
-        <input type="text" id="otpCode" class="otp-input" placeholder="000000" maxlength="8" inputmode="numeric" autocomplete="one-time-code">
-        <button class="begin-btn" id="verifyOtpBtn" style="margin-top:8px;">Verify Code</button>
-        <button class="begin-btn ghost" id="cancelOtpBtn" style="margin-top:8px;">Cancel</button>
-      ` : `
-        <label class="field-label">Sign in with password (works without email)</label>
-        <input type="email" id="signInEmailPw" placeholder="erdunn706@gmail.com">
-        <input type="password" id="signInPassword" placeholder="Password" autocomplete="current-password">
-        <button class="begin-btn" id="signInPwBtn">Sign In</button>
-        <button class="begin-btn ghost" id="registerAdminBtn" style="margin-top:8px;">Create Admin Account</button>
-        <p class="auth-note">First time? Tap <strong>Create Admin Account</strong> with your admin email + password (8+ chars). No email needed if Supabase has Confirm Email off.</p>
-        <hr style="border:none; border-top:1px dashed var(--border-soft); margin:14px 0;">
-        <label class="field-label">Or email sign-in link</label>
-        <input type="email" id="signInEmail" placeholder="your@email.com">
-        <button class="begin-btn ghost" id="signInBtn">Send Sign-In Link</button>
-        <ul class="auth-checklist">
-          <li>Resend → verify <strong>fsspserve.com</strong> domain</li>
-          <li>Supabase SMTP sender: <strong>no-reply@fsspserve.com</strong></li>
-          <li>Host <strong>smtp.resend.com</strong> port <strong>587</strong>, user <strong>resend</strong></li>
-          <li>Password = full <strong>re_...</strong> API key (Full Access)</li>
-          <li>Add <strong>https://fsspserve.com</strong> to Supabase redirect URLs</li>
-          <li>Check <strong>Resend → Logs</strong> if still failing</li>
-        </ul>
-      `}
     </div>
     <div class="stat-block">
       <div class="label">Masses Served</div>
@@ -1183,8 +1138,7 @@ function renderProfilePanel(){
         +${SCHEDULE_POINTS.pickup} pts when you pick up a trade offer<br>
         Practice progress is separate under Progress tab
       </div>
-    </div>
-    <button class="begin-btn ghost" id="refreshScheduleBtn" style="margin-top:14px;">Refresh Schedule</button>`;
+    </div>`;
 }
 
 function wireSchedulePanel(){
@@ -1212,12 +1166,15 @@ function wireSchedulePanel(){
   });
   const refreshBtn = document.getElementById('refreshScheduleBtn');
   if(refreshBtn){
-    refreshBtn.onclick = async ()=>{
-      refreshBtn.disabled = true;
-      try{
-        if(getScheduleBackend() === 'supabase') await refreshFromSupabase();
-      }catch(e){ alert(e.message); }
-      render();
+    refreshBtn.onclick = ()=> render();
+  }
+  const resetBtn = document.getElementById('resetScheduleBtn');
+  if(resetBtn){
+    resetBtn.onclick = async ()=>{
+      if(confirm('Reset the schedule to demo Masses? Your name, photo, and points are kept.')){
+        await resetDemoScheduleLocal();
+        render();
+      }
     };
   }
   const addBtn = document.getElementById('adminAddBtn');
@@ -1254,87 +1211,6 @@ function wireProfilePanel(){
         await saveProfileAvatar(file);
       }catch(e){ alert(e.message || 'Could not save photo'); }
       render();
-    };
-  }
-  const signInBtn = document.getElementById('signInBtn');
-  if(signInBtn){
-    signInBtn.onclick = async ()=>{
-      const emailInp = document.getElementById('signInEmail');
-      signInBtn.disabled = true;
-      try{
-        await signInWithEmail(emailInp.value);
-        render();
-      }catch(e){ alert(e.message || 'Could not send email'); signInBtn.disabled = false; }
-    };
-  }
-  const signInPwBtn = document.getElementById('signInPwBtn');
-  if(signInPwBtn){
-    signInPwBtn.onclick = async ()=>{
-      signInPwBtn.disabled = true;
-      try{
-        await signInWithPassword(
-          document.getElementById('signInEmailPw').value,
-          document.getElementById('signInPassword').value
-        );
-        render();
-      }catch(e){ alert(e.message); signInPwBtn.disabled = false; }
-    };
-  }
-  const registerAdminBtn = document.getElementById('registerAdminBtn');
-  if(registerAdminBtn){
-    registerAdminBtn.onclick = async ()=>{
-      registerAdminBtn.disabled = true;
-      try{
-        const result = await registerAdminAccount(
-          document.getElementById('signInEmailPw').value,
-          document.getElementById('signInPassword').value
-        );
-        if(result === 'signed_in') render();
-        else alert('Account created — check email to confirm, or disable Confirm Email in Supabase.');
-      }catch(e){ alert(e.message); registerAdminBtn.disabled = false; }
-    };
-  }
-  const verifyOtpBtn = document.getElementById('verifyOtpBtn');
-  if(verifyOtpBtn){
-    verifyOtpBtn.onclick = async ()=>{
-      verifyOtpBtn.disabled = true;
-      try{
-        await verifyEmailOtp(getPendingSignInEmail(), document.getElementById('otpCode').value);
-        render();
-      }catch(e){ alert(e.message); verifyOtpBtn.disabled = false; }
-    };
-  }
-  const cancelOtpBtn = document.getElementById('cancelOtpBtn');
-  if(cancelOtpBtn) cancelOtpBtn.onclick = ()=>{ clearPendingSignInEmail(); render(); };
-  const signOutBtn = document.getElementById('signOutBtn');
-  if(signOutBtn){
-    signOutBtn.onclick = async ()=>{
-      signOutBtn.disabled = true;
-      try{ await signOutUser(); }catch(e){ alert(e.message); }
-      render();
-    };
-  }
-  const refreshBtn = document.getElementById('refreshScheduleBtn');
-  if(refreshBtn){
-    refreshBtn.onclick = async ()=>{
-      refreshBtn.disabled = true;
-      try{
-        if(getScheduleBackend() === 'supabase') await refreshFromSupabase();
-      }catch(e){ alert(e.message); }
-      render();
-    };
-  }
-  const resetBtn = document.getElementById('resetScheduleBtn');
-  if(resetBtn){
-    resetBtn.onclick = async ()=>{
-      if(getScheduleBackend() === 'supabase'){
-        alert('Schedule is shared in Supabase. Ask the MC to manage slots in the dashboard.');
-        return;
-      }
-      if(confirm('Reset the local demo schedule? Your points and name are kept.')){
-        await resetDemoScheduleLocal();
-        render();
-      }
     };
   }
 }
@@ -2185,9 +2061,8 @@ function render(){
 
 async function boot(){
   try{
-    app.innerHTML = '<div class="cover"><div class="missal"><h2>Acolyte Training</h2><p style="color:var(--ink-soft);">Connecting schedule…</p></div></div>';
+    app.innerHTML = '<div class="cover"><div class="missal"><h2>Acolyte Training</h2><p style="color:var(--ink-soft);">Loading…</p></div></div>';
     await initScheduleBackend();
-    window.onScheduleUpdated = ()=> render();
     render();
   }catch(e){
     console.error('Boot failed:', e);
