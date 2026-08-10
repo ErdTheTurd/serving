@@ -1100,7 +1100,7 @@ function renderSchedulePanel(){
   ];
   return `
     <p style="font-size:13px; color:var(--ink-soft); margin-top:0;">${getScheduleStatus()}</p>
-    <p style="font-size:14px;">Sign up, cancel, or offer a trade. Schedule is saved on this device only.</p>
+    <p style="font-size:14px;">Claim a spot, cancel, or offer a trade. Schedule is saved on this device only.</p>
     <div class="sched-subtabs">${subtabs.map(t=>
       `<button data-sched-sub="${t.id}" class="${sub===t.id?'active':''}">${t.label}</button>`
     ).join('')}</div>
