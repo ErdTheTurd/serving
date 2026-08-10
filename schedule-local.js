@@ -112,6 +112,8 @@ async function initScheduleBackend(){
   scheduleCache = loadScheduleLocal() || [];
   profileCache = loadProfileLocal();
   scheduleStatus = 'Saved on this device';
+  // Drop leftover keys from the old sign-in flow
+  try{ localStorage.removeItem('altar_pendingEmail'); }catch(e){}
 }
 
 async function saveProfileName(name){
