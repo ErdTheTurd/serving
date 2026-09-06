@@ -4,23 +4,27 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Acolyte Practice — Immaculate Conception · El Paso</title>
-<meta name="theme-color" content="#1e4080">
+<meta name="theme-color" content="#1a3565">
 <meta name="description" content="Acolyte training for Immaculate Conception Church · FSSP · El Paso — practice Latin responses, movements, and parish rubrics.">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='4' fill='%231e4080'/%3E%3Cpath d='M16 7v18M11 11h10' stroke='%23fff' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='4' fill='%231a3565'/%3E%3Cpath d='M16 7v18M11 11h10' stroke='%23c9a84a' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
 <style>
   :root{
-    --bg:#eceef2;
-    --surface:#fff;
-    --surface-muted:#f7f8fa;
-    --border:#d4d9e2;
+    --fssp-navy:#1a3565;
+    --fssp-navy-dark:#122847;
+    --fssp-gold:#a8862e;
+    --fssp-gold-light:#c9a84a;
+    --bg:#e8ebf0;
+    --surface:#faf8f4;
+    --surface-muted:#f2efe8;
+    --border:#d8d0c4;
     --text:#1a2230;
-    --text-muted:#5f6b7a;
-    --accent:#1e4080;
-    --accent-hover:#163366;
-    --accent-soft:#e8eef7;
+    --text-muted:#5a6575;
+    --accent:var(--fssp-navy);
+    --accent-hover:var(--fssp-navy-dark);
+    --accent-soft:#e4eaf3;
     --success:#2d6a4f;
     --warning:#9a6700;
     --danger:#b42318;
@@ -42,9 +46,9 @@
     --ic-white:var(--text);
     --border-soft:var(--border);
     --tint:var(--accent-soft);
-    --gold:var(--text-muted);
-    --gold-bright:var(--text-muted);
-    --gold-pale:var(--accent-soft);
+    --gold:var(--fssp-gold);
+    --gold-bright:var(--fssp-gold-light);
+    --gold-pale:rgba(168,134,46,.12);
     --radius-sm:var(--radius);
     --radius-md:var(--radius);
     --radius-lg:8px;
@@ -66,20 +70,26 @@
     -webkit-font-smoothing:antialiased;
   }
 
-  .site-shell{display:flex;flex-direction:column;align-items:center;min-height:100vh;padding:0 16px 32px;width:100%;}
-  .site-header{width:100%;max-width:680px;padding:20px 0 16px;border-bottom:1px solid var(--border);margin-bottom:16px;}
-  .app-main{width:100%;max-width:680px;flex:1;}
-  .site-footer{width:100%;max-width:680px;margin-top:24px;padding-top:16px;border-top:1px solid var(--border);text-align:center;font-size:13px;color:var(--text-muted);}
+  .site-shell{display:flex;flex-direction:column;align-items:center;min-height:100vh;width:100%;}
+  .site-header{width:100%;background:var(--fssp-navy);border-bottom:2px solid var(--fssp-gold);margin-bottom:24px;}
+  .site-header-inner{max-width:680px;margin:0 auto;padding:22px 16px 20px;}
+  .app-main{width:100%;max-width:680px;flex:1;padding:0 16px;}
+  .site-footer{width:100%;max-width:680px;margin-top:28px;padding:16px 16px 32px;text-align:center;font-size:.8125rem;color:var(--text-muted);border-top:1px solid var(--border);}
 
   .brand{text-align:left;}
-  .brand h1{font-size:1.25rem;font-weight:600;margin:0 0 4px;color:var(--text);}
-  .brand .parish{font-size:.875rem;color:var(--text-muted);margin:0;font-weight:400;}
+  .brand-mark{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+  .brand-mark svg{flex-shrink:0;opacity:.92;}
+  .fssp-label{font-size:.6875rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--fssp-gold-light);line-height:1.3;}
+  .fssp-label span{display:block;font-size:.625rem;font-weight:500;letter-spacing:.06em;color:rgba(255,255,255,.65);text-transform:none;margin-top:2px;}
+  .brand h1{font-family:var(--font-latin);font-size:1.5rem;font-weight:500;margin:0 0 6px;color:#fff;line-height:1.25;}
+  .brand .parish{font-size:.875rem;color:rgba(255,255,255,.82);margin:0;font-weight:400;}
 
   .missal-wrap{width:100%;max-width:680px;margin:0 auto;}
   .ribbon{display:none;}
   .missal{
     background:var(--surface);
     border:1px solid var(--border);
+    border-left:3px solid var(--fssp-navy);
     border-radius:var(--radius-lg);
     box-shadow:var(--shadow);
     padding:24px;
@@ -87,12 +97,12 @@
   .missal-home{padding-top:24px;}
 
   .panel-header{margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid var(--border);}
-  .panel-header h2{margin:0 0 6px;}
+  .panel-header h2{margin:0 0 6px;font-family:var(--font-latin);font-weight:500;}
   .panel-intro{margin:0;font-size:.9375rem;color:var(--text-muted);}
 
   .meta-row{display:flex;justify-content:space-between;align-items:baseline;gap:12px;border-bottom:1px solid var(--border);padding-bottom:12px;margin-bottom:20px;}
   .step-count{font-size:.75rem;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.04em;}
-  .section-label{font-size:.8125rem;font-weight:600;color:var(--accent);text-align:right;line-height:1.35;}
+  .section-label{font-size:.8125rem;font-weight:600;color:var(--fssp-navy);text-align:right;line-height:1.35;}
 
   .block{margin-bottom:20px;}
   .role{display:flex;align-items:center;gap:8px;font-size:.75rem;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.04em;margin-bottom:8px;}
@@ -170,7 +180,7 @@
 
   .cover,.summary,.settings-view,.recordpriest-view,.rubric-view,.flash-view,.section-view,.learn-view{max-width:680px;width:100%;margin:0 auto;}
   .cover h2,.summary h2,.settings-view h2,.recordpriest-view h2,.rubric-view h2,.flash-view h2,.section-view h2,.learn-view h2,.panel-header h2{
-    font-size:1.125rem;font-weight:600;color:var(--text);margin-top:0;
+    font-size:1.125rem;font-weight:500;color:var(--fssp-navy);margin-top:0;
   }
   .cover p,.settings-view p{line-height:1.6;font-size:1rem;}
 
@@ -186,7 +196,7 @@
 
   .summary-item{border-bottom:1px solid var(--border);padding:14px 0;}
   .summary-item:last-child{border-bottom:none;}
-  .summary-item .sec{font-size:.75rem;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.04em;}
+  .summary-item .sec{font-size:.75rem;font-weight:600;color:var(--fssp-gold);text-transform:uppercase;letter-spacing:.04em;}
   .summary-item .lat{font-family:var(--font-latin);font-style:italic;margin:5px 0 10px;font-size:.9375rem;}
   .restart-btn{margin-top:20px;width:100%;}
 
@@ -220,7 +230,7 @@
     font-size:.8125rem;font-weight:500;padding:10px 12px;cursor:pointer;color:var(--text-muted);white-space:nowrap;margin-bottom:-1px;
   }
   .home-tabs button:hover{color:var(--text);}
-  .home-tabs button.active{color:var(--accent);border-bottom-color:var(--accent);}
+  .home-tabs button.active{color:var(--fssp-navy);border-bottom-color:var(--fssp-gold);font-weight:600;}
 
   .role-block{margin:12px 0 4px;}
   .role-block .field-label{margin-top:0;}
@@ -305,7 +315,7 @@
   .admin-form input,.admin-form select{padding:10px 12px;border:1px solid var(--border);border-radius:var(--radius);font-family:var(--font-ui);font-size:.9375rem;background:var(--surface);}
   .admin-form label{font-size:.75rem;font-weight:600;color:var(--text-muted);}
   .mini-btn.admin{background:var(--accent);color:#fff;border-color:var(--accent);}
-  .points-badge{display:inline-block;background:var(--accent-soft);color:var(--accent);font-size:.8125rem;font-weight:600;padding:4px 12px;border-radius:4px;margin-top:8px;}
+  .points-badge{display:inline-block;background:var(--fssp-navy);color:#fff;font-size:.8125rem;font-weight:600;padding:4px 12px;border-radius:4px;margin-top:8px;}
   .sched-subtabs{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap;}
   .sched-subtabs button{font-size:.8125rem;font-weight:500;padding:7px 12px;border:1px solid var(--border);border-radius:var(--radius);background:var(--surface);cursor:pointer;color:var(--text-muted);}
   .sched-subtabs button.active{background:var(--accent);color:#fff;border-color:var(--accent);}
@@ -313,7 +323,8 @@
   .mq-opt{border-radius:var(--radius)!important;}
 
   @media (max-width:600px){
-    .site-shell{padding:0 12px 24px;}
+    .site-header-inner{padding:18px 12px 16px;}
+    .app-main{padding:0 12px;}
     .missal,.cover .missal,.summary .missal,.settings-view .missal,.recordpriest-view .missal,.rubric-view .missal,.flash-view .missal,.section-view .missal,.learn-view .missal{padding:18px 16px;}
     .mode-grid{grid-template-columns:1fr;}
     .latin{font-size:1.125rem;}
@@ -326,16 +337,26 @@
 
 <div class="site-shell">
 <header class="site-header">
-  <div class="brand">
-    <h1>Acolyte Practice</h1>
-    <p class="parish">Immaculate Conception Church · FSSP · El Paso, Texas</p>
+  <div class="site-header-inner">
+    <div class="brand">
+      <div class="brand-mark">
+        <svg width="28" height="28" viewBox="0 0 32 32" aria-hidden="true" focusable="false">
+          <rect width="32" height="32" rx="4" fill="#122847"/>
+          <path d="M11 8v16M21 8v16M11 13h10" stroke="#c9a84a" stroke-width="1.75" stroke-linecap="round"/>
+        </svg>
+        <div class="fssp-label">FSSP<span>Priestly Fraternity of St. Peter</span></div>
+      </div>
+      <h1>Acolyte Practice</h1>
+      <p class="parish">Immaculate Conception Church · El Paso, Texas</p>
+    </div>
   </div>
 </header>
 
 <main id="app" class="app-main"></main>
 
 <footer class="site-footer">
-  <span>Immaculate Conception Church · El Paso, TX · FSSP</span>
+  <span>Immaculate Conception Church · El Paso, TX</span><br>
+  <span>Extraordinary Form · FSSP</span>
 </footer>
 </div>
 
