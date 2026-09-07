@@ -914,14 +914,14 @@ function stepInfoTag(s){
 
 function buildSequence(role, mode='full', range=null){
   const movements = getActiveMovements();
+  const asMovement = m=>({type:'movement', mq: shuffleMq(m)});
   if(mode === 'movements'){
-    return movements.filter(m=> m.role==='both' || m.role===role)
-      .map(m=>({type:'movement', mq:m}));
+    return movements.filter(m=> m.role==='both' || m.role===role).map(asMovement);
   }
   if(mode === 'canon'){
     return movements.filter(m=>(m.role==='both'||m.role===role) && CANON_MV_IDS.includes(m.id))
       .sort((a,b)=> a.insertBefore - b.insertBefore || a.id.localeCompare(b.id))
-      .map(m=>({type:'movement', mq:m}));
+      .map(asMovement);
   }
   if(mode === 'responses'){
     return STEPS.map((_, idx)=> idx)
@@ -932,11 +932,25 @@ function buildSequence(role, mode='full', range=null){
   for(let idx=0; idx<=STEPS.length; idx++){
     movements.filter(m=> m.insertBefore===idx && (m.role==='both'||m.role===role))
       .filter(m=> !range || (m.insertBefore >= range.from && m.insertBefore <= range.to + 1))
-      .forEach(m=> seq.push({type:'movement', mq:m}));
+      .forEach(m=> seq.push(asMovement(m)));
     if(idx < STEPS.length && (!range || inSection(idx, range)))
       seq.push({type:'prayer', idx});
   }
   return seq;
+}
+
+function shuffleMq(mq){
+  const n = mq.options.length;
+  const order = mq.options.map((_, i)=> i);
+  for(let i = n - 1; i > 0; i--){
+    const j = Math.floor(Math.random() * (i + 1));
+    [order[i], order[j]] = [order[j], order[i]];
+  }
+  return {
+    ...mq,
+    options: order.map(i=> mq.options[i]),
+    correct: order.indexOf(mq.correct)
+  };
 }
 
 function startPractice(mode, range=null){
@@ -2046,7 +2060,10 @@ function renderMovementStep(){
   `;
 
   const optHolder = document.getElementById('mqOptions');
-  optHolder.innerHTML = mq.options.map((opt,idx)=>`<button class="mini-btn mq-opt" data-idx="${idx}" style="display:block; width:100%; text-align:left; margin-bottom:8px; padding:10px 14px;">${opt}</button>`).join('');
+  optHolder.innerHTML = mq.options.map((opt,idx)=>{
+    const letter = String.fromCharCode(65 + idx);
+    return `<button class="mini-btn mq-opt" data-idx="${idx}" style="display:block; width:100%; text-align:left; margin-bottom:8px; padding:10px 14px;"><span style="font-weight:600; margin-right:8px; color:var(--text-muted);">${letter}.</span>${opt}</button>`;
+  }).join('');
 
   function lockIn(idx){
     const correct = idx === mq.correct;
