@@ -32,7 +32,8 @@ function buildSeedSlots(){
   const slots = [];
   const times = [
     {t:'7:30 AM', label:'Low Mass'},
-    {t:'12:10 PM', label:'Low Mass'},
+    {t:'10:00 AM', label:'Sung Mass'},
+    {t:'12:10 PM', label:'High Mass'},
     {t:'6:30 PM', label:'Low Mass'}
   ];
   const base = new Date();
@@ -41,7 +42,7 @@ function buildSeedSlots(){
     const day = new Date(base);
     day.setDate(day.getDate() + d);
     const dow = day.getDay();
-    const dayTimes = dow === 0 ? [times[0], times[1], times[2]] : (dow === 6 ? [times[0], times[2]] : [times[0], times[1]]);
+    const dayTimes = dow === 0 ? [times[0], times[2], times[3]] : (dow === 6 ? [times[0], times[1], times[3]] : [times[0], times[2]]);
     dayTimes.forEach(({t, label})=>{
       const id = `mass-${day.toISOString().slice(0,10)}-${t.replace(/[: ]/g,'')}`;
       slots.push({
