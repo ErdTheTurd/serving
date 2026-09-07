@@ -549,6 +549,7 @@
 
 <script src="schedule-local.js"></script>
 <script src="data/obrien-data.js"></script>
+<script src="data/mass-forms-data.js"></script>
 <script>
 const app = document.getElementById('app');
 
@@ -563,6 +564,10 @@ if(typeof initScheduleBackend !== 'function'){
 if(typeof O_BRIEN_MOVEMENTS === 'undefined'){
   showBootError('App failed to load', 'Missing <strong>data/obrien-data.js</strong> (could not find <code>O_BRIEN_MOVEMENTS</code>).');
   throw new Error('Missing data/obrien-data.js');
+}
+if(typeof getMovementsForForm !== 'function'){
+  showBootError('App failed to load', 'Missing <strong>data/mass-forms-data.js</strong> (could not find <code>getMovementsForForm</code>).');
+  throw new Error('Missing mass-forms-data.js');
 }
 
 /* ============ FULL MASS SEQUENCE (server's parts) ============ */
@@ -716,10 +721,8 @@ const STEPS = [
  server:"Deo grátias.", serverT:"Thanks be to God."}
 ];
 
-/* ============ ACOLYTE MOVEMENTS (O'Brien, How to Serve Low Mass) ============ */
-const MOVEMENTS = O_BRIEN_MOVEMENTS;
-
-const CANON_MV_IDS = ['ob11','ob12','ob13','ob14','ob15'];
+/* ============ ACOLYTE MOVEMENTS ============ */
+const CANON_MV_IDS = ['ob11','ob12','ob13','ob14','ob15','sm5','hm7','hm8'];
 
 const MASS_SECTIONS = [
   {id:'foot', label:'Prayers at the Foot of the Altar', from:0, to:7},
@@ -742,23 +745,20 @@ const PRACTICE_MODES = [
 ];
 
 const LEARN_ITEMS = [
-  {id:'obrienLessons', label:'Five Lessons', desc:'O\'Brien — Lessons I through V'},
-  {id:'obrienTwoServers', label:'Two Altar Boys', desc:'Duty chart from O\'Brien'},
-  {id:'obrienSacristy', label:'The Sacristy', desc:'Arrival, setup, furnishings'},
-  {id:'obrienSanctuary', label:'The Sanctuary', desc:'Altar furniture and names'},
-  {id:'obrienVestments', label:'Vestments & Chalice', desc:'How the Priest vests'},
-  {id:'obrienPostures', label:'Postures', desc:'Genuflect, kneel, bow'},
-  {id:'massGuide', label:'Mass Guide', desc:'Read the whole Mass — priest, server, movements'},
-  {id:'glossary', label:'Latin Glossary', desc:'Key phrases with O\'Brien pronunciation'},
-  {id:'bellChart', label:'Bells & Canon', desc:'Bell and elevation duties'},
-  {id:'rubric', label:'Rubric Sheet', desc:'All movement notes for your role'}
+  {id:'formOverview', label:'Mass Form Guide', desc:'Overview for Low, Sung, or High Mass', forms:['low','sung','high']},
+  {id:'obrienLessons', label:'Five Lessons', desc:'O\'Brien — Lessons I through V', forms:['low']},
+  {id:'obrienTwoServers', label:'Two Altar Boys', desc:'Duty chart for your mass form', forms:['low','sung','high']},
+  {id:'obrienSacristy', label:'The Sacristy', desc:'Arrival, setup, furnishings', forms:['low','sung','high']},
+  {id:'obrienSanctuary', label:'The Sanctuary', desc:'Altar furniture and names', forms:['low','sung','high']},
+  {id:'obrienVestments', label:'Vestments & Chalice', desc:'How the Priest vests', forms:['low','sung','high']},
+  {id:'obrienPostures', label:'Postures', desc:'Genuflect, kneel, bow', forms:['low','sung','high']},
+  {id:'massGuide', label:'Mass Guide', desc:'Read the whole Mass — priest, server, movements', forms:['low','sung','high']},
+  {id:'glossary', label:'Latin Glossary', desc:'Key phrases with O\'Brien pronunciation', forms:['low','sung','high']},
+  {id:'bellChart', label:'Bells & Canon', desc:'Bell and elevation duties', forms:['low','sung','high']},
+  {id:'rubric', label:'Rubric Sheet', desc:'All movement notes for your role', forms:['low','sung','high']}
 ];
 
 const GLOSSARY = O_BRIEN_GLOSSARY;
-
-const BELL_CHART = O_BRIEN_BELL_CHART;
-
-const PREMASS_ITEMS = O_BRIEN_PREMASS;
 
 /* ============ STATE ============ */
 function lsGet(key, fallback){
@@ -798,9 +798,20 @@ function wireLayoutToggle(){
   if(scrollBtn) scrollBtn.onclick = ()=> setLayoutMode(true);
 }
 
+function getActiveMovements(){
+  return getMovementsForForm(state.massForm || 'low');
+}
+function getStep(idx){
+  const base = STEPS[idx];
+  if(!base) return base;
+  const ov = getStepOverride(state.massForm || 'low', idx);
+  return ov ? {...base, ...ov} : base;
+}
+
 let state = {
   view: 'cover',
   homeTab: lsGet('altar_homeTab', 'practice'),
+  massForm: lsGet('altar_massForm', 'low'),
   practiceMode: lsGet('altar_practiceMode', 'full'),
   level: lsGet('altar_level', '1'),
   role: lsGet('altar_role', 'ac1'),
@@ -833,7 +844,7 @@ function saveSessionProgress(){
   p.lastSession = new Date().toISOString();
   Object.entries(state.transcripts).forEach(([idx, text])=>{
     if(!text) return;
-    const s = STEPS[idx];
+    const s = getStep(idx);
     const {score} = alignAndScore(s.server, text);
     const prev = p.bestScores[idx] || 0;
     if(score > prev) p.bestScores[idx] = score;
@@ -860,7 +871,7 @@ function goHome(){
 }
 function openLearn(id){
   const map = {
-    rubric:'rubric', massGuide:'massGuide', glossary:'glossary', bellChart:'bellChart',
+    formOverview:'formOverview', rubric:'rubric', massGuide:'massGuide', glossary:'glossary', bellChart:'bellChart',
     obrienLessons:'obrienLessons', obrienTwoServers:'obrienTwoServers', obrienSacristy:'obrienSacristy',
     obrienSanctuary:'obrienSanctuary', obrienVestments:'obrienVestments', obrienPostures:'obrienPostures'
   };
@@ -890,23 +901,25 @@ function inSection(idx, range){
 }
 
 function isServerResponseStep(idx){
-  const s = STEPS[idx];
-  return !s.priestOnly && !s.referenceOnly;
+  const s = getStep(idx);
+  return s && !s.priestOnly && !s.referenceOnly;
 }
 
 function stepInfoTag(s){
   if(s.priestOnly) return '<span class="info-tag">priest only</span>';
   if(s.referenceOnly) return '<span class="info-tag">reference only</span>';
+  if(s.note && state.massForm !== 'low') return '<span class="info-tag">' + (state.massForm === 'high' ? 'high mass' : 'sung mass') + '</span>';
   return '';
 }
 
 function buildSequence(role, mode='full', range=null){
+  const movements = getActiveMovements();
   if(mode === 'movements'){
-    return MOVEMENTS.filter(m=> m.role==='both' || m.role===role)
+    return movements.filter(m=> m.role==='both' || m.role===role)
       .map(m=>({type:'movement', mq:m}));
   }
   if(mode === 'canon'){
-    return MOVEMENTS.filter(m=>(m.role==='both'||m.role===role) && CANON_MV_IDS.includes(m.id))
+    return movements.filter(m=>(m.role==='both'||m.role===role) && CANON_MV_IDS.includes(m.id))
       .sort((a,b)=> a.insertBefore - b.insertBefore || a.id.localeCompare(b.id))
       .map(m=>({type:'movement', mq:m}));
   }
@@ -917,7 +930,7 @@ function buildSequence(role, mode='full', range=null){
   }
   const seq = [];
   for(let idx=0; idx<=STEPS.length; idx++){
-    MOVEMENTS.filter(m=> m.insertBefore===idx && (m.role==='both'||m.role===role))
+    movements.filter(m=> m.insertBefore===idx && (m.role==='both'||m.role===role))
       .filter(m=> !range || (m.insertBefore >= range.from && m.insertBefore <= range.to + 1))
       .forEach(m=> seq.push({type:'movement', mq:m}));
     if(idx < STEPS.length && (!range || inSection(idx, range)))
@@ -990,7 +1003,7 @@ async function speakEleven(text, i, statusEl){
 }
 
 function playPriestLine(i, statusEl){
-  const s = STEPS[i];
+  const s = getStep(i);
   if(state.priestMode === 'custom'){
     if(state.priestRecordings[i]){ new Audio(state.priestRecordings[i]).play(); }
     else if(statusEl){ statusEl.textContent = 'No recording yet for this line — record it in "Record the Priest".'; }
@@ -1023,7 +1036,7 @@ function alignAndScore(correctText, heardText){
   return {score, highlighted};
 }
 function renderComparison(i, transcript){
-  const s = STEPS[i];
+  const s = getStep(i);
   const holder = document.getElementById('compareHolder');
   if(!holder) return;
   if(!transcript){
@@ -1050,9 +1063,27 @@ function renderRoleSelector(){
     </div>
   </div>`;
 }
+function renderMassFormSelector(){
+  const forms = ['low','sung','high'];
+  const btns = forms.map(f=>{
+    const m = getFormMeta(f);
+    return `<button data-mass="${f}" class="${state.massForm===f?'active':''}">${m.shortLabel}</button>`;
+  }).join('');
+  const meta = getFormMeta(state.massForm);
+  return `<div class="role-block">
+    <p class="section-head">Mass Form</p>
+    <div class="seg">${btns}</div>
+    <p class="panel-intro" style="margin:8px 0 0;font-size:12px;">${meta.desc}</p>
+  </div>`;
+}
 function wireRoleButtons(){
   app.querySelectorAll('.seg button[data-role]').forEach(b=>{
     b.onclick = ()=>{ state.role = b.dataset.role; lsSet('altar_role', state.role); render(); };
+  });
+}
+function wireMassFormButtons(){
+  app.querySelectorAll('.seg button[data-mass]').forEach(b=>{
+    b.onclick = ()=>{ state.massForm = b.dataset.mass; lsSet('altar_massForm', state.massForm); render(); };
   });
 }
 
@@ -1076,7 +1107,7 @@ function renderPracticePanel(){
 }
 
 function renderLearnPanel(){
-  const cards = LEARN_ITEMS.map(m=>`
+  const cards = LEARN_ITEMS.filter(m=> !m.forms || m.forms.includes(state.massForm)).map(m=>`
     <button class="mode-btn" data-learn="${m.id}">
       ${m.label}<span>${m.desc}</span>
     </button>`).join('');
@@ -1085,7 +1116,8 @@ function renderLearnPanel(){
 
 function renderPreparePanel(){
   const checks = getChecklist();
-  const rows = PREMASS_ITEMS.map(item=>{
+  const premass = getPremassForForm(state.massForm);
+  const rows = premass.map(item=>{
     const done = !!checks[item.id];
     return `<div class="check-row ${done?'done':''}" data-id="${item.id}">
       <input type="checkbox" id="chk_${item.id}" ${done?'checked':''}>
@@ -1135,7 +1167,7 @@ function renderProgressPanel(){
     </div>
     ${weak.length ? `<label class="field-label">Lines to Review</label>
       ${weak.map(w=>`<div class="weak-item">
-        <span class="lat">${STEPS[w.idx].server.slice(0, 50)}${STEPS[w.idx].server.length>50?'…':''}</span>
+        <span class="lat">${getStep(w.idx).server.slice(0, 50)}${getStep(w.idx).server.length>50?'…':''}</span>
         <span class="score-chip score-mid">${w.score}%</span>
         <button class="mini-btn" data-practice-idx="${w.idx}">Practice</button>
       </div>`).join('')}` : '<p style="font-size:14px;color:var(--ink-soft);">Complete a practice session to see your weakest lines here.</p>'}`;
@@ -1235,7 +1267,11 @@ function renderSchedulePanel(){
         <select id="adminTime">
           <option>7:30 AM</option><option>12:10 PM</option><option>6:30 PM</option>
         </select>
-        <input type="text" id="adminLabel" placeholder="Low Mass" value="Low Mass">
+        <select id="adminLabel">
+          <option value="Low Mass">Low Mass</option>
+          <option value="Sung Mass">Sung Mass</option>
+          <option value="High Mass">High Mass</option>
+        </select>
         <input type="text" id="adminPriest" placeholder="Celebrant" value="Fr. FSSP">
         <button class="begin-btn" id="adminAddBtn" style="margin-top:4px;">Add Mass</button>
       </div>
@@ -1384,12 +1420,14 @@ function renderHome(){
   else if(state.homeTab === 'prepare') panel = renderPreparePanel();
   else panel = renderProgressPanel();
 
+  const formMeta = getFormMeta(state.massForm);
   app.innerHTML = `
     <div class="home-view">
       <div class="panel-header">
         <h2>Acolyte Training</h2>
-        <p class="panel-intro">Practice Latin responses, altar movements, and parish rubrics for Low Mass.</p>
+        <p class="panel-intro">${formMeta.intro}</p>
       </div>
+      ${renderMassFormSelector()}
       ${renderRoleSelector()}
       <div class="home-tabs">${tabBar}</div>
       <div class="home-panel">${panel}</div>
@@ -1403,6 +1441,7 @@ function renderHome(){
   app.querySelectorAll('.home-tabs button').forEach(b=>{
     b.onclick = ()=>{ state.homeTab = b.dataset.tab; lsSet('altar_homeTab', state.homeTab); render(); };
   });
+  wireMassFormButtons();
   wireRoleButtons();
 
   if(state.homeTab === 'practice'){
@@ -1458,11 +1497,32 @@ function renderHome(){
 }
 
 /* ============ LEARN VIEWS ============ */
+function renderFormOverview(){
+  const meta = getFormMeta(state.massForm);
+  const lesson = getFormLesson(state.massForm);
+  const lowNote = state.massForm === 'low'
+    ? `<p style="font-size:15px;">Low Mass uses two altar candles and spoken propers. All five O'Brien lessons apply directly.</p>`
+    : '';
+  const body = lesson ? lesson.body : '';
+  app.innerHTML = `
+    <div class="learn-view"><div class="missal">
+      <h2>${meta.guideTitle}</h2>
+      <p class="source-note">${meta.source}</p>
+      ${lowNote}
+      ${body ? `<div class="guide-scroll"><div class="guide-item"><div class="lesson-body">${body}</div></div></div>` : ''}
+      ${state.massForm !== 'low' ? `<p style="font-size:14px;color:var(--ink-soft);margin-top:14px;">Latin altar responses match Low Mass unless marked reference-only. Use <strong>Movements Only</strong> or <strong>Full Mass</strong> to practice ${meta.label}-specific rubrics.</p>` : ''}
+      ${obrienBackBtn()}
+    </div></div>`;
+  wireObrienBack();
+}
+
 function renderMassGuide(){
   const role = state.role;
+  const meta = getFormMeta(state.massForm);
+  const movements = getActiveMovements();
   let body = '';
   for(let idx=0; idx<=STEPS.length; idx++){
-    MOVEMENTS.filter(m=> m.insertBefore===idx && (m.role==='both'||m.role===role))
+    movements.filter(m=> m.insertBefore===idx && (m.role==='both'||m.role===role))
       .forEach(m=>{
         body += `<div class="guide-item guide-movement">
           <div class="sec">Movement · ${m.section}</div>
@@ -1471,7 +1531,7 @@ function renderMassGuide(){
         </div>`;
       });
     if(idx < STEPS.length){
-      const s = STEPS[idx];
+      const s = getStep(idx);
       body += `<div class="guide-item">
         <div class="sec">${idx+1}. ${s.section}</div>
         <div class="role" style="margin-top:8px;"><span class="dot"></span>Priest</div>
@@ -1486,8 +1546,8 @@ function renderMassGuide(){
   }
   app.innerHTML = `
     <div class="learn-view"><div class="missal">
-      <h2>Mass Guide</h2>
-      <p class="source-note">${O_BRIEN_SOURCE} — movements from O'Brien; Latin responses with pronunciation where given in the book.</p>
+      <h2>Mass Guide — ${meta.label}</h2>
+      <p class="source-note">${meta.source}</p>
       <p style="font-size:14px;">Read-only walkthrough for ${role==='ac1'?'Altar Boy No. 1 (Epistle)':'Altar Boy No. 2 (Gospel)'}.</p>
       <div class="guide-scroll">${body}</div>
       <button class="begin-btn" id="guideBackBtn" style="margin-top:16px;">← Home</button>
@@ -1519,12 +1579,14 @@ function renderGlossary(){
 }
 
 function renderBellChart(){
+  const meta = getFormMeta(state.massForm);
+  const chart = getBellChartForForm(state.massForm);
   app.innerHTML = `
     <div class="learn-view"><div class="missal">
-      <h2>Bells & Canon</h2>
-      <p class="source-note">${O_BRIEN_SOURCE}</p>
+      <h2>Bells & Canon — ${meta.label}</h2>
+      <p class="source-note">${meta.source}</p>
       <p style="font-size:14px;">Bell and elevation duties — two-server chart notes AC1 where applicable.</p>
-      ${BELL_CHART.map(r=>`<div class="bell-row">
+      ${chart.map(r=>`<div class="bell-row">
         <div class="moment">${r.moment}</div>
         <div class="action">${r.action}</div>
       </div>`).join('')}
@@ -1603,11 +1665,12 @@ function renderObrienPostures(){
 }
 
 function renderObrienTwoServers(){
-  const t = O_BRIEN_TWO_SERVERS;
+  const meta = getFormMeta(state.massForm);
+  const t = getTwoServersForForm(state.massForm);
   app.innerHTML = `
     <div class="learn-view"><div class="missal">
-      <h2>Ceremonies for Low Mass with Two Altar Boys</h2>
-      <p class="source-note">${O_BRIEN_SOURCE}</p>
+      <h2>${meta.guideTitle}</h2>
+      <p class="source-note">${meta.source}</p>
       <p style="font-size:15px;">${t.note}</p>
       <table class="ref-table">
         <tr><th>When</th><th>Altar Boy No. 1 (Epistle)</th><th>Altar Boy No. 2 (Gospel)</th></tr>
@@ -1622,11 +1685,12 @@ function renderObrienTwoServers(){
 
 /* ============ RUBRIC SHEET ============ */
 function renderRubricSheet(){
-  const items = MOVEMENTS.filter(m=> m.role==='both' || m.role===state.role);
+  const meta = getFormMeta(state.massForm);
+  const items = getActiveMovements().filter(m=> m.role==='both' || m.role===state.role);
   app.innerHTML = `
     <div class="rubric-view"><div class="missal">
-      <h2>Rubric Reference</h2>
-      <p class="source-note">${O_BRIEN_SOURCE}</p>
+      <h2>Rubric Reference — ${meta.label}</h2>
+      <p class="source-note">${meta.source}</p>
       <p style="font-size:15px;">Movement notes for ${state.role==='ac1'?'Altar Boy No. 1 (Epistle side)':'Altar Boy No. 2 (Gospel side)'}.</p>
       ${items.map(m=>{
         const ans = m.options[m.correct];
@@ -1652,7 +1716,7 @@ function getFlashSteps(){
 function renderFlashcards(){
   const steps = getFlashSteps();
   const i = steps[state.flashIdx];
-  const s = STEPS[i];
+  const s = getStep(i);
   const total = steps.length;
   app.innerHTML = `
     <div class="flash-view"><div class="missal">
@@ -1839,7 +1903,7 @@ function renderInfoPrayerStep(){
   const seqPos = state.step;
   const i = state.sequence[seqPos].idx;
   const total = state.sequence.length;
-  const s = STEPS[i];
+  const s = getStep(i);
   const label = s.priestOnly ? 'Priest Only' : 'Reference — Good to Know';
   const note = s.priestOnly
     ? 'This prayer — including the Amen — is said only by the priest. Listen and continue.'
@@ -1890,7 +1954,7 @@ function renderPrayerStep(){
   const seqPos = state.step;
   const i = state.sequence[seqPos].idx;
   const total = state.sequence.length;
-  const s = STEPS[i];
+  const s = getStep(i);
 
   app.innerHTML = `
     <div class="controls">
@@ -2165,7 +2229,7 @@ function renderSummary(){
         <p>You recorded ${recordedCount} of ${prayerItems.length} responses.</p>
         ${prayerItems.map(item=>{
           const idx = item.idx;
-          const s = STEPS[idx];
+          const s = getStep(idx);
           return `<div class="summary-item">
             <div class="sec">${idx+1}. ${s.section}</div>
             <div class="lat">${s.server}</div>
@@ -2194,6 +2258,7 @@ function render(){
   else if(state.view === 'massGuide') renderMassGuide();
   else if(state.view === 'glossary') renderGlossary();
   else if(state.view === 'bellChart') renderBellChart();
+  else if(state.view === 'formOverview') renderFormOverview();
   else if(state.view === 'obrienLessons') renderObrienLessons();
   else if(state.view === 'obrienTwoServers') renderObrienTwoServers();
   else if(state.view === 'obrienSacristy') renderObrienSacristy();
