@@ -348,6 +348,7 @@
   }
   .mode-btn span{display:block;font-size:13px;font-weight:400;color:var(--text-muted);margin-top:5px;line-height:1.4;}
   .mode-btn.active span{color:var(--text-secondary);}
+  .mode-btn.disabled,.mode-btn:disabled{opacity:.45;cursor:not-allowed;pointer-events:none;}
 
   .home-tabs{
     display:flex;gap:4px;margin:24px 0;padding:4px;background:var(--blue-subtle);
@@ -365,6 +366,8 @@
 
   .role-block{margin:14px 0 6px;}
   .role-block .field-label{margin-top:0;}
+  .role-seg{flex-wrap:wrap;}
+  .role-seg button{flex:1 1 auto;min-width:fit-content;font-size:13px;padding:8px 12px;}
 
   .rubric-item{border-bottom:1px solid var(--border);padding:16px 0;}
   .rubric-item .sec{font-size:12px;font-weight:600;color:var(--text-muted);}
@@ -722,7 +725,7 @@ const STEPS = [
 ];
 
 /* ============ ACOLYTE MOVEMENTS ============ */
-const CANON_MV_IDS = ['ob11','ob12','ob13','ob14','ob15','sm5','hm7','hm8'];
+const CANON_MV_IDS = ['ob11','ob12','ob13','ob14','ob15','sm5','hm7','hm8','th5','mc5','dc5'];
 
 const MASS_SECTIONS = [
   {id:'foot', label:'Prayers at the Foot of the Altar', from:0, to:7},
@@ -832,6 +835,8 @@ let state = {
   elevenCache: {},
   scheduleSubTab: lsGet('altar_scheduleSubTab', 'upcoming')
 };
+state.role = normalizeRole(state.massForm, state.role);
+lsSet('altar_role', state.role);
 
 function loadProgress(){
   return lsGetJSON('altar_progress', {
@@ -915,11 +920,24 @@ function stepInfoTag(s){
 function buildSequence(role, mode='full', range=null){
   const movements = getActiveMovements();
   const asMovement = m=>({type:'movement', mq: shuffleMq(m)});
+  const match = m => movementMatchesRole(m, role);
+
+  if(!roleHasResponses(role)){
+    const filtered = movements.filter(match)
+      .filter(m => !range || (m.insertBefore >= range.from && m.insertBefore <= range.to + 1))
+      .sort((a,b)=> a.insertBefore - b.insertBefore || a.id.localeCompare(b.id));
+    if(mode === 'canon'){
+      return filtered.filter(m => CANON_MV_IDS.includes(m.id)).map(asMovement);
+    }
+    if(mode === 'responses') return [];
+    return filtered.map(asMovement);
+  }
+
   if(mode === 'movements'){
-    return movements.filter(m=> m.role==='both' || m.role===role).map(asMovement);
+    return movements.filter(match).map(asMovement);
   }
   if(mode === 'canon'){
-    return movements.filter(m=>(m.role==='both'||m.role===role) && CANON_MV_IDS.includes(m.id))
+    return movements.filter(m=> match(m) && CANON_MV_IDS.includes(m.id))
       .sort((a,b)=> a.insertBefore - b.insertBefore || a.id.localeCompare(b.id))
       .map(asMovement);
   }
@@ -930,7 +948,7 @@ function buildSequence(role, mode='full', range=null){
   }
   const seq = [];
   for(let idx=0; idx<=STEPS.length; idx++){
-    movements.filter(m=> m.insertBefore===idx && (m.role==='both'||m.role===role))
+    movements.filter(m=> m.insertBefore===idx && match(m))
       .filter(m=> !range || (m.insertBefore >= range.from && m.insertBefore <= range.to + 1))
       .forEach(m=> seq.push(asMovement(m)));
     if(idx < STEPS.length && (!range || inSection(idx, range)))
@@ -961,7 +979,15 @@ function startPractice(mode, range=null){
   state.step = 0;
   if(mode === 'flashcards'){ state.view = 'flashcards'; state.flashIdx = 0; state.flashFlipped = false; render(); return; }
   if(mode === 'section'){ state.view = 'sectionPick'; render(); return; }
+  if(!roleHasResponses(state.role) && (mode === 'responses' || mode === 'full')){
+    mode = 'movements';
+    state.practiceMode = mode;
+  }
   state.sequence = buildSequence(state.role, mode, range);
+  if(!state.sequence.length){
+    state.practiceMode = 'movements';
+    state.sequence = buildSequence(state.role, 'movements', range);
+  }
   state.view = 'practice';
   render();
 }
@@ -1069,12 +1095,14 @@ function renderComparison(i, transcript){
 
 /* ============ HOME ============ */
 function renderRoleSelector(){
+  const roles = getRolesForForm(state.massForm);
+  const btns = roles.map(r=>{
+    const meta = getRoleMeta(r);
+    return `<button data-role="${r}" class="${state.role===r?'active':''}">${meta.shortLabel}</button>`;
+  }).join('');
   return `<div class="role-block">
     <p class="section-head">Your Role</p>
-    <div class="seg">
-      <button data-role="ac1" class="${state.role==='ac1'?'active':''}">Acolyte 1 · Senior</button>
-      <button data-role="ac2" class="${state.role==='ac2'?'active':''}">Acolyte 2 · Junior</button>
-    </div>
+    <div class="seg role-seg">${btns}</div>
   </div>`;
 }
 function renderMassFormSelector(){
@@ -1092,24 +1120,44 @@ function renderMassFormSelector(){
 }
 function wireRoleButtons(){
   app.querySelectorAll('.seg button[data-role]').forEach(b=>{
-    b.onclick = ()=>{ state.role = b.dataset.role; lsSet('altar_role', state.role); render(); };
+    b.onclick = ()=>{
+      state.role = b.dataset.role;
+      lsSet('altar_role', state.role);
+      if(!roleHasResponses(state.role) && ['responses','flashcards','full'].includes(state.practiceMode)){
+        state.practiceMode = 'movements';
+        lsSet('altar_practiceMode', 'movements');
+      }
+      render();
+    };
   });
 }
 function wireMassFormButtons(){
   app.querySelectorAll('.seg button[data-mass]').forEach(b=>{
-    b.onclick = ()=>{ state.massForm = b.dataset.mass; lsSet('altar_massForm', state.massForm); render(); };
+    b.onclick = ()=>{
+      state.massForm = b.dataset.mass;
+      lsSet('altar_massForm', state.massForm);
+      state.role = normalizeRole(state.massForm, state.role);
+      lsSet('altar_role', state.role);
+      render();
+    };
   });
 }
 
 function renderPracticePanel(){
-  const modeCards = PRACTICE_MODES.map(m=>`
-    <button class="mode-btn ${state.practiceMode===m.id?'active':''}" data-mode="${m.id}">
-      ${m.label}<span>${m.desc}</span>
-    </button>`).join('');
+  const hasResp = roleHasResponses(state.role);
+  const roleMeta = getRoleMeta(state.role);
+  const modeCards = PRACTICE_MODES.map(m=>{
+    const disabled = !hasResp && (m.id === 'responses' || m.id === 'flashcards');
+    return `<button class="mode-btn ${state.practiceMode===m.id?'active':''}${disabled?' disabled':''}" data-mode="${m.id}"${disabled?' disabled':''}>
+      ${m.label}<span>${disabled ? 'Acolyte roles only' : m.desc}</span>
+    </button>`;
+  }).join('');
+  const roleNote = hasResp ? '' : `<p class="panel-intro" style="margin-bottom:8px;">${roleMeta.label} practice uses movement rubrics only — no Latin altar responses.</p>`;
   return `
     <p class="section-head">Practice Mode</p>
+    ${roleNote}
     <div class="mode-grid">${modeCards}</div>
-    <div id="levelBlock" style="${['full','responses','section'].includes(state.practiceMode)?'':'display:none;'}">
+    <div id="levelBlock" style="${['full','responses','section'].includes(state.practiceMode) && hasResp ?'':'display:none;'}">
       <p class="section-head">Response Level</p>
       <div class="seg" style="margin-bottom:10px;">
         <button data-lvl="1" class="${state.level==='1'?'active':''}">Level I · Reveal</button>
@@ -1460,7 +1508,12 @@ function renderHome(){
 
   if(state.homeTab === 'practice'){
     app.querySelectorAll('.mode-btn[data-mode]').forEach(b=>{
-      b.onclick = ()=>{ state.practiceMode = b.dataset.mode; lsSet('altar_practiceMode', state.practiceMode); render(); };
+      b.onclick = ()=>{
+        if(b.disabled) return;
+        state.practiceMode = b.dataset.mode;
+        lsSet('altar_practiceMode', state.practiceMode);
+        render();
+      };
     });
     app.querySelectorAll('.seg button[data-lvl]').forEach(b=>{
       b.onclick = ()=>{ state.level = b.dataset.lvl; lsSet('altar_level', state.level); render(); };
@@ -1524,7 +1577,7 @@ function renderFormOverview(){
       <p class="source-note">${meta.source}</p>
       ${lowNote}
       ${body ? `<div class="guide-scroll"><div class="guide-item"><div class="lesson-body">${body}</div></div></div>` : ''}
-      ${state.massForm !== 'low' ? `<p style="font-size:14px;color:var(--ink-soft);margin-top:14px;">Latin altar responses match Low Mass unless marked reference-only. Use <strong>Movements Only</strong> or <strong>Full Mass</strong> to practice ${meta.label}-specific rubrics.</p>` : ''}
+      ${state.massForm !== 'low' ? `<p style="font-size:14px;color:var(--ink-soft);margin-top:14px;">Select your role on the Practice tab — acolytes practice Latin responses; thurifer, MC, Deacon, and Subdeacon use movement rubrics. Use <strong>Movements Only</strong> or <strong>Full Mass</strong> for ${meta.label}-specific duties.</p>` : ''}
       ${obrienBackBtn()}
     </div></div>`;
   wireObrienBack();
@@ -1532,37 +1585,53 @@ function renderFormOverview(){
 
 function renderMassGuide(){
   const role = state.role;
+  const roleMeta = getRoleMeta(role);
   const meta = getFormMeta(state.massForm);
   const movements = getActiveMovements();
   let body = '';
-  for(let idx=0; idx<=STEPS.length; idx++){
-    movements.filter(m=> m.insertBefore===idx && (m.role==='both'||m.role===role))
+  const match = m => movementMatchesRole(m, role);
+
+  if(roleHasResponses(role)){
+    for(let idx=0; idx<=STEPS.length; idx++){
+      movements.filter(m=> m.insertBefore===idx && match(m))
+        .forEach(m=>{
+          body += `<div class="guide-item guide-movement">
+            <div class="sec">Movement · ${m.section}</div>
+            <div class="q">${m.q}</div>
+            <div class="ans">→ ${m.options[m.correct]}</div>
+          </div>`;
+        });
+      if(idx < STEPS.length){
+        const s = getStep(idx);
+        body += `<div class="guide-item">
+          <div class="sec">${idx+1}. ${s.section}</div>
+          <div class="role" style="margin-top:8px;"><span class="dot"></span>Priest</div>
+          <div class="latin" style="font-size:16px;">${s.priest}${s.varies?'<span class="varies-tag">varies</span>':''}</div>
+          <div class="role" style="margin-top:10px;"><span class="dot" style="background:var(--gold);"></span>${s.priestOnly ? 'Priest Only' : s.referenceOnly ? 'Reference (good to know)' : 'Your Response'}</div>
+          <div class="latin" style="font-size:16px;">${s.server}${stepInfoTag(s)}</div>
+          ${getPhonetic(s.server) ? `<div class="phonetic">${getPhonetic(s.server)}</div>` : ''}
+          <div class="translation">${s.serverT}</div>
+          ${s.note ? `<div class="translation" style="font-style:italic;">${s.note}</div>` : ''}
+        </div>`;
+      }
+    }
+  } else {
+    movements.filter(match)
+      .sort((a,b)=> a.insertBefore - b.insertBefore || a.id.localeCompare(b.id))
       .forEach(m=>{
         body += `<div class="guide-item guide-movement">
-          <div class="sec">Movement · ${m.section}</div>
+          <div class="sec">${m.section}</div>
           <div class="q">${m.q}</div>
           <div class="ans">→ ${m.options[m.correct]}</div>
+          <div class="translation" style="margin-top:6px;">${m.explain}</div>
         </div>`;
       });
-    if(idx < STEPS.length){
-      const s = getStep(idx);
-      body += `<div class="guide-item">
-        <div class="sec">${idx+1}. ${s.section}</div>
-        <div class="role" style="margin-top:8px;"><span class="dot"></span>Priest</div>
-        <div class="latin" style="font-size:16px;">${s.priest}${s.varies?'<span class="varies-tag">varies</span>':''}</div>
-        <div class="role" style="margin-top:10px;"><span class="dot" style="background:var(--gold);"></span>${s.priestOnly ? 'Priest Only' : s.referenceOnly ? 'Reference (good to know)' : 'Your Response'}</div>
-        <div class="latin" style="font-size:16px;">${s.server}${stepInfoTag(s)}</div>
-        ${getPhonetic(s.server) ? `<div class="phonetic">${getPhonetic(s.server)}</div>` : ''}
-        <div class="translation">${s.serverT}</div>
-        ${s.note ? `<div class="translation" style="font-style:italic;">${s.note}</div>` : ''}
-      </div>`;
-    }
   }
   app.innerHTML = `
     <div class="learn-view"><div class="missal">
       <h2>Mass Guide — ${meta.label}</h2>
       <p class="source-note">${meta.source}</p>
-      <p style="font-size:14px;">Read-only walkthrough for ${role==='ac1'?'Altar Boy No. 1 (Epistle)':'Altar Boy No. 2 (Gospel)'}.</p>
+      <p style="font-size:14px;">Read-only walkthrough for ${roleMeta.label}${roleMeta.side ? ' (' + roleMeta.side + ' side)' : ''}.</p>
       <div class="guide-scroll">${body}</div>
       <button class="begin-btn" id="guideBackBtn" style="margin-top:16px;">← Home</button>
     </div></div>`;
@@ -1700,12 +1769,13 @@ function renderObrienTwoServers(){
 /* ============ RUBRIC SHEET ============ */
 function renderRubricSheet(){
   const meta = getFormMeta(state.massForm);
-  const items = getActiveMovements().filter(m=> m.role==='both' || m.role===state.role);
+  const roleMeta = getRoleMeta(state.role);
+  const items = getActiveMovements().filter(m=> movementMatchesRole(m, state.role));
   app.innerHTML = `
     <div class="rubric-view"><div class="missal">
       <h2>Rubric Reference — ${meta.label}</h2>
       <p class="source-note">${meta.source}</p>
-      <p style="font-size:15px;">Movement notes for ${state.role==='ac1'?'Altar Boy No. 1 (Epistle side)':'Altar Boy No. 2 (Gospel side)'}.</p>
+      <p style="font-size:15px;">Movement notes for ${roleMeta.label}${roleMeta.side ? ' (' + roleMeta.side + ' side)' : ''}.</p>
       ${items.map(m=>{
         const ans = m.options[m.correct];
         return `<div class="rubric-item">
@@ -2035,7 +2105,7 @@ function renderMovementStep(){
   const seqPos = state.step;
   const mq = state.sequence[seqPos].mq;
   const total = state.sequence.length;
-  const roleTag = mq.role==='both' ? 'Both Acolytes' : (mq.role==='ac1' ? 'Acolyte 1' : 'Acolyte 2');
+  const roleTag = getMovementRoleTag(mq);
   const prevAnswer = state.movementResults[mq.id];
 
   app.innerHTML = `
