@@ -17,7 +17,7 @@ const MASS_FORMS = {
     label: 'Sung Mass',
     shortLabel: 'Sung',
     desc: 'Missa cantata · 6 candles · choir',
-    intro: 'Practice acolyte duties for Sung Mass — choir sings the propers; servers make altar responses and assist at incense.',
+    intro: 'Practice server duties for Sung Mass — acolytes, thurifer, and MC roles. Choir sings the propers; servers assist at incense and follow ceremonial.',
     guideTitle: 'Acolyte Duties at Sung Mass (Missa Cantata)',
     source: 'Extraordinary Form ceremonial — acolyte rubrics for Missa cantata with two servers'
   },
@@ -26,7 +26,7 @@ const MASS_FORMS = {
     label: 'High Mass',
     shortLabel: 'High',
     desc: 'Solemn Mass · deacon · subdeacon · MC',
-    intro: 'Practice acolyte duties at Solemn High Mass — follow the MC, hold torches at the Gospel, double genuflections, and incense.',
+    intro: 'Practice Solemn High Mass — acolytes, thurifer, MC, Deacon, and Subdeacon. Follow the MC, hold torches at the Gospel, double genuflections, and incense.',
     guideTitle: 'Acolyte Duties at Solemn High Mass',
     source: 'Extraordinary Form ceremonial — acolyte rubrics for Missa solemnis with two servers'
   }
@@ -284,6 +284,159 @@ const SUNG_TWO_SERVERS = {
   ]
 };
 
+/* Practice roles available per mass form */
+const PRACTICE_ROLES = {
+  ac1: { id: 'ac1', label: 'Acolyte 1 · Senior', shortLabel: 'AC1', side: 'Epistle', hasResponses: true, forms: ['low', 'sung', 'high'] },
+  ac2: { id: 'ac2', label: 'Acolyte 2 · Junior', shortLabel: 'AC2', side: 'Gospel', hasResponses: true, forms: ['low', 'sung', 'high'] },
+  thurifer: { id: 'thurifer', label: 'Thurifer', shortLabel: 'Thurifer', hasResponses: false, forms: ['sung', 'high'] },
+  mc: { id: 'mc', label: 'Master of Ceremonies', shortLabel: 'MC', hasResponses: false, forms: ['sung', 'high'] },
+  deacon: { id: 'deacon', label: 'Deacon', shortLabel: 'Deacon', hasResponses: false, forms: ['high'] },
+  subdeacon: { id: 'subdeacon', label: 'Subdeacon', shortLabel: 'Subdeacon', hasResponses: false, forms: ['high'] }
+};
+
+const THURIFER_MOVEMENTS = [
+  { id: 'th0', insertBefore: 0, role: 'thurifer', section: 'Thurifer — Preparation',
+    q: 'Before Mass, what must the thurifer prepare in the sacristy?',
+    options: ['Lit charcoal in the thurible; fill the boat with incense; verify thurible chain and cover', 'Only light the six altar candles', 'Prepare the cruets for the acolytes', 'Nothing — the MC handles incense'],
+    correct: 0, explain: 'The thurifer prepares the thurible with lit charcoal and fills the boat with incense before Mass. Check that the thurible is clean and the chain moves freely.' },
+
+  { id: 'th1', insertBefore: 0, role: 'thurifer', section: 'Thurifer — Procession',
+    q: 'In the entrance procession at Sung or High Mass, where does the thurifer walk?',
+    options: ['As directed by the MC — often in front of or beside the crucifer, carrying the thurible (unlit until Offertory)', 'Behind the Sacred Ministers only', 'At the communion rail until the Gloria', 'The thurifer does not process'],
+    correct: 0, explain: 'The thurifer walks in the procession as the MC directs — typically near the crucifer. The thurible is not lit for incense until the Offertory (unless otherwise directed).' },
+
+  { id: 'th2', insertBefore: 28, role: 'thurifer', section: 'Thurifer — Offertory',
+    q: 'At the Offertory, in what order does the thurifer incense at Solemn or Sung Mass?',
+    options: ['Altar (center, then each side), cross, then ministers and acolytes in order set by the MC', 'Ministers first, then altar, then cross', 'Acolytes only — the Priest incenses the altar', 'Altar only — no incensation of ministers'],
+    correct: 0, explain: 'Standard order: incense the altar (center, Gospel side, Epistle side), then the cross, then the Sacred Ministers and acolytes as the MC directs. Bow to each person incensed.' },
+
+  { id: 'th3', insertBefore: 28, role: 'thurifer', section: 'Thurifer — Offertory',
+    q: 'When incensing a minister or acolyte, how does the thurifer make the triple swing?',
+    options: ['Two swings at chest height, one at knee height — bow to the person after the third swing', 'Three swings all at head height only', 'One swing only for acolytes', 'Swing continuously while walking past'],
+    correct: 0, explain: 'The triple swing of the thurible: two at chest height, one lower (knee height). After the third swing, bow to the person incensed before moving to the next.' },
+
+  { id: 'th4', insertBefore: 25, role: 'thurifer', section: 'Thurifer — Gospel',
+    q: 'At High Mass, does the thurifer incense the Gospel book?',
+    options: ['Yes — when the MC directs, incense the book before the Deacon reads (often at the altar before procession to the Gospel side)', 'No — only the Deacon handles the book', 'Only at Low Mass', 'The thurifer holds a torch instead'],
+    correct: 0, explain: 'At Solemn Mass the thurifer may incense the Gospel book when directed by the MC, typically before the Deacon chants the Gospel.' },
+
+  { id: 'th5', insertBefore: 35, role: 'thurifer', section: 'Thurifer — Canon',
+    q: 'During the Canon at High Mass, where does the thurifer kneel?',
+    options: ['At the MC\'s place (south side of the sanctuary floor) — thurible on the floor or held as directed', 'On the predella beside the acolytes', 'Standing at the credence', 'Behind the Subdeacon at the altar'],
+    correct: 0, explain: 'At the consecration the thurifer kneels at the MC\'s place with the thurible. The Deacon (not the thurifer) incenses the Host and Chalice at the elevations.' },
+
+  { id: 'th6', insertBefore: 47, role: 'thurifer', section: 'Thurifer — Closing',
+    q: 'After Mass, what is the thurifer\'s duty regarding the thurible?',
+    options: ['Empty remaining charcoal safely; clean the thurible and return it to the sacristy', 'Leave the thurible on the credence', 'Process out with the thurible still lit', 'The MC always cleans it — thurifer has no closing duty'],
+    correct: 0, explain: 'After Mass the thurifer empties hot charcoal safely, cleans the thurible, and returns all incense items to their place in the sacristy.' }
+];
+
+const MC_MOVEMENTS = [
+  { id: 'mc0', insertBefore: 0, role: 'mc', section: 'MC — Before Mass',
+    q: 'What is the MC\'s first duty before Sung or High Mass begins?',
+    options: ['Verify all ministers, servers, and vessels are ready; confirm positions with thurifer, acolytes, and choir', 'Vest the Priest only', 'Light all candles personally', 'Begin the organ prelude'],
+    correct: 0, explain: 'The MC checks that every server knows his place, incense is ready, candles are lit, and the procession order is clear before the ministers enter.' },
+
+  { id: 'mc1', insertBefore: 0, role: 'mc', section: 'MC — Procession',
+    q: 'In the solemn entrance procession, where does the MC walk?',
+    options: ['Beside or just ahead of the Sacred Ministers — directing pace and stops with gestures', 'At the very front ahead of the crucifer', 'At the back of the procession only', 'The MC waits at the altar and does not process'],
+    correct: 0, explain: 'The MC walks near the Sacred Ministers to direct the procession — slowing, stopping for genuflections, and signaling when to ascend the altar steps.' },
+
+  { id: 'mc2', insertBefore: 23, role: 'mc', section: 'MC — Epistle',
+    q: 'At High Mass during the Epistle, what does the MC direct?',
+    options: ['Subdeacon chants at the altar — MC ensures acolytes do not transfer the missal; signals when to respond Deo gratias', 'Acolyte 1 transfers the missal as at Low Mass', 'MC reads the Epistle from the Missal stand', 'MC holds the book for the Priest'],
+    correct: 0, explain: 'At High Mass the Subdeacon sings the Epistle at the altar. The MC prevents the Low Mass missal transfer and cues acolytes for their responses.' },
+
+  { id: 'mc3', insertBefore: 25, role: 'mc', section: 'MC — Gospel',
+    q: 'At the Solemn Gospel, what does the MC signal the torch bearers to do?',
+    options: ['Take torches and flank the Deacon facing north — hold steady until the MC directs them to leave', 'Extinguish torches before the Gospel', 'Stand at the credence during the Gospel', 'Ring the bell three times'],
+    correct: 0, explain: 'The MC directs acolytes to take lit torches and flank the Deacon at the Gospel side. They hold until the Gospel is finished and the MC signals departure.' },
+
+  { id: 'mc4', insertBefore: 28, role: 'mc', section: 'MC — Offertory',
+    q: 'During the Offertory incensation, how does the MC coordinate the acolytes?',
+    options: ['Signals when acolytes rise to present cruets after incensation is complete — timing with the thurifer and ministers', 'Acolytes bring cruets before any incense', 'MC carries the cruets personally', 'No coordination needed — acolytes decide'],
+    correct: 0, explain: 'The MC ensures incensation finishes before signaling acolytes to ascend with cruets. He coordinates thurifer, torch bearers, and ministers throughout the Offertory.' },
+
+  { id: 'mc5', insertBefore: 35, role: 'mc', section: 'MC — Canon',
+    q: 'At the double genuflection during the consecration, what does the MC do?',
+    options: ['Genuflect with the ministers on the floor — may hold the MC\'s staff; ensure acolytes make the double genuflection', 'Stand on the predella to watch the acolytes', 'Ring the bell for the acolytes', 'Incense the Host at the elevation'],
+    correct: 0, explain: 'The MC genuflects on the sanctuary floor with the Sacred Ministers and verifies acolytes perform the double genuflection at each elevation.' },
+
+  { id: 'mc6', insertBefore: 47, role: 'mc', section: 'MC — Recession',
+    q: 'In the recession after High Mass, how does the MC lead?',
+    options: ['Directs the order of departure — ministers, then servers — and signals when acolytes may extinguish candles (Gospel side first)', 'Leaves first before all ministers', 'Stays at the altar while servers leave alone', 'Extinguishes all candles before the recession begins'],
+    correct: 0, explain: 'The MC directs the recession order and cues acolytes to extinguish candles after ministers depart — Gospel side first, then Epistle, reverse of lighting order.' }
+];
+
+const DEACON_MOVEMENTS = [
+  { id: 'dc0', insertBefore: 0, role: 'deacon', section: 'Deacon — Preparation',
+    q: 'Before Solemn High Mass, where does the Deacon vest and what does he verify?',
+    options: ['In the sacristy with the Subdeacon — dalmatic, stole (over left shoulder), and maniple; review Gospel book placement', 'At the altar in chasuble', 'Only the Priest vests in the sacristy', 'The Deacon arrives already vested from the rectory'],
+    correct: 0, explain: 'The Deacon vests in dalmatic, stole worn over the left shoulder (unlike the Priest), and maniple. He confirms the Gospel book and his place in the procession.' },
+
+  { id: 'dc1', insertBefore: 0, role: 'deacon', section: 'Deacon — Procession',
+    q: 'In the entrance procession, where does the Deacon walk?',
+    options: ['Between the Subdeacon and the Priest (Celebrant) — in order of dignity as the MC directs', 'In front of the crucifer', 'Behind the acolytes at the rear', 'Alone on the Gospel side of the nave'],
+    correct: 0, explain: 'Procession order (typical): thurifer/crucifer, acolytes, Subdeacon, Deacon, Priest, MC nearby. The Deacon walks directly before the Celebrant.' },
+
+  { id: 'dc2', insertBefore: 25, role: 'deacon', section: 'Deacon — Gospel',
+    q: 'When chanting the Gospel at High Mass, which direction does the Deacon face?',
+    options: ['North (toward the people\'s left / liturgical north) — book held by the Subdeacon', 'East toward the altar cross only', 'South toward the choir', 'Toward the Celebrant at the altar'],
+    correct: 0, explain: 'The Deacon faces north to chant the Gospel toward the people. The Subdeacon holds the book; acolytes flank with torches as the MC directs.' },
+
+  { id: 'dc3', insertBefore: 25, role: 'deacon', section: 'Deacon — Gospel',
+    q: 'Before proclaiming the Gospel, what does the Deacon do with his maniple?',
+    options: ['Places it on the altar or hands it to the Subdeacon — does not wear it while reading the Gospel', 'Keeps it on his left arm throughout', 'Gives it to the thurifer', 'Places it on the Gospel book'],
+    correct: 0, explain: 'The Deacon removes his maniple before reading the Gospel (placed on the altar or given to the Subdeacon) and replaces it afterward.' },
+
+  { id: 'dc4', insertBefore: 28, role: 'deacon', section: 'Deacon — Offertory',
+    q: 'At the Offertory, what is the Deacon\'s primary duty after incensation?',
+    options: ['Assist the Subdeacon and Priest — hold the chalice veil or assist with the chalice as directed', 'Bring the wine and water cruets', 'Ring the bell at the Sanctus', 'Chant the Offertory verse alone'],
+    correct: 0, explain: 'The Deacon assists at the Offertory — helping with the chalice, paten, and veil as the Celebrant prepares the gifts. He is incensed with the other ministers.' },
+
+  { id: 'dc5', insertBefore: 35, role: 'deacon', section: 'Deacon — Canon',
+    q: 'At the elevations during the Canon, what does the Deacon do with the thurible?',
+    options: ['Incenses the Host and Chalice at each elevation with three double swings (six swings total each time)', 'Hands the thurible to the thurifer to incense', 'Kneels without incensing — only the Priest incenses', 'Incenses only the Celebrant, not the Host'],
+    correct: 0, explain: 'At High Mass the Deacon incenses the consecrated Host and Chalice at each elevation — three double swings (six swings) per elevation, kneeling beside the Celebrant.' },
+
+  { id: 'dc6', insertBefore: 39, role: 'deacon', section: 'Deacon — Communion',
+    q: 'During Communion of the Sacred Ministers, what does the Deacon do?',
+    options: ['Receives Communion after the Celebrant — may assist with the pall or purificator as directed', 'Distributes Communion to the faithful at the rail', 'Leaves the sanctuary during Communion', 'Chants the Communion antiphon alone always'],
+    correct: 0, explain: 'The Deacon receives Communion at the altar after the Priest. He may assist with vessels and remains on the predella unless directed otherwise.' }
+];
+
+const SUBDEACON_MOVEMENTS = [
+  { id: 'sd0', insertBefore: 0, role: 'subdeacon', section: 'Subdeacon — Preparation',
+    q: 'What vestments does the Subdeacon wear at High Mass?',
+    options: ['Tunicle and maniple — no stole; arms covered by the tunicle', 'Dalmatic and stole over both shoulders', 'Chasuble like the Celebrant', 'Cassock and surplice only'],
+    correct: 0, explain: 'The Subdeacon wears the tunicle (similar to a dalmatic but without the distinctive Deacon\'s ornamentation) and maniple. He does not wear a stole.' },
+
+  { id: 'sd1', insertBefore: 23, role: 'subdeacon', section: 'Subdeacon — Epistle',
+    q: 'At High Mass, how does the Subdeacon chant the Epistle?',
+    options: ['From the altar at the Epistle corner — facing the book toward the altar cross, not facing the people', 'From the pulpit facing the people', 'Walking through the nave like the Gospel', 'From the Missal stand on the Gospel side'],
+    correct: 0, explain: 'The Subdeacon chants the Epistle at the altar (Epistle side), facing the book toward the cross — unlike the Gospel which is chanted facing north.' },
+
+  { id: 'sd2', insertBefore: 25, role: 'subdeacon', section: 'Subdeacon — Gospel',
+    q: 'During the Solemn Gospel, what does the Subdeacon hold?',
+    options: ['The Gospel book for the Deacon — standing to the Deacon\'s left (facing north)', 'A torch like the acolytes', 'The thurible', 'The paten only'],
+    correct: 0, explain: 'The Subdeacon holds the Gospel book for the Deacon during the proclamation. He stands on the Deacon\'s left side as the Deacon faces north.' },
+
+  { id: 'sd3', insertBefore: 28, role: 'subdeacon', section: 'Subdeacon — Offertory',
+    q: 'What does the Subdeacon carry in the Offertory procession to the altar?',
+    options: ['The chalice (veiled) and paten — held veiled on the humeral veil over his shoulders', 'The wine and water cruets', 'The thurible', 'The processional cross'],
+    correct: 0, explain: 'The Subdeacon carries the chalice and paten veiled on the humeral veil, held by both hands under the veil — a sign of reverence for the sacred vessels.' },
+
+  { id: 'sd4', insertBefore: 35, role: 'subdeacon', section: 'Subdeacon — Canon',
+    q: 'During the Canon, what does the Subdeacon hold and where does he stand?',
+    options: ['The paten (veiled) at chest height — standing at the Celebrant\'s left on the predella', 'The Gospel book at the MC\'s place', 'A torch at the Gospel side', 'Nothing — kneels on the floor with the MC'],
+    correct: 0, explain: 'From the Offertory through Communion the Subdeacon holds the paten veiled at chest height, standing on the predella at the Celebrant\'s left — a distinctive duty of the Subdeacon at High Mass.' },
+
+  { id: 'sd5', insertBefore: 39, role: 'subdeacon', section: 'Subdeacon — Communion',
+    q: 'When may the Subdeacon consume the ablutions at High Mass?',
+    options: ['After the Celebrant and Deacon — if no other ordained minister is present to assist; otherwise he does not consume', 'Always before the Deacon', 'Never under any circumstances', 'Before the Canon begins'],
+    correct: 0, explain: 'The Subdeacon may consume the ablutions only when necessary (no other ordained assistant). Normally the Deacon or another priest assists with ablutions.' }
+];
+
 const HIGH_TWO_SERVERS = {
   note: 'At Solemn High Mass the MC directs acolytes. Torch duties at Gospel; no missal transfer at Epistle.',
   duties: [
@@ -311,6 +464,35 @@ function getStepOverride(form, idx){
   return o && o[idx] ? o[idx] : null;
 }
 
+function getRolesForForm(form){
+  return Object.values(PRACTICE_ROLES).filter(r => r.forms.includes(form)).map(r => r.id);
+}
+
+function getRoleMeta(role){
+  return PRACTICE_ROLES[role] || PRACTICE_ROLES.ac1;
+}
+
+function roleHasResponses(role){
+  return getRoleMeta(role).hasResponses !== false;
+}
+
+function normalizeRole(form, role){
+  const roles = getRolesForForm(form);
+  return roles.includes(role) ? role : roles[0];
+}
+
+function movementMatchesRole(m, role){
+  if(m.roles) return m.roles.includes(role);
+  if(m.role === 'both') return role === 'ac1' || role === 'ac2';
+  return m.role === role;
+}
+
+function getMovementRoleTag(mq){
+  if(mq.role === 'both') return 'Both Acolytes';
+  const meta = getRoleMeta(mq.role);
+  return meta ? meta.label : mq.role;
+}
+
 function getMovementsForForm(form){
   let list = O_BRIEN_MOVEMENTS.filter(m=>{
     const ex = MOVEMENT_EXCLUDE[m.id];
@@ -319,6 +501,8 @@ function getMovementsForForm(form){
   });
   if(form === 'sung' || form === 'high') list = list.concat(SUNG_MASS_MOVEMENTS);
   if(form === 'high') list = list.concat(HIGH_MASS_MOVEMENTS);
+  if(form === 'sung' || form === 'high') list = list.concat(THURIFER_MOVEMENTS, MC_MOVEMENTS);
+  if(form === 'high') list = list.concat(DEACON_MOVEMENTS, SUBDEACON_MOVEMENTS);
   return list;
 }
 
