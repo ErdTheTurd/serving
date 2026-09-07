@@ -350,6 +350,29 @@
   .mode-btn.active span{color:var(--text-secondary);}
   .mode-btn.disabled,.mode-btn:disabled{opacity:.45;cursor:not-allowed;pointer-events:none;}
 
+  .mode-grid.mode-grid-merge .mode-btn:not(.role-pop-out){
+    transition:transform .48s cubic-bezier(.34,1.2,.64,1), opacity .48s ease;
+  }
+  .practice-resp-only{transform-origin:center center;overflow:hidden;}
+  .practice-resp-only.role-pop-out{
+    animation:rolePopOut .48s cubic-bezier(.4,0,.2,1) forwards;
+    pointer-events:none;z-index:1;
+  }
+  .practice-resp-only.role-pop-in{
+    animation:rolePopIn .52s cubic-bezier(.34,1.25,.64,1) forwards;
+  }
+  @keyframes rolePopOut{
+    0%{opacity:1;transform:scale(1);filter:blur(0);max-height:140px;}
+    38%{opacity:1;transform:scale(1.08);filter:blur(0);}
+    100%{opacity:0;transform:scale(.7);filter:blur(8px);max-height:0;margin:0!important;padding-top:0!important;padding-bottom:0!important;border-width:0;}
+  }
+  @keyframes rolePopIn{
+    0%{opacity:0;transform:scale(.65);filter:blur(8px);max-height:0;}
+    55%{opacity:1;transform:scale(1.06);filter:blur(0);max-height:140px;}
+    100%{opacity:1;transform:scale(1);filter:blur(0);max-height:200px;}
+  }
+  #levelBlock.level-collapsed{max-height:0!important;opacity:0;margin:0!important;padding:0!important;pointer-events:none;overflow:hidden;}
+
   .home-tabs{
     display:flex;gap:4px;margin:24px 0;padding:4px;background:var(--blue-subtle);
     border-radius:var(--radius);border:1px solid var(--border);overflow-x:auto;-webkit-overflow-scrolling:touch;
@@ -725,7 +748,7 @@ const STEPS = [
 ];
 
 /* ============ ACOLYTE MOVEMENTS ============ */
-const CANON_MV_IDS = ['ob11','ob12','ob13','ob14','ob15','sm5','hm7','hm8','th5','mc5','dc5'];
+const CANON_MV_IDS = ['ob11','ob12','ob13','ob14','ob15','sm5','hm7','hm8','th5','mc5','t1_4','t2_4'];
 
 const MASS_SECTIONS = [
   {id:'foot', label:'Prayers at the Foot of the Altar', from:0, to:7},
@@ -979,7 +1002,7 @@ function startPractice(mode, range=null){
   state.step = 0;
   if(mode === 'flashcards'){ state.view = 'flashcards'; state.flashIdx = 0; state.flashFlipped = false; render(); return; }
   if(mode === 'section'){ state.view = 'sectionPick'; render(); return; }
-  if(!roleHasResponses(state.role) && (mode === 'responses' || mode === 'full')){
+  if(!roleHasResponses(state.role) && practiceModeRequiresResponses(mode)){
     mode = 'movements';
     state.practiceMode = mode;
   }
@@ -1118,14 +1141,69 @@ function renderMassFormSelector(){
     <p class="panel-intro" style="margin:8px 0 0;font-size:12px;">${meta.desc}</p>
   </div>`;
 }
+function practiceModeRequiresResponses(modeId){
+  return modeId === 'full' || modeId === 'responses' || modeId === 'flashcards' || modeId === 'section';
+}
+
+function applyRoleChange(role){
+  state.role = role;
+  lsSet('altar_role', role);
+  if(!roleHasResponses(role) && practiceModeRequiresResponses(state.practiceMode)){
+    state.practiceMode = 'movements';
+    lsSet('altar_practiceMode', 'movements');
+  }
+}
+
+function animatePracticeRespOut(done){
+  const panel = app.querySelector('.home-panel');
+  if(!panel){ done(); return; }
+  const grid = panel.querySelector('.mode-grid');
+  const els = panel.querySelectorAll('.practice-resp-only');
+  if(!els.length){ done(); return; }
+  if(grid) grid.classList.add('mode-grid-merge');
+  let pending = els.length;
+  const finish = ()=>{
+    if(--pending > 0) return;
+    if(grid) grid.classList.remove('mode-grid-merge');
+    done();
+  };
+  els.forEach(el=>{
+    el.addEventListener('animationend', finish, {once:true});
+    el.classList.add('role-pop-out');
+  });
+  setTimeout(finish, 560);
+}
+
+function animatePracticeRespIn(){
+  const panel = app.querySelector('.home-panel');
+  if(!panel) return;
+  panel.querySelectorAll('.practice-resp-only').forEach((el, i)=>{
+    el.style.animationDelay = (i * 45) + 'ms';
+    el.classList.add('role-pop-in');
+  });
+}
+
 function wireRoleButtons(){
   app.querySelectorAll('.seg button[data-role]').forEach(b=>{
     b.onclick = ()=>{
-      state.role = b.dataset.role;
-      lsSet('altar_role', state.role);
-      if(!roleHasResponses(state.role) && ['responses','flashcards','full'].includes(state.practiceMode)){
-        state.practiceMode = 'movements';
-        lsSet('altar_practiceMode', 'movements');
+      const newRole = b.dataset.role;
+      if(newRole === state.role) return;
+      const oldHasResp = roleHasResponses(state.role);
+      const newHasResp = roleHasResponses(newRole);
+      const onPractice = state.homeTab === 'practice' && state.view === 'cover';
+
+      if(onPractice && oldHasResp && !newHasResp){
+        animatePracticeRespOut(()=>{
+          applyRoleChange(newRole);
+          renderHome();
+        });
+        return;
+      }
+      applyRoleChange(newRole);
+      if(onPractice && !oldHasResp && newHasResp){
+        renderHome();
+        requestAnimationFrame(()=> animatePracticeRespIn());
+        return;
       }
       render();
     };
@@ -1134,10 +1212,31 @@ function wireRoleButtons(){
 function wireMassFormButtons(){
   app.querySelectorAll('.seg button[data-mass]').forEach(b=>{
     b.onclick = ()=>{
-      state.massForm = b.dataset.mass;
+      const newForm = b.dataset.mass;
+      const oldHasResp = roleHasResponses(state.role);
+      state.massForm = newForm;
       lsSet('altar_massForm', state.massForm);
-      state.role = normalizeRole(state.massForm, state.role);
+      const newRole = normalizeRole(state.massForm, state.role);
+      const newHasResp = roleHasResponses(newRole);
+      const onPractice = state.homeTab === 'practice' && state.view === 'cover';
+
+      if(onPractice && oldHasResp && !newHasResp && newRole !== state.role){
+        animatePracticeRespOut(()=>{
+          state.role = newRole;
+          lsSet('altar_role', state.role);
+          applyRoleChange(state.role);
+          renderHome();
+        });
+        return;
+      }
+      state.role = newRole;
       lsSet('altar_role', state.role);
+      applyRoleChange(state.role);
+      if(onPractice && !oldHasResp && newHasResp){
+        renderHome();
+        requestAnimationFrame(()=> animatePracticeRespIn());
+        return;
+      }
       render();
     };
   });
@@ -1147,24 +1246,29 @@ function renderPracticePanel(){
   const hasResp = roleHasResponses(state.role);
   const roleMeta = getRoleMeta(state.role);
   const modeCards = PRACTICE_MODES.map(m=>{
-    const disabled = !hasResp && (m.id === 'responses' || m.id === 'flashcards');
-    return `<button class="mode-btn ${state.practiceMode===m.id?'active':''}${disabled?' disabled':''}" data-mode="${m.id}"${disabled?' disabled':''}>
-      ${m.label}<span>${disabled ? 'Acolyte roles only' : m.desc}</span>
+    const respOnly = practiceModeRequiresResponses(m.id);
+    if(!hasResp && respOnly) return '';
+    const respClass = respOnly ? ' practice-resp-only' : '';
+    return `<button class="mode-btn${respClass} ${state.practiceMode===m.id?'active':''}" data-mode="${m.id}">
+      ${m.label}<span>${m.desc}</span>
     </button>`;
   }).join('');
-  const roleNote = hasResp ? '' : `<p class="panel-intro" style="margin-bottom:8px;">${roleMeta.label} practice uses movement rubrics only — no Latin altar responses.</p>`;
-  return `
-    <p class="section-head">Practice Mode</p>
-    ${roleNote}
-    <div class="mode-grid">${modeCards}</div>
-    <div id="levelBlock" style="${['full','responses','section'].includes(state.practiceMode) && hasResp ?'':'display:none;'}">
+  const roleNote = hasResp ? '' : `<p class="panel-intro role-movements-note" style="margin-bottom:8px;">${roleMeta.label} — movement rubrics only; no Latin altar responses.</p>`;
+  const levelVisible = ['full','responses','section'].includes(state.practiceMode);
+  const levelBlock = hasResp ? `
+    <div id="levelBlock" class="practice-resp-only${levelVisible ? '' : ' level-collapsed'}">
       <p class="section-head">Response Level</p>
       <div class="seg" style="margin-bottom:10px;">
         <button data-lvl="1" class="${state.level==='1'?'active':''}">Level I · Reveal</button>
         <button data-lvl="2" class="${state.level==='2'?'active':''}">Level II · Memory</button>
       </div>
       <p class="panel-intro" style="margin-bottom:8px;">Level I reveals text first; Level II is from memory.</p>
-    </div>
+    </div>` : '';
+  return `
+    <p class="section-head">Practice Mode</p>
+    ${roleNote}
+    <div class="mode-grid">${modeCards}</div>
+    ${levelBlock}
     <button class="begin-btn block" id="beginBtn">Start Practice</button>`;
 }
 
@@ -1577,7 +1681,7 @@ function renderFormOverview(){
       <p class="source-note">${meta.source}</p>
       ${lowNote}
       ${body ? `<div class="guide-scroll"><div class="guide-item"><div class="lesson-body">${body}</div></div></div>` : ''}
-      ${state.massForm !== 'low' ? `<p style="font-size:14px;color:var(--ink-soft);margin-top:14px;">Select your role on the Practice tab — acolytes practice Latin responses; thurifer, MC, Deacon, and Subdeacon use movement rubrics. Use <strong>Movements Only</strong> or <strong>Full Mass</strong> for ${meta.label}-specific duties.</p>` : ''}
+      ${state.massForm !== 'low' ? `<p style="font-size:14px;color:var(--ink-soft);margin-top:14px;">Select your role on the Practice tab — acolytes practice Latin responses; thurifer, MC, cross bearer, and torch bearers use movement rubrics only.</p>` : ''}
       ${obrienBackBtn()}
     </div></div>`;
   wireObrienBack();
