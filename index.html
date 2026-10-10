@@ -400,12 +400,27 @@
 
   .flash-card{
     min-height:200px;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;
-    cursor:pointer;padding:32px 24px;border:1px solid var(--border);border-radius:var(--radius-lg);
-    background:var(--surface-raised);margin:18px 0;transition:box-shadow .15s var(--ease);
+    cursor:pointer;padding:32px 24px 28px;border:1px solid var(--border);border-radius:var(--radius-lg);
+    background:var(--surface-raised);margin:18px 0;transition:box-shadow .15s var(--ease);position:relative;
   }
   .flash-card:hover{box-shadow:var(--shadow-sm);}
-  .flash-card .hint{font-size:12px;font-weight:600;color:var(--text-muted);margin-bottom:14px;}
-  .flash-card .main{font-family:var(--font-latin);font-size:1.3125rem;line-height:1.5;}
+  .flash-card-head{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;margin-bottom:14px;flex-wrap:wrap;}
+  .flash-card .hint{font-size:12px;font-weight:600;color:var(--text-muted);margin:0;}
+  .flash-hint-btn{
+    flex-shrink:0;width:36px;height:36px;border-radius:50%;border:1px solid var(--border);
+    background:var(--surface);cursor:pointer;font-size:18px;line-height:1;display:flex;align-items:center;justify-content:center;
+    transition:background .15s var(--ease),border-color .15s var(--ease),transform .1s var(--ease);
+  }
+  .flash-hint-btn:hover{background:var(--gold-subtle, rgba(201,162,39,.12));border-color:var(--gold);}
+  .flash-hint-btn.active{background:var(--gold-subtle, rgba(201,162,39,.18));border-color:var(--gold);box-shadow:0 0 0 2px rgba(201,162,39,.25);}
+  .flash-hint-btn:active{transform:scale(.94);}
+  .flash-hint-reveal{
+    margin-top:14px;padding:10px 14px;border-radius:var(--radius-sm);
+    background:var(--blue-subtle);border:1px dashed rgba(74,123,200,.35);font-size:14px;color:var(--navy);max-width:100%;
+  }
+  .flash-hint-reveal .flash-hint-label{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.04em;color:var(--text-muted);margin-bottom:4px;}
+  .flash-hint-reveal .flash-hint-latin{font-family:var(--font-latin);font-size:1.125rem;font-style:italic;}
+  .flash-card .main{font-family:var(--font-latin);font-size:1.3125rem;line-height:1.5;max-width:100%;}
 
   .flash-nav{display:flex;justify-content:space-between;align-items:center;margin-top:16px;gap:10px;}
   .section-list{display:flex;flex-direction:column;gap:8px;margin:14px 0;}
@@ -766,7 +781,7 @@ const PRACTICE_MODES = [
   {id:'responses', label:'Responses Only', desc:'Latin server parts, no movement breaks'},
   {id:'movements', label:'Movements Only', desc:'All rubric MCQs for your role'},
   {id:'canon', label:'Canon & Bells', desc:'Sanctus through Domine non sum dignus'},
-  {id:'flashcards', label:'Flashcards', desc:'Tap to flip Latin ↔ English'},
+  {id:'flashcards', label:'Flashcards', desc:'Priest\'s Latin cue → flip for your response'},
   {id:'section', label:'By Section', desc:'Pick one part of the Mass'}
 ];
 
@@ -846,6 +861,7 @@ let state = {
   sectionRange: null,
   flashIdx: 0,
   flashFlipped: false,
+  flashHint: false,
   movementResults: {},
   recordings: {},
   transcripts: {},
@@ -1021,6 +1037,7 @@ function startPractice(mode, range=null){
     state.view = 'flashcards';
     state.flashIdx = 0;
     state.flashFlipped = false;
+    state.flashHint = false;
     render();
     return;
   }
@@ -1950,18 +1967,41 @@ function getFlashSteps(){
   return pool;
 }
 
+function flashFirstTwoWords(latinText){
+  const cleaned = (latinText || '').replace(/\(.*?\)/g, ' ').replace(/\s+/g, ' ').trim();
+  const words = cleaned.split(' ').filter(Boolean);
+  if(!words.length) return '—';
+  if(words.length === 1) return words[0] + '…';
+  return words.slice(0, 2).join(' ') + '…';
+}
+
 function renderFlashcards(){
   const steps = getFlashSteps();
   const i = steps[state.flashIdx];
   const s = getStep(i);
   const total = steps.length;
+  const onPriestSide = !state.flashFlipped;
+  const hintWords = flashFirstTwoWords(s.server);
+  const hintBtn = onPriestSide
+    ? `<button type="button" class="flash-hint-btn${state.flashHint?' active':''}" id="flashHintBtn" aria-label="Show first words of response" title="Hint: first two words">💡</button>`
+    : '';
+  const hintReveal = onPriestSide && state.flashHint
+    ? `<div class="flash-hint-reveal" id="flashHintReveal">
+        <div class="flash-hint-label">Response starts with</div>
+        <div class="flash-hint-latin">${hintWords}</div>
+      </div>`
+    : '';
   app.innerHTML = `
     <div class="flash-view"><div class="missal">
       <h2>Flashcards</h2>
       <p style="font-size:14px; color:var(--ink-soft);">${state.flashIdx+1} of ${total} · ${s.section}</p>
       <div class="flash-card" id="flashCard">
-        <div class="hint">${state.flashFlipped ? 'Latin — priest\'s line · tap to flip' : 'Latin — your response · tap to flip'}</div>
-        <div class="main latin">${state.flashFlipped ? s.priest : s.server}</div>
+        <div class="flash-card-head">
+          <div class="hint">${onPriestSide ? 'Latin — priest\'s line · tap card to flip' : 'Latin — your response · tap to flip back'}</div>
+          ${hintBtn}
+        </div>
+        <div class="main latin">${onPriestSide ? s.priest : s.server}</div>
+        ${hintReveal}
       </div>
       <div class="flash-nav">
         <button class="nav-btn" id="flashPrev" ${state.flashIdx===0?'disabled':''}>← Prev</button>
@@ -1969,10 +2009,34 @@ function renderFlashcards(){
         <button class="nav-btn" id="flashNext">${state.flashIdx===total-1?'Done':'Next →'}</button>
       </div>
     </div></div>`;
-  document.getElementById('flashCard').onclick = ()=>{ state.flashFlipped = !state.flashFlipped; renderFlashcards(); };
-  document.getElementById('flashPrev').onclick = ()=>{ if(state.flashIdx>0){ state.flashIdx--; state.flashFlipped=false; renderFlashcards(); } };
+  document.getElementById('flashCard').onclick = ()=>{
+    state.flashFlipped = !state.flashFlipped;
+    if(state.flashFlipped) state.flashHint = false;
+    renderFlashcards();
+  };
+  const hintBtnEl = document.getElementById('flashHintBtn');
+  if(hintBtnEl){
+    hintBtnEl.onclick = (e)=>{
+      e.stopPropagation();
+      state.flashHint = !state.flashHint;
+      renderFlashcards();
+    };
+  }
+  document.getElementById('flashPrev').onclick = ()=>{
+    if(state.flashIdx>0){
+      state.flashIdx--;
+      state.flashFlipped = false;
+      state.flashHint = false;
+      renderFlashcards();
+    }
+  };
   document.getElementById('flashNext').onclick = ()=>{
-    if(state.flashIdx < total-1){ state.flashIdx++; state.flashFlipped=false; renderFlashcards(); }
+    if(state.flashIdx < total-1){
+      state.flashIdx++;
+      state.flashFlipped = false;
+      state.flashHint = false;
+      renderFlashcards();
+    }
     else { goHome(); }
   };
   document.getElementById('flashBack').onclick = goHome;
