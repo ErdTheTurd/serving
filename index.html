@@ -1960,8 +1960,8 @@ function renderFlashcards(){
       <h2>Flashcards</h2>
       <p style="font-size:14px; color:var(--ink-soft);">${state.flashIdx+1} of ${total} · ${s.section}</p>
       <div class="flash-card" id="flashCard">
-        <div class="hint">${state.flashFlipped ? 'English' : 'Latin — tap to flip'}</div>
-        <div class="main ${state.flashFlipped?'':'latin'}">${state.flashFlipped ? s.serverT : s.server}</div>
+        <div class="hint">${state.flashFlipped ? 'Latin — priest\'s line · tap to flip' : 'Latin — your response · tap to flip'}</div>
+        <div class="main latin">${state.flashFlipped ? s.priest : s.server}</div>
       </div>
       <div class="flash-nav">
         <button class="nav-btn" id="flashPrev" ${state.flashIdx===0?'disabled':''}>← Prev</button>
