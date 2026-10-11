@@ -414,6 +414,10 @@
   .flash-hint-btn:hover{background:var(--gold-subtle, rgba(201,162,39,.12));border-color:var(--gold);}
   .flash-hint-btn.active{background:var(--gold-subtle, rgba(201,162,39,.18));border-color:var(--gold);box-shadow:0 0 0 2px rgba(201,162,39,.25);}
   .flash-hint-btn:active{transform:scale(.94);}
+  .flash-hint-btn.flash-bookmark-btn.active{background:rgba(196,160,53,.22);border-color:var(--gold);box-shadow:0 0 0 2px rgba(196,160,53,.3);}
+  .flash-toolbar{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:0 0 12px;}
+  .flash-toolbar .mini-btn{font-size:13px;padding:8px 12px;}
+  .flash-toolbar .mini-btn.active{background:var(--blue-subtle);border-color:var(--blue);color:var(--navy);}
   .flash-hint-reveal{
     margin-top:14px;padding:10px 14px;border-radius:var(--radius-sm);
     background:var(--blue-subtle);border:1px dashed rgba(74,123,200,.35);font-size:14px;color:var(--navy);max-width:100%;
@@ -787,7 +791,7 @@ const PRACTICE_MODES = [
   {id:'responses', label:'Responses Only', desc:'Latin server parts, no movement breaks'},
   {id:'movements', label:'Movements Only', desc:'All rubric MCQs for your role'},
   {id:'canon', label:'Canon & Bells', desc:'Sanctus through Domine non sum dignus'},
-  {id:'flashcards', label:'Flashcards', desc:'Priest\'s Latin cue → flip for your response'},
+  {id:'flashcards', label:'Flashcards', desc:'Text cues + pronunciation guide · bookmark misses'},
   {id:'section', label:'By Section', desc:'Pick one part of the Mass'}
 ];
 
@@ -869,6 +873,8 @@ let state = {
   flashFlipped: false,
   flashHint: false,
   flashPronounce: false,
+  flashBookmarksOnly: lsGet('altar_flashBookmarksOnly', '0') === '1',
+  showEasyPronunciation: false,
   movementResults: {},
   recordings: {},
   transcripts: {},
@@ -1134,16 +1140,48 @@ function loadVoices(){
   if(!('speechSynthesis' in window)) return;
   availableVoices = window.speechSynthesis.getVoices();
 }
+function isLikelyMicrosoft(){
+  const ua = navigator.userAgent || '';
+  return /Windows NT|Win64|Edg\//i.test(ua);
+}
+function findWillemVoice(){
+  return availableVoices.find(v => /willem/i.test(v.name));
+}
+function pickBrowserVoice(){
+  loadVoices();
+  if(state.voiceURI){
+    const saved = availableVoices.find(v => v.voiceURI === state.voiceURI);
+    if(saved) return saved;
+  }
+  if(isLikelyMicrosoft()){
+    const willem = findWillemVoice();
+    if(willem) return willem;
+  }
+  return availableVoices.find(v => v.lang && v.lang.toLowerCase().startsWith('it'))
+    || availableVoices.find(v => v.default)
+    || availableVoices[0];
+}
+function applyDefaultVoiceIfUnset(){
+  if(lsGet('altar_voiceURI', '')) return;
+  loadVoices();
+  const voice = pickBrowserVoice();
+  if(!voice) return;
+  state.voiceURI = voice.voiceURI;
+  lsSet('altar_voiceURI', voice.voiceURI);
+}
 if('speechSynthesis' in window){
   loadVoices();
-  window.speechSynthesis.onvoiceschanged = loadVoices;
+  window.speechSynthesis.onvoiceschanged = ()=>{
+    loadVoices();
+    applyDefaultVoiceIfUnset();
+  };
+  applyDefaultVoiceIfUnset();
 }
 function speakBrowser(text){
   if(!('speechSynthesis' in window)) return;
   window.speechSynthesis.cancel();
   const u = new SpeechSynthesisUtterance(stripAccents(text));
-  let voice = availableVoices.find(v=>v.voiceURI === state.voiceURI);
-  if(!voice) voice = availableVoices.find(v=>v.lang && v.lang.toLowerCase().startsWith('it')) || availableVoices.find(v=>v.default) || availableVoices[0];
+  const voice = pickBrowserVoice();
   if(voice) u.voice = voice;
   u.rate = 0.82;
   u.pitch = 0.95;
@@ -1192,6 +1230,31 @@ function playPriestLine(i, statusEl){
 
 /* ============ SPEECH-TO-TEXT SCORING (server's part) ============ */
 function normToken(w){ return stripAccents(w).toLowerCase().replace(/[^a-z]/g,''); }
+function scoreHeardAgainstExpected(expectedLatin, heardText){
+  if(!heardText || !expectedLatin) return 0;
+  const primary = alignAndScore(expectedLatin, heardText).score;
+  const phonetic = getPhonetic(expectedLatin);
+  if(!phonetic) return primary;
+  const phoneticPlain = phonetic.replace(/[^a-zA-Z'\s-]/g, ' ').replace(/\s+/g, ' ').trim();
+  if(!phoneticPlain) return primary;
+  return Math.max(primary, alignAndScore(phoneticPlain, heardText).score);
+}
+
+function pickBestSpeechAlternative(speechResult, expectedLatin){
+  if(!speechResult || !speechResult.length) return '';
+  let best = speechResult[0].transcript || '';
+  let bestScore = scoreHeardAgainstExpected(expectedLatin, best);
+  for(let a = 1; a < speechResult.length; a++){
+    const t = speechResult[a].transcript || '';
+    const score = scoreHeardAgainstExpected(expectedLatin, t);
+    if(score > bestScore){
+      bestScore = score;
+      best = t;
+    }
+  }
+  return best;
+}
+
 function alignAndScore(correctText, heardText){
   const correctTokens = correctText.replace(/\(.*?\)/g,'').split(/\s+/).filter(Boolean);
   const correctNorm = correctTokens.map(normToken);
@@ -1216,7 +1279,7 @@ function renderComparison(i, transcript){
   const holder = document.getElementById('compareHolder');
   if(!holder) return;
   if(!transcript){
-    holder.innerHTML = `<div class="compare-note">Speech recognition unavailable or heard nothing — recording saved, but no transcript to compare.</div>`;
+    holder.innerHTML = `<div class="compare-note">Recording saved. Speech recognition did not catch words — try speaking clearly toward the mic, or use Chrome/Edge on desktop. Your audio playback above still works.</div>`;
     return;
   }
   const {score, highlighted} = alignAndScore(s.server, transcript);
@@ -2024,10 +2087,45 @@ function renderRubricSheet(){
 }
 
 /* ============ FLASHCARDS ============ */
+function getFlashBookmarkSet(){
+  return new Set(lsGetJSON('altar_flashBookmarks', []));
+}
+function isFlashBookmarked(stepIdx){
+  return getFlashBookmarkSet().has(stepIdx);
+}
+function toggleFlashBookmark(stepIdx){
+  const set = getFlashBookmarkSet();
+  if(set.has(stepIdx)) set.delete(stepIdx);
+  else set.add(stepIdx);
+  lsSetJSON('altar_flashBookmarks', [...set].sort((a, b)=> a - b));
+}
+function clearFlashBookmarks(){
+  lsSetJSON('altar_flashBookmarks', []);
+  state.flashIdx = 0;
+  state.flashBookmarksOnly = false;
+  lsSet('altar_flashBookmarksOnly', '0');
+}
+
 function getFlashSteps(){
-  const pool = STEPS.map((_,i)=>i).filter(isServerResponseStep);
-  if(state.sectionRange) return pool.filter(i=> inSection(i, state.sectionRange));
+  let pool = STEPS.map((_,i)=>i).filter(isServerResponseStep);
+  if(state.sectionRange) pool = pool.filter(i=> inSection(i, state.sectionRange));
+  if(state.flashBookmarksOnly){
+    const marks = getFlashBookmarkSet();
+    pool = pool.filter(i=> marks.has(i));
+  }
   return pool;
+}
+
+function practicePronounceBlock(latinText){
+  if(!state.showEasyPronunciation) return '';
+  const guide = getPhoneticGuide(latinText);
+  const plain = String(latinText || '').replace(/\(.*?\)/g, ' ').replace(/\[.*?\]/g, ' ').replace(/\s+/g, ' ').trim();
+  const wordBuilt = !!(guide && plain && !getPhonetic(plain) && !lookupPhoneticPhrase(plain));
+  return `<div class="flash-pronounce-reveal" style="margin-top:10px;">
+    <div class="flash-hint-label">Easy pronunciation</div>
+    <div class="phonetic">${guide || 'No dictionary entry for this line yet — try the Latin Glossary in Learn.'}</div>
+    ${wordBuilt ? '<div class="flash-pronounce-note">Built word-by-word from the server dictionary.</div>' : ''}
+  </div>`;
 }
 
 function flashFirstTwoWords(latinText){
@@ -2039,18 +2137,44 @@ function flashFirstTwoWords(latinText){
 }
 
 function renderFlashcards(){
+  const bookmarkCount = getFlashBookmarkSet().size;
   const steps = getFlashSteps();
+  if(!steps.length){
+    app.innerHTML = `
+      <div class="flash-view"><div class="missal">
+        <h2>Flashcards</h2>
+        <p style="font-size:15px;">${state.flashBookmarksOnly ? 'No bookmarked cards yet. Flip a card and tap the bookmark when you miss a response.' : 'No cards in this set.'}</p>
+        <div class="flash-toolbar" style="margin-top:16px;">
+          ${state.flashBookmarksOnly ? `<button class="mini-btn" id="flashShowAll">All cards</button>` : ''}
+          <button class="begin-btn ghost" id="flashBack">← Home</button>
+        </div>
+      </div></div>`;
+    const showAll = document.getElementById('flashShowAll');
+    if(showAll) showAll.onclick = ()=>{
+      state.flashBookmarksOnly = false;
+      lsSet('altar_flashBookmarksOnly', '0');
+      state.flashIdx = 0;
+      renderFlashcards();
+    };
+    document.getElementById('flashBack').onclick = goHome;
+    return;
+  }
+  if(state.flashIdx >= steps.length) state.flashIdx = steps.length - 1;
   const i = steps[state.flashIdx];
   const s = getStep(i);
   const total = steps.length;
+  const bookmarked = isFlashBookmarked(i);
   const onPriestSide = !state.flashFlipped;
   const cardLatin = onPriestSide ? s.priest : s.server;
   const hintWords = flashFirstTwoWords(s.server);
-  const pronounceGuide = getPhoneticGuide(cardLatin);
   const hintBtn = onPriestSide
     ? `<button type="button" class="flash-hint-btn${state.flashHint?' active':''}" id="flashHintBtn" aria-label="Show first words of response" title="Hint: first two words">💡</button>`
     : '';
-  const pronounceBtn = `<button type="button" class="flash-hint-btn${state.flashPronounce?' active':''}" id="flashPronounceBtn" aria-label="Easy pronunciation dictionary" title="Easy pronunciation">📖</button>`;
+  const bookmarkBtn = `<button type="button" class="flash-hint-btn flash-bookmark-btn${bookmarked?' active':''}" id="flashBookmarkBtn" aria-label="${bookmarked?'Remove bookmark':'Bookmark to review later'}" title="${bookmarked?'Bookmarked — tap to remove':'Bookmark ones you missed'}">🔖</button>`;
+  const plainCardLatin = cardLatin.replace(/\(.*?\)/g, ' ').replace(/\[.*?\]/g, ' ').replace(/\s+/g, ' ').trim();
+  const pronounceGuide = getPhoneticGuide(cardLatin);
+  const pronounceIsWordBuilt = !!(pronounceGuide && plainCardLatin && !getPhonetic(plainCardLatin) && !lookupPhoneticPhrase(plainCardLatin));
+  const pronounceBtn = `<button type="button" class="flash-hint-btn${state.flashPronounce?' active':''}" id="flashPronounceBtn" aria-label="Easy pronunciation (text)" title="Easy pronunciation — text only">📖</button>`;
   const hintReveal = onPriestSide && state.flashHint
     ? `<div class="flash-hint-reveal" id="flashHintReveal">
         <div class="flash-hint-label">Response starts with</div>
@@ -2061,17 +2185,21 @@ function renderFlashcards(){
     ? `<div class="flash-pronounce-reveal" id="flashPronounceReveal">
         <div class="flash-hint-label">Easy pronunciation</div>
         <div class="phonetic">${pronounceGuide || 'No dictionary entry for this line yet — try the Latin Glossary in Learn.'}</div>
-        ${pronounceGuide && pronounceGuide === wordsToEasyPronunciation(cardLatin.replace(/\(.*?\)/g,' ').replace(/\[.*?\]/g,' ')) ? '<div class="flash-pronounce-note">Built word-by-word from the server dictionary.</div>' : ''}
+        ${pronounceIsWordBuilt ? '<div class="flash-pronounce-note">Built word-by-word from the server dictionary.</div>' : ''}
       </div>`
     : '';
   app.innerHTML = `
     <div class="flash-view"><div class="missal">
       <h2>Flashcards</h2>
-      <p style="font-size:14px; color:var(--ink-soft);">${state.flashIdx+1} of ${total} · ${s.section}</p>
+      <div class="flash-toolbar">
+        <button type="button" class="mini-btn${state.flashBookmarksOnly?' active':''}" id="flashFilterBookmarks">Bookmarked only (${bookmarkCount})</button>
+        ${bookmarkCount ? `<button type="button" class="mini-btn ghost" id="flashClearBookmarks">Clear all</button>` : ''}
+      </div>
+      <p style="font-size:14px; color:var(--ink-soft);">${state.flashIdx+1} of ${total} · ${s.section} · no mic or speaker · 📖 = text pronunciation</p>
       <div class="flash-card" id="flashCard">
         <div class="flash-card-head">
           <div class="hint">${onPriestSide ? 'Latin — priest\'s line · tap card to flip' : 'Latin — your response · tap to flip back'}</div>
-          ${hintBtn}${pronounceBtn}
+          <div style="display:flex;gap:8px;">${hintBtn}${pronounceBtn}${bookmarkBtn}</div>
         </div>
         <div class="main latin">${cardLatin}</div>
         ${hintReveal}
@@ -2096,11 +2224,29 @@ function renderFlashcards(){
       renderFlashcards();
     };
   }
-  const pronounceBtnEl = document.getElementById('flashPronounceBtn');
-  if(pronounceBtnEl){
-    pronounceBtnEl.onclick = (e)=>{
-      e.stopPropagation();
-      state.flashPronounce = !state.flashPronounce;
+  document.getElementById('flashBookmarkBtn').onclick = (e)=>{
+    e.stopPropagation();
+    toggleFlashBookmark(i);
+    renderFlashcards();
+  };
+  document.getElementById('flashPronounceBtn').onclick = (e)=>{
+    e.stopPropagation();
+    state.flashPronounce = !state.flashPronounce;
+    renderFlashcards();
+  };
+  document.getElementById('flashFilterBookmarks').onclick = ()=>{
+    state.flashBookmarksOnly = !state.flashBookmarksOnly;
+    lsSet('altar_flashBookmarksOnly', state.flashBookmarksOnly ? '1' : '0');
+    state.flashIdx = 0;
+    state.flashFlipped = false;
+    state.flashHint = false;
+    state.flashPronounce = false;
+    renderFlashcards();
+  };
+  const clearBtn = document.getElementById('flashClearBookmarks');
+  if(clearBtn){
+    clearBtn.onclick = ()=>{
+      if(confirm('Remove all flashcard bookmarks?')) clearFlashBookmarks();
       renderFlashcards();
     };
   }
@@ -2182,10 +2328,10 @@ function renderSettings(){
       holder.innerHTML = `
         <label class="field-label">Voice</label>
         <select class="text-input" id="voiceSelect">
-          <option value="">Auto (Italian-leaning, best default)</option>
+          <option value="">Auto (Willem on Windows, else Italian)</option>
           ${voiceOptions}
         </select>
-        <div class="settings-note">Your browser's available voices vary by device. Italian voices tend to sound closest to ecclesiastical Latin.</div>`;
+        <div class="settings-note">On Microsoft Windows/Edge, Auto selects <strong>Willem</strong> when installed. Other devices fall back to an Italian voice for Latin priest lines.</div>`;
       document.getElementById('voiceSelect').onchange = (e)=>{ state.voiceURI = e.target.value; localStorage.setItem('altar_voiceURI', state.voiceURI); };
     } else if(state.priestMode === 'custom'){
       holder.innerHTML = `<div class="settings-note">Read every priest's line aloud once, in your own voice — use the "Record the Priest" button on the main screen. Those recordings will play back during practice instead of a synthetic voice.</div>`;
@@ -2319,6 +2465,7 @@ function renderInfoPrayerStep(){
   app.innerHTML = `
     <div class="controls">
       <button class="toggle-link ${state.showTranslation?'active':''}" id="transToggle">English</button>
+      <button class="toggle-link ${state.showEasyPronunciation?'active':''}" id="pronounceToggle">Say it</button>
       <button class="toggle-link" id="settingsLink">Voice</button>
     </div>
     <div class="missal-wrap">
@@ -2331,6 +2478,7 @@ function renderInfoPrayerStep(){
           <div class="role"><span class="dot"></span>Priest</div>
           <div class="latin">${s.priest}${s.varies ? '<span class="varies-tag">varies by day</span>' : ''}</div>
           ${state.showTranslation ? `<div class="translation">${s.priestT}</div>` : ''}
+          ${practicePronounceBlock(s.priest)}
           <div class="hear-row">
             <button class="hear-btn" id="hearBtn">Hear the Priest</button>
             <span class="voice-note" id="hearStatus"></span>
@@ -2339,7 +2487,7 @@ function renderInfoPrayerStep(){
         <div class="block server-block">
           <div class="role"><span class="dot"></span>${label}</div>
           <div class="latin">${s.server}</div>
-          ${getPhonetic(s.server) ? `<div class="phonetic">${getPhonetic(s.server)}</div>` : ''}
+          ${practicePronounceBlock(s.server)}
           ${state.showTranslation ? `<div class="translation">${s.serverT}</div>` : ''}
           ${s.note ? `<div class="translation" style="font-style:italic;">${s.note}</div>` : ''}
           <div class="compare-box" style="margin-top:12px;">
@@ -2352,6 +2500,7 @@ function renderInfoPrayerStep(){
   `;
 
   document.getElementById('transToggle').onclick = ()=>{ state.showTranslation = !state.showTranslation; renderInfoPrayerStep(); };
+  document.getElementById('pronounceToggle').onclick = ()=>{ state.showEasyPronunciation = !state.showEasyPronunciation; renderInfoPrayerStep(); };
   document.getElementById('settingsLink').onclick = ()=>{ state.view='settings'; render(); };
   document.getElementById('hearBtn').onclick = ()=> playPriestLine(i, document.getElementById('hearStatus'));
   wireNav(seqPos);
@@ -2370,6 +2519,7 @@ function renderPrayerStep(){
         <button data-lvl="2" class="${state.level==='2'?'active':''}">Level II · Memory</button>
       </div>
       <button class="toggle-link ${state.showTranslation?'active':''}" id="transToggle">English</button>
+      <button class="toggle-link ${state.showEasyPronunciation?'active':''}" id="pronounceToggle">Say it</button>
       <button class="toggle-link" id="settingsLink">Voice</button>
     </div>
     <div class="missal-wrap">
@@ -2383,6 +2533,7 @@ function renderPrayerStep(){
           <div class="role"><span class="dot"></span>Priest</div>
           <div class="latin">${s.priest}${s.varies ? '<span class="varies-tag">varies by day</span>' : ''}</div>
           ${state.showTranslation ? `<div class="translation">${s.priestT}</div>` : ''}
+          ${practicePronounceBlock(s.priest)}
           <div class="hear-row">
             <button class="hear-btn" id="hearBtn">Hear the Priest</button>
             <span class="voice-note" id="hearStatus"></span>
@@ -2392,6 +2543,7 @@ function renderPrayerStep(){
         <div class="block server-block">
           <div class="role"><span class="dot"></span>Your Response</div>
           <div id="serverArea"></div>
+          ${practicePronounceBlock(s.server)}
 
           <div class="record-row">
             <button class="rec-btn" id="recBtn" disabled>
@@ -2411,6 +2563,7 @@ function renderPrayerStep(){
   `;
 
   document.getElementById('transToggle').onclick = ()=>{ state.showTranslation = !state.showTranslation; renderPrayerStep(); };
+  document.getElementById('pronounceToggle').onclick = ()=>{ state.showEasyPronunciation = !state.showEasyPronunciation; renderPrayerStep(); };
   document.getElementById('settingsLink').onclick = ()=>{ state.view='settings'; render(); };
   app.querySelectorAll('.seg button').forEach(b=>{
     b.onclick = ()=>{ state.level = b.dataset.lvl; localStorage.setItem('altar_level', state.level); renderPrayerStep(); };
@@ -2421,7 +2574,9 @@ function renderPrayerStep(){
   setupServerArea(i, s);
   setupRecorder(i);
 
-  setTimeout(()=>playPriestLine(i, document.getElementById('hearStatus')), 250);
+  if(state.view === 'practice' && state.sequence[state.step]?.type === 'prayer'){
+    setTimeout(()=>playPriestLine(i, document.getElementById('hearStatus')), 250);
+  }
 }
 
 function renderMovementStep(){
@@ -2504,7 +2659,6 @@ function setupServerArea(i, s){
       <div class="reveal-wrap">
         <div class="reveal-bar"><div class="reveal-bar-fill" id="revealFill"></div></div>
         <div class="latin" id="revealText">${s.server}</div>
-        ${getPhonetic(s.server) ? `<div class="phonetic">${getPhonetic(s.server)}</div>` : ''}
       </div>`;
     const fill = document.getElementById('revealFill');
     fill.style.animation = 'shrink 5s linear forwards';
@@ -2522,8 +2676,19 @@ function setupServerArea(i, s){
 }
 
 let mediaRecorder, chunks=[], recTimerInterval, recSeconds=0, currentStream;
-let recognition, recognizedText='';
+let recognition, recognizedText='', lastInterimText='';
 const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+function speechRecognitionLang(){
+  if(isLikelyMicrosoft() && findWillemVoice()) return 'it-IT';
+  return 'it-IT';
+}
+
+function stopActiveRecognition(){
+  if(!recognition) return;
+  try{ recognition.stop(); }catch(e){}
+  try{ recognition.abort(); }catch(e){}
+}
 
 function setupRecorder(i){
   const recBtn = document.getElementById('recBtn');
@@ -2531,6 +2696,7 @@ function setupRecorder(i){
   const timerEl = document.getElementById('timer');
   const playbackHolder = document.getElementById('playbackHolder');
   const statusChip = document.getElementById('statusChip');
+  const expectedLatin = getStep(i).server;
 
   if(state.recordings[i]){
     playbackHolder.innerHTML = `<audio controls src="${state.recordings[i].url}"></audio>`;
@@ -2544,10 +2710,19 @@ function setupRecorder(i){
       return;
     }
     try{
-      const stream = await navigator.mediaDevices.getUserMedia({audio:true});
+      stopActiveRecognition();
+      const stream = await navigator.mediaDevices.getUserMedia({
+        audio: {
+          channelCount: 1,
+          echoCancellation: true,
+          noiseSuppression: false,
+          autoGainControl: true
+        }
+      });
       currentStream = stream;
       chunks = [];
       recognizedText = '';
+      lastInterimText = '';
       document.getElementById('compareHolder').innerHTML = '';
       mediaRecorder = new MediaRecorder(stream);
       mediaRecorder.ondataavailable = e => chunks.push(e.data);
@@ -2558,45 +2733,64 @@ function setupRecorder(i){
         playbackHolder.innerHTML = `<audio controls src="${url}"></audio>`;
         recBtn.classList.remove('recording');
         recLabel.textContent = 'Re-record';
-        statusChip.textContent = 'Saved';
+        statusChip.textContent = 'Processing speech…';
         clearInterval(recTimerInterval);
         timerEl.textContent = '';
         currentStream.getTracks().forEach(t=>t.stop());
         document.querySelectorAll('.dots span')[i]?.classList.add('done');
         const finalize = ()=>{
-          state.transcripts[i] = recognizedText.trim();
+          let text = recognizedText.trim();
+          if(!text) text = lastInterimText.trim();
+          state.transcripts[i] = text;
+          statusChip.textContent = text ? 'Saved' : 'Saved (no transcript)';
           renderComparison(i, state.transcripts[i]);
         };
         if(recognition){
           let done = false;
-          const finish = ()=>{ if(!done){ done=true; finalize(); } };
+          const finish = ()=>{
+            if(done) return;
+            done = true;
+            finalize();
+          };
           recognition.onend = finish;
           try{ recognition.stop(); }catch(e){ finish(); }
-          setTimeout(finish, 1200);
+          setTimeout(finish, 2400);
         } else {
           finalize();
         }
       };
-      mediaRecorder.start();
 
       if(SpeechRec){
         recognition = new SpeechRec();
-        recognition.lang = 'it-IT';
+        recognition.lang = speechRecognitionLang();
         recognition.continuous = true;
         recognition.interimResults = true;
+        recognition.maxAlternatives = 5;
         recognition.onresult = (e)=>{
-          for(let r= e.resultIndex; r < e.results.length; r++){
-            if(e.results[r].isFinal) recognizedText += e.results[r][0].transcript + ' ';
+          for(let r = e.resultIndex; r < e.results.length; r++){
+            const result = e.results[r];
+            const chunk = pickBestSpeechAlternative(result, expectedLatin);
+            if(result.isFinal) recognizedText += chunk + ' ';
+            else lastInterimText = chunk;
+          }
+          if(lastInterimText && statusChip){
+            statusChip.textContent = 'Hearing: ' + lastInterimText.slice(0, 48) + (lastInterimText.length > 48 ? '…' : '');
           }
         };
-        recognition.onerror = ()=>{};
-        try{ recognition.start(); }catch(e){}
+        recognition.onerror = (ev)=>{
+          if(ev.error === 'no-speech' && statusChip) statusChip.textContent = 'No speech detected — speak up';
+          else if(ev.error === 'not-allowed' && statusChip) statusChip.textContent = 'Mic blocked for speech recognition';
+        };
+        try{ recognition.start(); }catch(e){ recognition = null; }
       }
+
+      mediaRecorder.start(250);
 
       recBtn.classList.add('recording');
       recLabel.textContent = 'Stop';
       recSeconds = 0;
       timerEl.textContent = '0:00';
+      statusChip.textContent = 'Listening…';
       recTimerInterval = setInterval(()=>{
         recSeconds++;
         const m = Math.floor(recSeconds/60), sec = String(recSeconds%60).padStart(2,'0');
