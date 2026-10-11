@@ -1134,16 +1134,48 @@ function loadVoices(){
   if(!('speechSynthesis' in window)) return;
   availableVoices = window.speechSynthesis.getVoices();
 }
+function isLikelyMicrosoft(){
+  const ua = navigator.userAgent || '';
+  return /Windows NT|Win64|Edg\//i.test(ua);
+}
+function findWillemVoice(){
+  return availableVoices.find(v => /willem/i.test(v.name));
+}
+function pickBrowserVoice(){
+  loadVoices();
+  if(state.voiceURI){
+    const saved = availableVoices.find(v => v.voiceURI === state.voiceURI);
+    if(saved) return saved;
+  }
+  if(isLikelyMicrosoft()){
+    const willem = findWillemVoice();
+    if(willem) return willem;
+  }
+  return availableVoices.find(v => v.lang && v.lang.toLowerCase().startsWith('it'))
+    || availableVoices.find(v => v.default)
+    || availableVoices[0];
+}
+function applyDefaultVoiceIfUnset(){
+  if(lsGet('altar_voiceURI', '')) return;
+  loadVoices();
+  const voice = pickBrowserVoice();
+  if(!voice) return;
+  state.voiceURI = voice.voiceURI;
+  lsSet('altar_voiceURI', voice.voiceURI);
+}
 if('speechSynthesis' in window){
   loadVoices();
-  window.speechSynthesis.onvoiceschanged = loadVoices;
+  window.speechSynthesis.onvoiceschanged = ()=>{
+    loadVoices();
+    applyDefaultVoiceIfUnset();
+  };
+  applyDefaultVoiceIfUnset();
 }
 function speakBrowser(text){
   if(!('speechSynthesis' in window)) return;
   window.speechSynthesis.cancel();
   const u = new SpeechSynthesisUtterance(stripAccents(text));
-  let voice = availableVoices.find(v=>v.voiceURI === state.voiceURI);
-  if(!voice) voice = availableVoices.find(v=>v.lang && v.lang.toLowerCase().startsWith('it')) || availableVoices.find(v=>v.default) || availableVoices[0];
+  const voice = pickBrowserVoice();
   if(voice) u.voice = voice;
   u.rate = 0.82;
   u.pitch = 0.95;
@@ -1192,6 +1224,31 @@ function playPriestLine(i, statusEl){
 
 /* ============ SPEECH-TO-TEXT SCORING (server's part) ============ */
 function normToken(w){ return stripAccents(w).toLowerCase().replace(/[^a-z]/g,''); }
+function scoreHeardAgainstExpected(expectedLatin, heardText){
+  if(!heardText || !expectedLatin) return 0;
+  const primary = alignAndScore(expectedLatin, heardText).score;
+  const phonetic = getPhonetic(expectedLatin);
+  if(!phonetic) return primary;
+  const phoneticPlain = phonetic.replace(/[^a-zA-Z'\s-]/g, ' ').replace(/\s+/g, ' ').trim();
+  if(!phoneticPlain) return primary;
+  return Math.max(primary, alignAndScore(phoneticPlain, heardText).score);
+}
+
+function pickBestSpeechAlternative(speechResult, expectedLatin){
+  if(!speechResult || !speechResult.length) return '';
+  let best = speechResult[0].transcript || '';
+  let bestScore = scoreHeardAgainstExpected(expectedLatin, best);
+  for(let a = 1; a < speechResult.length; a++){
+    const t = speechResult[a].transcript || '';
+    const score = scoreHeardAgainstExpected(expectedLatin, t);
+    if(score > bestScore){
+      bestScore = score;
+      best = t;
+    }
+  }
+  return best;
+}
+
 function alignAndScore(correctText, heardText){
   const correctTokens = correctText.replace(/\(.*?\)/g,'').split(/\s+/).filter(Boolean);
   const correctNorm = correctTokens.map(normToken);
@@ -1216,7 +1273,7 @@ function renderComparison(i, transcript){
   const holder = document.getElementById('compareHolder');
   if(!holder) return;
   if(!transcript){
-    holder.innerHTML = `<div class="compare-note">Speech recognition unavailable or heard nothing — recording saved, but no transcript to compare.</div>`;
+    holder.innerHTML = `<div class="compare-note">Recording saved. Speech recognition did not catch words — try speaking clearly toward the mic, or use Chrome/Edge on desktop. Your audio playback above still works.</div>`;
     return;
   }
   const {score, highlighted} = alignAndScore(s.server, transcript);
@@ -2046,7 +2103,9 @@ function renderFlashcards(){
   const onPriestSide = !state.flashFlipped;
   const cardLatin = onPriestSide ? s.priest : s.server;
   const hintWords = flashFirstTwoWords(s.server);
+  const plainCardLatin = cardLatin.replace(/\(.*?\)/g, ' ').replace(/\[.*?\]/g, ' ').replace(/\s+/g, ' ').trim();
   const pronounceGuide = getPhoneticGuide(cardLatin);
+  const pronounceIsWordBuilt = !!(pronounceGuide && !getPhonetic(plainCardLatin) && !lookupPhoneticPhrase(plainCardLatin));
   const hintBtn = onPriestSide
     ? `<button type="button" class="flash-hint-btn${state.flashHint?' active':''}" id="flashHintBtn" aria-label="Show first words of response" title="Hint: first two words">💡</button>`
     : '';
@@ -2061,7 +2120,7 @@ function renderFlashcards(){
     ? `<div class="flash-pronounce-reveal" id="flashPronounceReveal">
         <div class="flash-hint-label">Easy pronunciation</div>
         <div class="phonetic">${pronounceGuide || 'No dictionary entry for this line yet — try the Latin Glossary in Learn.'}</div>
-        ${pronounceGuide && pronounceGuide === wordsToEasyPronunciation(cardLatin.replace(/\(.*?\)/g,' ').replace(/\[.*?\]/g,' ')) ? '<div class="flash-pronounce-note">Built word-by-word from the server dictionary.</div>' : ''}
+        ${pronounceIsWordBuilt ? '<div class="flash-pronounce-note">Built word-by-word from the server dictionary.</div>' : ''}
       </div>`
     : '';
   app.innerHTML = `
@@ -2182,10 +2241,10 @@ function renderSettings(){
       holder.innerHTML = `
         <label class="field-label">Voice</label>
         <select class="text-input" id="voiceSelect">
-          <option value="">Auto (Italian-leaning, best default)</option>
+          <option value="">Auto (Willem on Windows, else Italian)</option>
           ${voiceOptions}
         </select>
-        <div class="settings-note">Your browser's available voices vary by device. Italian voices tend to sound closest to ecclesiastical Latin.</div>`;
+        <div class="settings-note">On Microsoft Windows/Edge, Auto selects <strong>Willem</strong> when installed. Other devices fall back to an Italian voice for Latin priest lines.</div>`;
       document.getElementById('voiceSelect').onchange = (e)=>{ state.voiceURI = e.target.value; localStorage.setItem('altar_voiceURI', state.voiceURI); };
     } else if(state.priestMode === 'custom'){
       holder.innerHTML = `<div class="settings-note">Read every priest's line aloud once, in your own voice — use the "Record the Priest" button on the main screen. Those recordings will play back during practice instead of a synthetic voice.</div>`;
@@ -2522,8 +2581,19 @@ function setupServerArea(i, s){
 }
 
 let mediaRecorder, chunks=[], recTimerInterval, recSeconds=0, currentStream;
-let recognition, recognizedText='';
+let recognition, recognizedText='', lastInterimText='';
 const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+function speechRecognitionLang(){
+  if(isLikelyMicrosoft() && findWillemVoice()) return 'it-IT';
+  return 'it-IT';
+}
+
+function stopActiveRecognition(){
+  if(!recognition) return;
+  try{ recognition.stop(); }catch(e){}
+  try{ recognition.abort(); }catch(e){}
+}
 
 function setupRecorder(i){
   const recBtn = document.getElementById('recBtn');
@@ -2531,6 +2601,7 @@ function setupRecorder(i){
   const timerEl = document.getElementById('timer');
   const playbackHolder = document.getElementById('playbackHolder');
   const statusChip = document.getElementById('statusChip');
+  const expectedLatin = getStep(i).server;
 
   if(state.recordings[i]){
     playbackHolder.innerHTML = `<audio controls src="${state.recordings[i].url}"></audio>`;
@@ -2544,10 +2615,19 @@ function setupRecorder(i){
       return;
     }
     try{
-      const stream = await navigator.mediaDevices.getUserMedia({audio:true});
+      stopActiveRecognition();
+      const stream = await navigator.mediaDevices.getUserMedia({
+        audio: {
+          channelCount: 1,
+          echoCancellation: true,
+          noiseSuppression: false,
+          autoGainControl: true
+        }
+      });
       currentStream = stream;
       chunks = [];
       recognizedText = '';
+      lastInterimText = '';
       document.getElementById('compareHolder').innerHTML = '';
       mediaRecorder = new MediaRecorder(stream);
       mediaRecorder.ondataavailable = e => chunks.push(e.data);
@@ -2558,45 +2638,64 @@ function setupRecorder(i){
         playbackHolder.innerHTML = `<audio controls src="${url}"></audio>`;
         recBtn.classList.remove('recording');
         recLabel.textContent = 'Re-record';
-        statusChip.textContent = 'Saved';
+        statusChip.textContent = 'Processing speech…';
         clearInterval(recTimerInterval);
         timerEl.textContent = '';
         currentStream.getTracks().forEach(t=>t.stop());
         document.querySelectorAll('.dots span')[i]?.classList.add('done');
         const finalize = ()=>{
-          state.transcripts[i] = recognizedText.trim();
+          let text = recognizedText.trim();
+          if(!text) text = lastInterimText.trim();
+          state.transcripts[i] = text;
+          statusChip.textContent = text ? 'Saved' : 'Saved (no transcript)';
           renderComparison(i, state.transcripts[i]);
         };
         if(recognition){
           let done = false;
-          const finish = ()=>{ if(!done){ done=true; finalize(); } };
+          const finish = ()=>{
+            if(done) return;
+            done = true;
+            finalize();
+          };
           recognition.onend = finish;
           try{ recognition.stop(); }catch(e){ finish(); }
-          setTimeout(finish, 1200);
+          setTimeout(finish, 2400);
         } else {
           finalize();
         }
       };
-      mediaRecorder.start();
 
       if(SpeechRec){
         recognition = new SpeechRec();
-        recognition.lang = 'it-IT';
+        recognition.lang = speechRecognitionLang();
         recognition.continuous = true;
         recognition.interimResults = true;
+        recognition.maxAlternatives = 5;
         recognition.onresult = (e)=>{
-          for(let r= e.resultIndex; r < e.results.length; r++){
-            if(e.results[r].isFinal) recognizedText += e.results[r][0].transcript + ' ';
+          for(let r = e.resultIndex; r < e.results.length; r++){
+            const result = e.results[r];
+            const chunk = pickBestSpeechAlternative(result, expectedLatin);
+            if(result.isFinal) recognizedText += chunk + ' ';
+            else lastInterimText = chunk;
+          }
+          if(lastInterimText && statusChip){
+            statusChip.textContent = 'Hearing: ' + lastInterimText.slice(0, 48) + (lastInterimText.length > 48 ? '…' : '');
           }
         };
-        recognition.onerror = ()=>{};
-        try{ recognition.start(); }catch(e){}
+        recognition.onerror = (ev)=>{
+          if(ev.error === 'no-speech' && statusChip) statusChip.textContent = 'No speech detected — speak up';
+          else if(ev.error === 'not-allowed' && statusChip) statusChip.textContent = 'Mic blocked for speech recognition';
+        };
+        try{ recognition.start(); }catch(e){ recognition = null; }
       }
+
+      mediaRecorder.start(250);
 
       recBtn.classList.add('recording');
       recLabel.textContent = 'Stop';
       recSeconds = 0;
       timerEl.textContent = '0:00';
+      statusChip.textContent = 'Listening…';
       recTimerInterval = setInterval(()=>{
         recSeconds++;
         const m = Math.floor(recSeconds/60), sec = String(recSeconds%60).padStart(2,'0');
