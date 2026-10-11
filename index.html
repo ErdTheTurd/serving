@@ -787,7 +787,7 @@ const PRACTICE_MODES = [
   {id:'responses', label:'Responses Only', desc:'Latin server parts, no movement breaks'},
   {id:'movements', label:'Movements Only', desc:'All rubric MCQs for your role'},
   {id:'canon', label:'Canon & Bells', desc:'Sanctus through Domine non sum dignus'},
-  {id:'flashcards', label:'Flashcards', desc:'Priest\'s Latin cue → flip for your response'},
+  {id:'flashcards', label:'Flashcards', desc:'Text-only — priest cue, flip for response (no audio)'},
   {id:'section', label:'By Section', desc:'Pick one part of the Mass'}
 ];
 
@@ -868,7 +868,7 @@ let state = {
   flashIdx: 0,
   flashFlipped: false,
   flashHint: false,
-  flashPronounce: false,
+  showEasyPronunciation: false,
   movementResults: {},
   recordings: {},
   transcripts: {},
@@ -1100,7 +1100,6 @@ function startPractice(mode, range=null){
     state.flashIdx = 0;
     state.flashFlipped = false;
     state.flashHint = false;
-    state.flashPronounce = false;
     render();
     return;
   }
@@ -2087,6 +2086,18 @@ function getFlashSteps(){
   return pool;
 }
 
+function practicePronounceBlock(latinText){
+  if(!state.showEasyPronunciation) return '';
+  const guide = getPhoneticGuide(latinText);
+  const plain = String(latinText || '').replace(/\(.*?\)/g, ' ').replace(/\[.*?\]/g, ' ').replace(/\s+/g, ' ').trim();
+  const wordBuilt = !!(guide && plain && !getPhonetic(plain) && !lookupPhoneticPhrase(plain));
+  return `<div class="flash-pronounce-reveal" style="margin-top:10px;">
+    <div class="flash-hint-label">Easy pronunciation</div>
+    <div class="phonetic">${guide || 'No dictionary entry for this line yet — try the Latin Glossary in Learn.'}</div>
+    ${wordBuilt ? '<div class="flash-pronounce-note">Built word-by-word from the server dictionary.</div>' : ''}
+  </div>`;
+}
+
 function flashFirstTwoWords(latinText){
   const cleaned = (latinText || '').replace(/\(.*?\)/g, ' ').replace(/\s+/g, ' ').trim();
   const words = cleaned.split(' ').filter(Boolean);
@@ -2103,38 +2114,26 @@ function renderFlashcards(){
   const onPriestSide = !state.flashFlipped;
   const cardLatin = onPriestSide ? s.priest : s.server;
   const hintWords = flashFirstTwoWords(s.server);
-  const plainCardLatin = cardLatin.replace(/\(.*?\)/g, ' ').replace(/\[.*?\]/g, ' ').replace(/\s+/g, ' ').trim();
-  const pronounceGuide = getPhoneticGuide(cardLatin);
-  const pronounceIsWordBuilt = !!(pronounceGuide && !getPhonetic(plainCardLatin) && !lookupPhoneticPhrase(plainCardLatin));
   const hintBtn = onPriestSide
     ? `<button type="button" class="flash-hint-btn${state.flashHint?' active':''}" id="flashHintBtn" aria-label="Show first words of response" title="Hint: first two words">💡</button>`
     : '';
-  const pronounceBtn = `<button type="button" class="flash-hint-btn${state.flashPronounce?' active':''}" id="flashPronounceBtn" aria-label="Easy pronunciation dictionary" title="Easy pronunciation">📖</button>`;
   const hintReveal = onPriestSide && state.flashHint
     ? `<div class="flash-hint-reveal" id="flashHintReveal">
         <div class="flash-hint-label">Response starts with</div>
         <div class="flash-hint-latin">${hintWords}</div>
       </div>`
     : '';
-  const pronounceReveal = state.flashPronounce
-    ? `<div class="flash-pronounce-reveal" id="flashPronounceReveal">
-        <div class="flash-hint-label">Easy pronunciation</div>
-        <div class="phonetic">${pronounceGuide || 'No dictionary entry for this line yet — try the Latin Glossary in Learn.'}</div>
-        ${pronounceIsWordBuilt ? '<div class="flash-pronounce-note">Built word-by-word from the server dictionary.</div>' : ''}
-      </div>`
-    : '';
   app.innerHTML = `
     <div class="flash-view"><div class="missal">
       <h2>Flashcards</h2>
-      <p style="font-size:14px; color:var(--ink-soft);">${state.flashIdx+1} of ${total} · ${s.section}</p>
+      <p style="font-size:14px; color:var(--ink-soft);">${state.flashIdx+1} of ${total} · ${s.section} · text only (no mic or speaker)</p>
       <div class="flash-card" id="flashCard">
         <div class="flash-card-head">
           <div class="hint">${onPriestSide ? 'Latin — priest\'s line · tap card to flip' : 'Latin — your response · tap to flip back'}</div>
-          ${hintBtn}${pronounceBtn}
+          ${hintBtn}
         </div>
         <div class="main latin">${cardLatin}</div>
         ${hintReveal}
-        ${pronounceReveal}
       </div>
       <div class="flash-nav">
         <button class="nav-btn" id="flashPrev" ${state.flashIdx===0?'disabled':''}>← Prev</button>
@@ -2155,20 +2154,11 @@ function renderFlashcards(){
       renderFlashcards();
     };
   }
-  const pronounceBtnEl = document.getElementById('flashPronounceBtn');
-  if(pronounceBtnEl){
-    pronounceBtnEl.onclick = (e)=>{
-      e.stopPropagation();
-      state.flashPronounce = !state.flashPronounce;
-      renderFlashcards();
-    };
-  }
   document.getElementById('flashPrev').onclick = ()=>{
     if(state.flashIdx>0){
       state.flashIdx--;
       state.flashFlipped = false;
       state.flashHint = false;
-      state.flashPronounce = false;
       renderFlashcards();
     }
   };
@@ -2177,7 +2167,6 @@ function renderFlashcards(){
       state.flashIdx++;
       state.flashFlipped = false;
       state.flashHint = false;
-      state.flashPronounce = false;
       renderFlashcards();
     }
     else { goHome(); }
@@ -2378,6 +2367,7 @@ function renderInfoPrayerStep(){
   app.innerHTML = `
     <div class="controls">
       <button class="toggle-link ${state.showTranslation?'active':''}" id="transToggle">English</button>
+      <button class="toggle-link ${state.showEasyPronunciation?'active':''}" id="pronounceToggle">Say it</button>
       <button class="toggle-link" id="settingsLink">Voice</button>
     </div>
     <div class="missal-wrap">
@@ -2390,6 +2380,7 @@ function renderInfoPrayerStep(){
           <div class="role"><span class="dot"></span>Priest</div>
           <div class="latin">${s.priest}${s.varies ? '<span class="varies-tag">varies by day</span>' : ''}</div>
           ${state.showTranslation ? `<div class="translation">${s.priestT}</div>` : ''}
+          ${practicePronounceBlock(s.priest)}
           <div class="hear-row">
             <button class="hear-btn" id="hearBtn">Hear the Priest</button>
             <span class="voice-note" id="hearStatus"></span>
@@ -2398,7 +2389,7 @@ function renderInfoPrayerStep(){
         <div class="block server-block">
           <div class="role"><span class="dot"></span>${label}</div>
           <div class="latin">${s.server}</div>
-          ${getPhonetic(s.server) ? `<div class="phonetic">${getPhonetic(s.server)}</div>` : ''}
+          ${practicePronounceBlock(s.server)}
           ${state.showTranslation ? `<div class="translation">${s.serverT}</div>` : ''}
           ${s.note ? `<div class="translation" style="font-style:italic;">${s.note}</div>` : ''}
           <div class="compare-box" style="margin-top:12px;">
@@ -2411,6 +2402,7 @@ function renderInfoPrayerStep(){
   `;
 
   document.getElementById('transToggle').onclick = ()=>{ state.showTranslation = !state.showTranslation; renderInfoPrayerStep(); };
+  document.getElementById('pronounceToggle').onclick = ()=>{ state.showEasyPronunciation = !state.showEasyPronunciation; renderInfoPrayerStep(); };
   document.getElementById('settingsLink').onclick = ()=>{ state.view='settings'; render(); };
   document.getElementById('hearBtn').onclick = ()=> playPriestLine(i, document.getElementById('hearStatus'));
   wireNav(seqPos);
@@ -2429,6 +2421,7 @@ function renderPrayerStep(){
         <button data-lvl="2" class="${state.level==='2'?'active':''}">Level II · Memory</button>
       </div>
       <button class="toggle-link ${state.showTranslation?'active':''}" id="transToggle">English</button>
+      <button class="toggle-link ${state.showEasyPronunciation?'active':''}" id="pronounceToggle">Say it</button>
       <button class="toggle-link" id="settingsLink">Voice</button>
     </div>
     <div class="missal-wrap">
@@ -2442,6 +2435,7 @@ function renderPrayerStep(){
           <div class="role"><span class="dot"></span>Priest</div>
           <div class="latin">${s.priest}${s.varies ? '<span class="varies-tag">varies by day</span>' : ''}</div>
           ${state.showTranslation ? `<div class="translation">${s.priestT}</div>` : ''}
+          ${practicePronounceBlock(s.priest)}
           <div class="hear-row">
             <button class="hear-btn" id="hearBtn">Hear the Priest</button>
             <span class="voice-note" id="hearStatus"></span>
@@ -2451,6 +2445,7 @@ function renderPrayerStep(){
         <div class="block server-block">
           <div class="role"><span class="dot"></span>Your Response</div>
           <div id="serverArea"></div>
+          ${practicePronounceBlock(s.server)}
 
           <div class="record-row">
             <button class="rec-btn" id="recBtn" disabled>
@@ -2470,6 +2465,7 @@ function renderPrayerStep(){
   `;
 
   document.getElementById('transToggle').onclick = ()=>{ state.showTranslation = !state.showTranslation; renderPrayerStep(); };
+  document.getElementById('pronounceToggle').onclick = ()=>{ state.showEasyPronunciation = !state.showEasyPronunciation; renderPrayerStep(); };
   document.getElementById('settingsLink').onclick = ()=>{ state.view='settings'; render(); };
   app.querySelectorAll('.seg button').forEach(b=>{
     b.onclick = ()=>{ state.level = b.dataset.lvl; localStorage.setItem('altar_level', state.level); renderPrayerStep(); };
@@ -2480,7 +2476,9 @@ function renderPrayerStep(){
   setupServerArea(i, s);
   setupRecorder(i);
 
-  setTimeout(()=>playPriestLine(i, document.getElementById('hearStatus')), 250);
+  if(state.view === 'practice' && state.sequence[state.step]?.type === 'prayer'){
+    setTimeout(()=>playPriestLine(i, document.getElementById('hearStatus')), 250);
+  }
 }
 
 function renderMovementStep(){
@@ -2563,7 +2561,6 @@ function setupServerArea(i, s){
       <div class="reveal-wrap">
         <div class="reveal-bar"><div class="reveal-bar-fill" id="revealFill"></div></div>
         <div class="latin" id="revealText">${s.server}</div>
-        ${getPhonetic(s.server) ? `<div class="phonetic">${getPhonetic(s.server)}</div>` : ''}
       </div>`;
     const fill = document.getElementById('revealFill');
     fill.style.animation = 'shrink 5s linear forwards';
