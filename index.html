@@ -420,6 +420,12 @@
   }
   .flash-hint-reveal .flash-hint-label{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.04em;color:var(--text-muted);margin-bottom:4px;}
   .flash-hint-reveal .flash-hint-latin{font-family:var(--font-latin);font-size:1.125rem;font-style:italic;}
+  .flash-pronounce-reveal{
+    margin-top:14px;padding:12px 14px;border-radius:var(--radius-sm);text-align:left;max-width:100%;
+    background:rgba(196,160,53,.1);border:1px solid rgba(196,160,53,.35);
+  }
+  .flash-pronounce-reveal .phonetic{font-size:15px;line-height:1.55;color:var(--navy);margin:0;}
+  .flash-pronounce-reveal .flash-pronounce-note{font-size:12px;color:var(--text-muted);margin-top:6px;font-style:italic;}
   .flash-card .main{font-family:var(--font-latin);font-size:1.3125rem;line-height:1.5;max-width:100%;}
 
   .flash-nav{display:flex;justify-content:space-between;align-items:center;margin-top:16px;gap:10px;}
@@ -862,6 +868,7 @@ let state = {
   flashIdx: 0,
   flashFlipped: false,
   flashHint: false,
+  flashPronounce: false,
   movementResults: {},
   recordings: {},
   transcripts: {},
@@ -936,6 +943,42 @@ function openLearn(id){
 }
 
 function stripAccents(s){ return s.normalize('NFD').replace(/[\u0300-\u036f]/g,''); }
+function normLatinKey(s){
+  return stripAccents(String(s || '')).toLowerCase()
+    .replace(/\[[^\]]*\]/g, ' ').replace(/\([^)]*\)/g, ' ')
+    .replace(/[.,;:!?'""—–-]/g, ' ').replace(/\s+/g, ' ').trim();
+}
+
+let phoneticLookupCache = null;
+function buildPhoneticLookup(){
+  if(phoneticLookupCache) return phoneticLookupCache;
+  phoneticLookupCache = new Map();
+  const add = (latin, phonetic)=>{
+    if(!latin || !phonetic) return;
+    phoneticLookupCache.set(normLatinKey(latin), phonetic);
+  };
+  for(const [k, v] of Object.entries(O_BRIEN_PHONETICS)) add(k, v);
+  for(const g of GLOSSARY) add(g.latin.replace(/…/g, '').trim(), g.phonetic);
+  return phoneticLookupCache;
+}
+
+function lookupPhoneticPhrase(phrase){
+  const map = buildPhoneticLookup();
+  const key = normLatinKey(phrase);
+  if(map.has(key)) return map.get(key);
+  return '';
+}
+
+function wordsToEasyPronunciation(text){
+  if(typeof O_BRIEN_WORD_PHONETICS === 'undefined') return '';
+  const words = normLatinKey(text).split(' ').filter(Boolean);
+  if(!words.length) return '';
+  return words.map(w=>{
+    if(O_BRIEN_WORD_PHONETICS[w]) return O_BRIEN_WORD_PHONETICS[w];
+    return w;
+  }).join(' ');
+}
+
 function getPhonetic(text){
   if(!text) return '';
   if(O_BRIEN_PHONETICS[text]) return O_BRIEN_PHONETICS[text];
@@ -943,6 +986,25 @@ function getPhonetic(text){
   for(const [k,v] of Object.entries(O_BRIEN_PHONETICS)){
     if(stripAccents(k) === plain) return v;
   }
+  return lookupPhoneticPhrase(text);
+}
+
+function getPhoneticGuide(text){
+  if(!text) return '';
+  const cleaned = String(text).replace(/\s+/g, ' ').trim();
+  const stripped = cleaned.replace(/\(.*?\)/g, ' ').replace(/\[.*?\]/g, ' ').replace(/\s+/g, ' ').trim();
+  const tryText = stripped || cleaned;
+  let direct = getPhonetic(tryText) || lookupPhoneticPhrase(tryText);
+  if(direct) return direct;
+  const chunks = tryText.split(/\s*(?<=[.;:…])\s*/).map(c=> c.trim()).filter(Boolean);
+  if(chunks.length > 1){
+    const parts = chunks.map(c=> getPhonetic(c) || lookupPhoneticPhrase(c)).filter(Boolean);
+    if(parts.length) return parts.join(' / ');
+  }
+  const wordGuide = wordsToEasyPronunciation(tryText);
+  const rawWords = normLatinKey(tryText).split(' ').filter(Boolean);
+  if(wordGuide && wordGuide.split(' ').length === rawWords.length) return wordGuide;
+  if(wordGuide && wordGuide !== normLatinKey(tryText)) return wordGuide;
   return '';
 }
 function obrienBackBtn(){
@@ -1038,6 +1100,7 @@ function startPractice(mode, range=null){
     state.flashIdx = 0;
     state.flashFlipped = false;
     state.flashHint = false;
+    state.flashPronounce = false;
     render();
     return;
   }
@@ -1981,14 +2044,24 @@ function renderFlashcards(){
   const s = getStep(i);
   const total = steps.length;
   const onPriestSide = !state.flashFlipped;
+  const cardLatin = onPriestSide ? s.priest : s.server;
   const hintWords = flashFirstTwoWords(s.server);
+  const pronounceGuide = getPhoneticGuide(cardLatin);
   const hintBtn = onPriestSide
     ? `<button type="button" class="flash-hint-btn${state.flashHint?' active':''}" id="flashHintBtn" aria-label="Show first words of response" title="Hint: first two words">💡</button>`
     : '';
+  const pronounceBtn = `<button type="button" class="flash-hint-btn${state.flashPronounce?' active':''}" id="flashPronounceBtn" aria-label="Easy pronunciation dictionary" title="Easy pronunciation">📖</button>`;
   const hintReveal = onPriestSide && state.flashHint
     ? `<div class="flash-hint-reveal" id="flashHintReveal">
         <div class="flash-hint-label">Response starts with</div>
         <div class="flash-hint-latin">${hintWords}</div>
+      </div>`
+    : '';
+  const pronounceReveal = state.flashPronounce
+    ? `<div class="flash-pronounce-reveal" id="flashPronounceReveal">
+        <div class="flash-hint-label">Easy pronunciation</div>
+        <div class="phonetic">${pronounceGuide || 'No dictionary entry for this line yet — try the Latin Glossary in Learn.'}</div>
+        ${pronounceGuide && pronounceGuide === wordsToEasyPronunciation(cardLatin.replace(/\(.*?\)/g,' ').replace(/\[.*?\]/g,' ')) ? '<div class="flash-pronounce-note">Built word-by-word from the server dictionary.</div>' : ''}
       </div>`
     : '';
   app.innerHTML = `
@@ -1998,10 +2071,11 @@ function renderFlashcards(){
       <div class="flash-card" id="flashCard">
         <div class="flash-card-head">
           <div class="hint">${onPriestSide ? 'Latin — priest\'s line · tap card to flip' : 'Latin — your response · tap to flip back'}</div>
-          ${hintBtn}
+          ${hintBtn}${pronounceBtn}
         </div>
-        <div class="main latin">${onPriestSide ? s.priest : s.server}</div>
+        <div class="main latin">${cardLatin}</div>
         ${hintReveal}
+        ${pronounceReveal}
       </div>
       <div class="flash-nav">
         <button class="nav-btn" id="flashPrev" ${state.flashIdx===0?'disabled':''}>← Prev</button>
@@ -2022,11 +2096,20 @@ function renderFlashcards(){
       renderFlashcards();
     };
   }
+  const pronounceBtnEl = document.getElementById('flashPronounceBtn');
+  if(pronounceBtnEl){
+    pronounceBtnEl.onclick = (e)=>{
+      e.stopPropagation();
+      state.flashPronounce = !state.flashPronounce;
+      renderFlashcards();
+    };
+  }
   document.getElementById('flashPrev').onclick = ()=>{
     if(state.flashIdx>0){
       state.flashIdx--;
       state.flashFlipped = false;
       state.flashHint = false;
+      state.flashPronounce = false;
       renderFlashcards();
     }
   };
@@ -2035,6 +2118,7 @@ function renderFlashcards(){
       state.flashIdx++;
       state.flashFlipped = false;
       state.flashHint = false;
+      state.flashPronounce = false;
       renderFlashcards();
     }
     else { goHome(); }
