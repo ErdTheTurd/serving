@@ -414,6 +414,10 @@
   .flash-hint-btn:hover{background:var(--gold-subtle, rgba(201,162,39,.12));border-color:var(--gold);}
   .flash-hint-btn.active{background:var(--gold-subtle, rgba(201,162,39,.18));border-color:var(--gold);box-shadow:0 0 0 2px rgba(201,162,39,.25);}
   .flash-hint-btn:active{transform:scale(.94);}
+  .flash-hint-btn.flash-bookmark-btn.active{background:rgba(196,160,53,.22);border-color:var(--gold);box-shadow:0 0 0 2px rgba(196,160,53,.3);}
+  .flash-toolbar{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:0 0 12px;}
+  .flash-toolbar .mini-btn{font-size:13px;padding:8px 12px;}
+  .flash-toolbar .mini-btn.active{background:var(--blue-subtle);border-color:var(--blue);color:var(--navy);}
   .flash-hint-reveal{
     margin-top:14px;padding:10px 14px;border-radius:var(--radius-sm);
     background:var(--blue-subtle);border:1px dashed rgba(74,123,200,.35);font-size:14px;color:var(--navy);max-width:100%;
@@ -787,7 +791,7 @@ const PRACTICE_MODES = [
   {id:'responses', label:'Responses Only', desc:'Latin server parts, no movement breaks'},
   {id:'movements', label:'Movements Only', desc:'All rubric MCQs for your role'},
   {id:'canon', label:'Canon & Bells', desc:'Sanctus through Domine non sum dignus'},
-  {id:'flashcards', label:'Flashcards', desc:'Text-only — priest cue, flip for response (no audio)'},
+  {id:'flashcards', label:'Flashcards', desc:'Text-only cues · bookmark cards you miss'},
   {id:'section', label:'By Section', desc:'Pick one part of the Mass'}
 ];
 
@@ -868,6 +872,7 @@ let state = {
   flashIdx: 0,
   flashFlipped: false,
   flashHint: false,
+  flashBookmarksOnly: lsGet('altar_flashBookmarksOnly', '0') === '1',
   showEasyPronunciation: false,
   movementResults: {},
   recordings: {},
@@ -2080,9 +2085,32 @@ function renderRubricSheet(){
 }
 
 /* ============ FLASHCARDS ============ */
+function getFlashBookmarkSet(){
+  return new Set(lsGetJSON('altar_flashBookmarks', []));
+}
+function isFlashBookmarked(stepIdx){
+  return getFlashBookmarkSet().has(stepIdx);
+}
+function toggleFlashBookmark(stepIdx){
+  const set = getFlashBookmarkSet();
+  if(set.has(stepIdx)) set.delete(stepIdx);
+  else set.add(stepIdx);
+  lsSetJSON('altar_flashBookmarks', [...set].sort((a, b)=> a - b));
+}
+function clearFlashBookmarks(){
+  lsSetJSON('altar_flashBookmarks', []);
+  state.flashIdx = 0;
+  state.flashBookmarksOnly = false;
+  lsSet('altar_flashBookmarksOnly', '0');
+}
+
 function getFlashSteps(){
-  const pool = STEPS.map((_,i)=>i).filter(isServerResponseStep);
-  if(state.sectionRange) return pool.filter(i=> inSection(i, state.sectionRange));
+  let pool = STEPS.map((_,i)=>i).filter(isServerResponseStep);
+  if(state.sectionRange) pool = pool.filter(i=> inSection(i, state.sectionRange));
+  if(state.flashBookmarksOnly){
+    const marks = getFlashBookmarkSet();
+    pool = pool.filter(i=> marks.has(i));
+  }
   return pool;
 }
 
@@ -2107,16 +2135,40 @@ function flashFirstTwoWords(latinText){
 }
 
 function renderFlashcards(){
+  const bookmarkCount = getFlashBookmarkSet().size;
   const steps = getFlashSteps();
+  if(!steps.length){
+    app.innerHTML = `
+      <div class="flash-view"><div class="missal">
+        <h2>Flashcards</h2>
+        <p style="font-size:15px;">${state.flashBookmarksOnly ? 'No bookmarked cards yet. Flip a card and tap the bookmark when you miss a response.' : 'No cards in this set.'}</p>
+        <div class="flash-toolbar" style="margin-top:16px;">
+          ${state.flashBookmarksOnly ? `<button class="mini-btn" id="flashShowAll">All cards</button>` : ''}
+          <button class="begin-btn ghost" id="flashBack">← Home</button>
+        </div>
+      </div></div>`;
+    const showAll = document.getElementById('flashShowAll');
+    if(showAll) showAll.onclick = ()=>{
+      state.flashBookmarksOnly = false;
+      lsSet('altar_flashBookmarksOnly', '0');
+      state.flashIdx = 0;
+      renderFlashcards();
+    };
+    document.getElementById('flashBack').onclick = goHome;
+    return;
+  }
+  if(state.flashIdx >= steps.length) state.flashIdx = steps.length - 1;
   const i = steps[state.flashIdx];
   const s = getStep(i);
   const total = steps.length;
+  const bookmarked = isFlashBookmarked(i);
   const onPriestSide = !state.flashFlipped;
   const cardLatin = onPriestSide ? s.priest : s.server;
   const hintWords = flashFirstTwoWords(s.server);
   const hintBtn = onPriestSide
     ? `<button type="button" class="flash-hint-btn${state.flashHint?' active':''}" id="flashHintBtn" aria-label="Show first words of response" title="Hint: first two words">💡</button>`
     : '';
+  const bookmarkBtn = `<button type="button" class="flash-hint-btn flash-bookmark-btn${bookmarked?' active':''}" id="flashBookmarkBtn" aria-label="${bookmarked?'Remove bookmark':'Bookmark to review later'}" title="${bookmarked?'Bookmarked — tap to remove':'Bookmark ones you missed'}">🔖</button>`;
   const hintReveal = onPriestSide && state.flashHint
     ? `<div class="flash-hint-reveal" id="flashHintReveal">
         <div class="flash-hint-label">Response starts with</div>
@@ -2126,11 +2178,15 @@ function renderFlashcards(){
   app.innerHTML = `
     <div class="flash-view"><div class="missal">
       <h2>Flashcards</h2>
+      <div class="flash-toolbar">
+        <button type="button" class="mini-btn${state.flashBookmarksOnly?' active':''}" id="flashFilterBookmarks">Bookmarked only (${bookmarkCount})</button>
+        ${bookmarkCount ? `<button type="button" class="mini-btn ghost" id="flashClearBookmarks">Clear all</button>` : ''}
+      </div>
       <p style="font-size:14px; color:var(--ink-soft);">${state.flashIdx+1} of ${total} · ${s.section} · text only (no mic or speaker)</p>
       <div class="flash-card" id="flashCard">
         <div class="flash-card-head">
           <div class="hint">${onPriestSide ? 'Latin — priest\'s line · tap card to flip' : 'Latin — your response · tap to flip back'}</div>
-          ${hintBtn}
+          <div style="display:flex;gap:8px;">${hintBtn}${bookmarkBtn}</div>
         </div>
         <div class="main latin">${cardLatin}</div>
         ${hintReveal}
@@ -2151,6 +2207,26 @@ function renderFlashcards(){
     hintBtnEl.onclick = (e)=>{
       e.stopPropagation();
       state.flashHint = !state.flashHint;
+      renderFlashcards();
+    };
+  }
+  document.getElementById('flashBookmarkBtn').onclick = (e)=>{
+    e.stopPropagation();
+    toggleFlashBookmark(i);
+    renderFlashcards();
+  };
+  document.getElementById('flashFilterBookmarks').onclick = ()=>{
+    state.flashBookmarksOnly = !state.flashBookmarksOnly;
+    lsSet('altar_flashBookmarksOnly', state.flashBookmarksOnly ? '1' : '0');
+    state.flashIdx = 0;
+    state.flashFlipped = false;
+    state.flashHint = false;
+    renderFlashcards();
+  };
+  const clearBtn = document.getElementById('flashClearBookmarks');
+  if(clearBtn){
+    clearBtn.onclick = ()=>{
+      if(confirm('Remove all flashcard bookmarks?')) clearFlashBookmarks();
       renderFlashcards();
     };
   }
