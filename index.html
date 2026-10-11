@@ -1020,6 +1020,22 @@ function getPhoneticGuide(text){
   if(wordGuide && wordGuide !== normLatinKey(tryText)) return wordGuide;
   return '';
 }
+
+/* Flashcard 📖 only — plain syllable chunks (no stress marks / dense hyphens). */
+function simplifyPhoneticForFlash(guide){
+  if(!guide) return '';
+  return String(guide)
+    .replace(/'/g, ' ')
+    .replace(/-/g, ' ')
+    .replace(/\s*\/\s*/g, ' · ')
+    .replace(/ahse\b/gi, 'ahs')
+    .replace(/eese\b/gi, 'ees')
+    .replace(/oose\b/gi, 'oos')
+    .replace(/toor\b/gi, 'tour')
+    .replace(/([^.\s])\.$/g, '$1')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
 function obrienBackBtn(){
   return `<button class="begin-btn" id="obrienBackBtn" style="margin-top:16px;">← Home</button>`;
 }
@@ -2179,9 +2195,10 @@ function renderFlashcards(){
     : '';
   const bookmarkBtn = `<button type="button" class="flash-hint-btn flash-bookmark-btn${bookmarked?' active':''}" id="flashBookmarkBtn" aria-label="${bookmarked?'Remove bookmark':'Bookmark to review later'}" title="${bookmarked?'Bookmarked — tap to remove':'Bookmark ones you missed'}">🔖</button>`;
   const plainCardLatin = cardLatin.replace(/\(.*?\)/g, ' ').replace(/\[.*?\]/g, ' ').replace(/\s+/g, ' ').trim();
-  const pronounceGuide = getPhoneticGuide(cardLatin);
-  const pronounceIsWordBuilt = !!(pronounceGuide && plainCardLatin && !getPhonetic(plainCardLatin) && !lookupPhoneticPhrase(plainCardLatin));
-  const pronounceBtn = `<button type="button" class="flash-hint-btn${state.flashPronounce?' active':''}" id="flashPronounceBtn" aria-label="Easy pronunciation (text)" title="Easy pronunciation — text only">📖</button>`;
+  const pronounceGuideRaw = getPhoneticGuide(cardLatin);
+  const pronounceGuide = simplifyPhoneticForFlash(pronounceGuideRaw);
+  const pronounceIsWordBuilt = !!(pronounceGuideRaw && plainCardLatin && !getPhonetic(plainCardLatin) && !lookupPhoneticPhrase(plainCardLatin));
+  const pronounceBtn = `<button type="button" class="flash-hint-btn${state.flashPronounce?' active':''}" id="flashPronounceBtn" aria-label="Simple pronunciation (text)" title="Say it like this — simple text">📖</button>`;
   const flashCueBlock = onPriestSide && s.flashCue
     ? `<div class="flash-cue-reveal">
         <div class="flash-hint-label">Server cue</div>
@@ -2196,9 +2213,9 @@ function renderFlashcards(){
     : '';
   const pronounceReveal = state.flashPronounce
     ? `<div class="flash-pronounce-reveal" id="flashPronounceReveal">
-        <div class="flash-hint-label">Easy pronunciation</div>
-        <div class="phonetic">${pronounceGuide || 'No dictionary entry for this line yet — try the Latin Glossary in Learn.'}</div>
-        ${pronounceIsWordBuilt ? '<div class="flash-pronounce-note">Built word-by-word from the server dictionary.</div>' : ''}
+        <div class="flash-hint-label">Say it like this</div>
+        <div class="phonetic">${pronounceGuide || 'No simple guide for this line yet — try the Latin Glossary in Learn.'}</div>
+        ${pronounceIsWordBuilt ? '<div class="flash-pronounce-note">Built word-by-word (simple spelling).</div>' : ''}
       </div>`
     : '';
   app.innerHTML = `
