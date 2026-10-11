@@ -791,7 +791,7 @@ const PRACTICE_MODES = [
   {id:'responses', label:'Responses Only', desc:'Latin server parts, no movement breaks'},
   {id:'movements', label:'Movements Only', desc:'All rubric MCQs for your role'},
   {id:'canon', label:'Canon & Bells', desc:'Sanctus through Domine non sum dignus'},
-  {id:'flashcards', label:'Flashcards', desc:'Text-only cues · bookmark cards you miss'},
+  {id:'flashcards', label:'Flashcards', desc:'Text cues + pronunciation guide · bookmark misses'},
   {id:'section', label:'By Section', desc:'Pick one part of the Mass'}
 ];
 
@@ -872,6 +872,7 @@ let state = {
   flashIdx: 0,
   flashFlipped: false,
   flashHint: false,
+  flashPronounce: false,
   flashBookmarksOnly: lsGet('altar_flashBookmarksOnly', '0') === '1',
   showEasyPronunciation: false,
   movementResults: {},
@@ -1105,6 +1106,7 @@ function startPractice(mode, range=null){
     state.flashIdx = 0;
     state.flashFlipped = false;
     state.flashHint = false;
+    state.flashPronounce = false;
     render();
     return;
   }
@@ -2169,10 +2171,21 @@ function renderFlashcards(){
     ? `<button type="button" class="flash-hint-btn${state.flashHint?' active':''}" id="flashHintBtn" aria-label="Show first words of response" title="Hint: first two words">💡</button>`
     : '';
   const bookmarkBtn = `<button type="button" class="flash-hint-btn flash-bookmark-btn${bookmarked?' active':''}" id="flashBookmarkBtn" aria-label="${bookmarked?'Remove bookmark':'Bookmark to review later'}" title="${bookmarked?'Bookmarked — tap to remove':'Bookmark ones you missed'}">🔖</button>`;
+  const plainCardLatin = cardLatin.replace(/\(.*?\)/g, ' ').replace(/\[.*?\]/g, ' ').replace(/\s+/g, ' ').trim();
+  const pronounceGuide = getPhoneticGuide(cardLatin);
+  const pronounceIsWordBuilt = !!(pronounceGuide && plainCardLatin && !getPhonetic(plainCardLatin) && !lookupPhoneticPhrase(plainCardLatin));
+  const pronounceBtn = `<button type="button" class="flash-hint-btn${state.flashPronounce?' active':''}" id="flashPronounceBtn" aria-label="Easy pronunciation (text)" title="Easy pronunciation — text only">📖</button>`;
   const hintReveal = onPriestSide && state.flashHint
     ? `<div class="flash-hint-reveal" id="flashHintReveal">
         <div class="flash-hint-label">Response starts with</div>
         <div class="flash-hint-latin">${hintWords}</div>
+      </div>`
+    : '';
+  const pronounceReveal = state.flashPronounce
+    ? `<div class="flash-pronounce-reveal" id="flashPronounceReveal">
+        <div class="flash-hint-label">Easy pronunciation</div>
+        <div class="phonetic">${pronounceGuide || 'No dictionary entry for this line yet — try the Latin Glossary in Learn.'}</div>
+        ${pronounceIsWordBuilt ? '<div class="flash-pronounce-note">Built word-by-word from the server dictionary.</div>' : ''}
       </div>`
     : '';
   app.innerHTML = `
@@ -2182,14 +2195,15 @@ function renderFlashcards(){
         <button type="button" class="mini-btn${state.flashBookmarksOnly?' active':''}" id="flashFilterBookmarks">Bookmarked only (${bookmarkCount})</button>
         ${bookmarkCount ? `<button type="button" class="mini-btn ghost" id="flashClearBookmarks">Clear all</button>` : ''}
       </div>
-      <p style="font-size:14px; color:var(--ink-soft);">${state.flashIdx+1} of ${total} · ${s.section} · text only (no mic or speaker)</p>
+      <p style="font-size:14px; color:var(--ink-soft);">${state.flashIdx+1} of ${total} · ${s.section} · no mic or speaker · 📖 = text pronunciation</p>
       <div class="flash-card" id="flashCard">
         <div class="flash-card-head">
           <div class="hint">${onPriestSide ? 'Latin — priest\'s line · tap card to flip' : 'Latin — your response · tap to flip back'}</div>
-          <div style="display:flex;gap:8px;">${hintBtn}${bookmarkBtn}</div>
+          <div style="display:flex;gap:8px;">${hintBtn}${pronounceBtn}${bookmarkBtn}</div>
         </div>
         <div class="main latin">${cardLatin}</div>
         ${hintReveal}
+        ${pronounceReveal}
       </div>
       <div class="flash-nav">
         <button class="nav-btn" id="flashPrev" ${state.flashIdx===0?'disabled':''}>← Prev</button>
@@ -2215,12 +2229,18 @@ function renderFlashcards(){
     toggleFlashBookmark(i);
     renderFlashcards();
   };
+  document.getElementById('flashPronounceBtn').onclick = (e)=>{
+    e.stopPropagation();
+    state.flashPronounce = !state.flashPronounce;
+    renderFlashcards();
+  };
   document.getElementById('flashFilterBookmarks').onclick = ()=>{
     state.flashBookmarksOnly = !state.flashBookmarksOnly;
     lsSet('altar_flashBookmarksOnly', state.flashBookmarksOnly ? '1' : '0');
     state.flashIdx = 0;
     state.flashFlipped = false;
     state.flashHint = false;
+    state.flashPronounce = false;
     renderFlashcards();
   };
   const clearBtn = document.getElementById('flashClearBookmarks');
@@ -2235,6 +2255,7 @@ function renderFlashcards(){
       state.flashIdx--;
       state.flashFlipped = false;
       state.flashHint = false;
+      state.flashPronounce = false;
       renderFlashcards();
     }
   };
@@ -2243,6 +2264,7 @@ function renderFlashcards(){
       state.flashIdx++;
       state.flashFlipped = false;
       state.flashHint = false;
+      state.flashPronounce = false;
       renderFlashcards();
     }
     else { goHome(); }
