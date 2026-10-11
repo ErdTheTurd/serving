@@ -94,7 +94,8 @@ const STEP_OVERRIDES = {
     22: {
       priest: '(The Subdeacon chants the Epistle at the altar.)',
       priestT: 'Epistle chanted by Subdeacon',
-      note: 'At High Mass the Subdeacon sings the Epistle — acolytes do not transfer the missal. Still respond Deo gratias.'
+      note: 'At High Mass the Subdeacon sings the Epistle — acolytes do not transfer the missal. Still respond Deo gratias.',
+      flashCue: 'When the Subdeacon finishes the Epistle at the altar, respond Deo gratias. Acolytes do not transfer the missal at High Mass.'
     },
     24: {
       priest: '(The Deacon chants the Gospel facing north.)',

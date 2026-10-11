@@ -424,6 +424,12 @@
   }
   .flash-hint-reveal .flash-hint-label{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.04em;color:var(--text-muted);margin-bottom:4px;}
   .flash-hint-reveal .flash-hint-latin{font-family:var(--font-latin);font-size:1.125rem;font-style:italic;}
+  .flash-cue-reveal{
+    margin-top:12px;padding:10px 12px;border-radius:var(--radius-sm, 8px);
+    background:var(--blue-subtle, rgba(59,130,246,.08));border:1px solid var(--border);
+    text-align:left;max-width:100%;
+  }
+  .flash-cue-reveal .flash-cue-text{font-size:14px;line-height:1.55;color:var(--ink-soft);}
   .flash-pronounce-reveal{
     margin-top:14px;padding:12px 14px;border-radius:var(--radius-sm);text-align:left;max-width:100%;
     background:rgba(196,160,53,.1);border:1px solid rgba(196,160,53,.35);
@@ -692,7 +698,8 @@ const STEPS = [
  server:"Amen.", serverT:"Amen."},
 
 {section:"Epistle", priest:"[The Epistle is read — its text varies by day.]", priestT:"[Epistle of the day]", varies:true,
- server:"Deo grátias.", serverT:"Thanks be to God."},
+ server:"Deo grátias.", serverT:"Thanks be to God.",
+ flashCue:"When the Priest finishes the Epistle, watch for his signal: he turns his head toward you or drops his left hand flat on the altar to the side — then respond Deo gratias."},
 
 {section:"Before the Gospel", priest:"Dóminus vobíscum.", priestT:"The Lord be with you.",
  server:"Et cum spíritu tuo.", serverT:"And with thy spirit."},
@@ -2175,6 +2182,12 @@ function renderFlashcards(){
   const pronounceGuide = getPhoneticGuide(cardLatin);
   const pronounceIsWordBuilt = !!(pronounceGuide && plainCardLatin && !getPhonetic(plainCardLatin) && !lookupPhoneticPhrase(plainCardLatin));
   const pronounceBtn = `<button type="button" class="flash-hint-btn${state.flashPronounce?' active':''}" id="flashPronounceBtn" aria-label="Easy pronunciation (text)" title="Easy pronunciation — text only">📖</button>`;
+  const flashCueBlock = onPriestSide && s.flashCue
+    ? `<div class="flash-cue-reveal">
+        <div class="flash-hint-label">Server cue</div>
+        <div class="flash-cue-text">${s.flashCue}</div>
+      </div>`
+    : '';
   const hintReveal = onPriestSide && state.flashHint
     ? `<div class="flash-hint-reveal" id="flashHintReveal">
         <div class="flash-hint-label">Response starts with</div>
@@ -2202,6 +2215,7 @@ function renderFlashcards(){
           <div style="display:flex;gap:8px;">${hintBtn}${pronounceBtn}${bookmarkBtn}</div>
         </div>
         <div class="main latin">${cardLatin}</div>
+        ${flashCueBlock}
         ${hintReveal}
         ${pronounceReveal}
       </div>
